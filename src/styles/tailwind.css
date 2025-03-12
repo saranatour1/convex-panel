@@ -12,6 +12,10 @@
     @apply rounded-full shadow-lg flex items-center justify-center cursor-pointer bg-[#2a2825] w-9 h-9;
   }
 
+  .convex-panel-logo {
+    @apply !w-9 !h-9 !rounded-full !overflow-hidden !object-contain !p-0 !m-0;
+  }
+
   .convex-panel-card {
     @apply shadow-lg bg-[#1e1e1e] rounded-xl border border-[#333] overflow-hidden flex flex-col h-[calc(100vh-var(--header-height,64px)-3rem)] max-h-[40rem] p-2 relative mr-4;
   }
