@@ -1,6 +1,6 @@
 {
   "name": "convex-panel",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "A React component for monitoring and debugging Convex applications",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -46,10 +46,12 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
+    "@types/recharts": "^1.8.29",
     "debounce": "^1.2.1",
     "framer-motion": "^10.16.4",
     "lucide-react": "^0.479.0",
-    "react-window": "^1.8.11"
+    "react-window": "^1.8.11",
+    "recharts": "^2.15.1"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.4",

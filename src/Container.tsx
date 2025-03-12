@@ -854,7 +854,10 @@ const Container = ({
       )}
       
       {activeTab === 'health' && (
-        <HealthContainer />
+        <HealthContainer 
+          deploymentUrl={convexUrl}
+          authToken={accessToken}
+        />
       )}
     </motion.div>
   );
