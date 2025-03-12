@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for Convex Panel */
+@layer components {
+  .convex-panel-container {
+    @apply fixed bottom-5 right-3 z-50 flex items-end;
+  }
+
+  .convex-panel-button {
+    @apply rounded-full shadow-lg flex items-center justify-center cursor-pointer bg-[#2a2825] w-9 h-9;
+  }
+
+  .convex-panel-card {
+    @apply shadow-lg bg-[#1e1e1e] rounded-xl border border-[#333] overflow-hidden flex flex-col h-[calc(100vh-var(--header-height,64px)-3rem)] max-h-[40rem] p-2 relative mr-4;
+  }
+
+  .convex-panel-header-container {
+    @apply rounded-lg;
+  }
+
+  .convex-panel-header {
+    @apply rounded-t-md px-3 h-8 flex-shrink-0 flex w-full relative border-b border-[#444] bg-[#38383A] select-none;
+  }
+
+  .convex-panel-tabs {
+    @apply flex w-full select-none items-center justify-between gap-1 border-b border-[#444] bg-[#141414] text-xs;
+  }
+
+  .convex-panel-tab {
+    @apply px-3 h-9 flex items-center gap-1 border-b-4 border-transparent text-white;
+  }
+
+  .convex-panel-tab[data-state="active"] {
+    @apply border-b-[rgb(141,38,118)] bg-[rgba(141,38,118,0.5)];
+  }
+
+  .convex-panel-tab[data-state="inactive"] {
+    @apply bg-[#141414];
+  }
+
+  .convex-panel-content {
+    @apply flex-1 overflow-auto;
+  }
+
+  .convex-panel-table {
+    @apply w-full border-collapse;
+  }
+
+  .convex-panel-table th {
+    @apply bg-[#2a2a2a] p-2 text-left font-medium border-b border-[#444];
+  }
+
+  .convex-panel-table td {
+    @apply p-2 border-b border-[#333];
+  }
+
+  .convex-panel-table tr:hover {
+    @apply bg-white/5;
+  }
+
+  .convex-panel-toolbar {
+    @apply flex items-center p-2 gap-2 border-b border-[#444] bg-[#1a1a1a];
+  }
+
+  .convex-panel-input {
+    @apply bg-[#2a2a2a] border border-[#444] rounded px-2 py-1 text-white text-sm;
+  }
+
+  .convex-panel-button-sm {
+    @apply bg-[#3f5295] rounded px-2 py-1 text-white cursor-pointer hover:bg-[#3f529599];
+  }
+
+  .convex-panel-window-control {
+    @apply w-[10px] h-[10px] rounded-full cursor-pointer relative flex items-center justify-center;
+  }
+
+  .convex-panel-close {
+    @apply bg-[#FF5F57] hover:bg-[#b33e3a];
+  }
+
+  .convex-panel-minimize {
+    @apply bg-[#FFBD2E] hover:bg-[#b38420];
+  }
+
+  .convex-panel-maximize {
+    @apply bg-[#28C840] hover:bg-[#1a8f2a];
+  }
+
+  .convex-panel-success {
+    @apply text-[#4caf50];
+  }
+
+  .convex-panel-error {
+    @apply text-[#f44336];
+  }
+
+  .convex-panel-warning {
+    @apply text-[#ff9800];
+  }
+
+  .convex-panel-sidebar {
+    @apply w-[200px] border-r border-[#444] overflow-y-auto;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .convex-panel-card {
+    @apply !w-[calc(100vw-2rem)] !h-[calc(100vh-6rem)];
+  }
+} 
