@@ -2,21 +2,23 @@
 
 A development panel for Convex applications that provides real-time logs, data inspection, and more.
 
-![Convex Panel Data View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2F260_1x_shots_so.png?alt=media&token=ab319476-3e64-4348-83bc-0d2ca126533e)
+![Convex Panel Data View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fconvex-panel1.png?alt=media&token=d4b6da5e-db91-4b94-9d7a-a716ebebdedf)
 
 ## Features
 
-- 📊 **Real-time Data Inspection**: Browse and filter your Convex tables with ease
+- 📊 **Real-time Data View**: Browse and filter your Convex tables with ease
 - 📝 **Live Logs**: Monitor function calls, HTTP actions, and system events in real-time
-- 🔍 **Advanced Filtering**: Filter logs and data with powerful query capabilities
-- 🔄 **Health Monitoring**: Track the health of your Convex deployment
+- 🔍 **Advanced Filtering**: Filter logs and data with query capabilities
+- 🔄 **Health Monitoring**: Track the health of your application and see your cache rates, schedulers are more.
 - 🎨 **Beautiful UI**: Sleek, developer-friendly interface that integrates with your app
 
-![Convex Panel Logs View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2F617_1x_shots_so.png?alt=media&token=0232b53b-a618-4a35-af46-c9c6b13324e4)
+![Convex Panel Logs View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fconvex-panel2.png?alt=media&token=685faba4-d9f8-4ca7-8112-2825cf3040ec)
 
 ## Installation
 
 ```bash
+bun add convex-panel
+# or
 npm install convex-panel
 # or
 yarn add convex-panel
@@ -25,21 +27,6 @@ pnpm add convex-panel
 ```
 
 ## Usage
-
-### Styling
-
-The Convex Panel comes with built-in styling. No CSS imports are required! The styles are automatically injected when the component mounts.
-
-#### CSS Isolation
-
-Convex Panel uses a CSS isolation mechanism to ensure its styles don't interfere with your application:
-
-- All styles are prefixed with `convex-panel-` to avoid naming conflicts
-- Styles are injected into a separate `<style>` element with a unique ID
-- Most style properties use `!important` to ensure they work correctly within your app
-- The panel is rendered in a portal, keeping its DOM structure separate from your app
-
-This approach ensures that Convex Panel's styles won't affect your application's styling, and vice versa.
 
 ### Setting Up the Panel
 
@@ -107,65 +94,26 @@ export async function GET() {
 
    > **Important**: If this API route is not properly set up, you may encounter errors like `GET http://localhost:3000/api/convex-token 404 (Not Found)` or `Received Invalid JSON on websocket: missing field 'value'`.
 
-2. **Import and use the Convex Panel in your application:**
+**This component or button must be inside of a `ConvexReactProvider`**
 
 ```tsx
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { ConvexPanel } from 'convex-panel';
 import { useConvex } from 'convex/react';
+import { ConvexProvider } from "@convex-dev/react-convex";
 
-export default function YourComponent() {
+export default function YourComponent({ children: ReactNode }) {
   const convex = useConvex();
-  const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [size, setSize] = useState({ width: 1000, height: 500 });
 
   return (
-    <div>
-      <button onClick={() => setIsOpen(!isOpen)}>Toggle Convex Panel</button>
-      
+    <ConvexProvider>    
+      {children}  
       <ConvexPanel
-        isOpen={isOpen}
-        toggleOpen={() => setIsOpen(!isOpen)}
-        position={position}
-        setPosition={setPosition}
-        containerSize={size}
-        setContainerSize={setSize}
+        deployUrl={process.env.CONVEX_DEPLOYMENT}
         convex={convex}
-        // The panel will automatically fetch the token from /api/convex-token
       />
-    </div>
-  );
-}
-```
-
-### Option 2: Providing the Access Token Directly
-
-If you prefer not to create an API route, you can provide the access token directly:
-
-```tsx
-import { useState } from 'react';
-import { ConvexPanel } from 'convex-panel';
-import { useConvex } from 'convex/react';
-
-// Get the token from your environment or another source
-const CONVEX_ACCESS_TOKEN = process.env.CONVEX_ACCESS_TOKEN;
-
-export default function YourComponent() {
-  const convex = useConvex();
-  const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [size, setSize] = useState({ width: 1000, height: 500 });
-
-  return (
-    <div>
-      <button onClick={() => setIsOpen(!isOpen)}>Toggle Convex Panel</button>
-      
-      <ConvexPanel
-        convex={convex}
-        convexAccessToken={CONVEX_ACCESS_TOKEN}
-      />
-    </div>
+    </ConvexProvider>
   );
 }
 ```
@@ -183,7 +131,6 @@ The Convex Panel accepts the following props:
 | `containerSize` | { width: number, height: number } | Size of the panel |
 | `setContainerSize` | (size) => void | Function to update the panel size |
 | `convex` | ConvexReactClient | Convex client instance |
-| `convexAccessToken` | string (optional) | Convex access token (if not using API route) |
 | `cloudUrl` | string (optional) | Convex cloud URL (if not using environment variable) |
 | `deployKey` | string (optional) | Convex deploy key (for admin features) |
 | `theme` | ThemeClasses (optional) | Custom theme options |
@@ -204,23 +151,8 @@ The Convex Panel accepts the following props:
    - Verify that your `NEXT_PUBLIC_CONVEX_URL` environment variable is correctly set.
    - Check that you've passed the `convex` prop to the ConvexPanel component.
 
-3. **Styling issues or unstyled panel**:
-   - The panel includes all necessary styling automatically - no CSS imports required!
-   - If you're experiencing styling issues, it might be due to conflicting styles in your application. The panel uses `!important` flags to override conflicting styles.
-
-4. **Missing Convex logo or 400 Bad Request error**:
-   - The component uses Next.js Image component to display the Convex logo
-   - By default, it looks for `/convex.png` in your public directory
-   - If the image is not found, a fallback Convex logo SVG will be displayed automatically
-   - You can provide a custom image by passing the `buttonIcon` prop:
-     ```jsx
-     <ConvexPanel buttonIcon="/your-custom-logo.png" />
-     ```
-   - To use the default Convex logo, add it to your public directory:
-     ```
-     public/
-       └── convex.png
-     ```
+3. **Build warnings about "use client" directive**:
+   - If you see warnings like `Module level directives cause errors when bundled, "use client" in "src/data/components/FilterMenu.tsx" was ignored`, this is expected and won't affect functionality. The package is designed to work in both client and server environments.
 
 ## Development
 
@@ -229,6 +161,15 @@ To contribute to this package:
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Start the development server: `npm run dev`
+
+## Publishing Updates
+
+To publish a new version of the package:
+
+1. Update the version in `package.json`
+2. Run `npm run build` to build the package
+3. Commit your changes and push to GitHub
+4. Run `npm publish` to publish to npm
 
 ## License
 
