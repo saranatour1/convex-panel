@@ -26,6 +26,7 @@ const ConvexPanel = ({
   cloudUrl,
 }: ButtonProps) => {
   const mergedTheme = useMemo(() => ({ ...defaultTheme, ...theme }), [theme]);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Only create adminClient if we have a URL and deployKey
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || cloudUrl;
@@ -41,10 +42,17 @@ const ConvexPanel = ({
   const [containerSize, setContainerSize] = useState({ width: 1000, height: 500 });
   const dragControls = useDragControls();
 
+  // Only render on client-side to avoid hydration errors
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   /**
    * Load saved position and container size from localStorage on component mount
    */
   useEffect(() => {
+    if (!isMounted) return;
+    
     const savedPosition = localStorage.getItem('convex-panel:position');
     const savedSize = localStorage.getItem('convex-panel:size');
     
@@ -63,15 +71,17 @@ const ConvexPanel = ({
         console.error('Failed to parse saved size', e);
       }
     }
-  }, []);
+  }, [isMounted]);
 
   /**
    * Save position and container size to localStorage when they change
    */
   useEffect(() => {
+    if (!isMounted) return;
+    
     localStorage.setItem('convex-panel:position', JSON.stringify(position));
     localStorage.setItem('convex-panel:size', JSON.stringify(containerSize));
-  }, [position, containerSize]);
+  }, [position, containerSize, isMounted]);
 
   /**
    * Toggle the open state of the container
@@ -85,6 +95,11 @@ const ConvexPanel = ({
       onToggle(newIsOpen);
     }
   };
+
+  // Don't render anything on the server
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <div className="convex-panel-container">
@@ -128,6 +143,7 @@ const ConvexPanel = ({
           width={36} 
           height={36} 
           className="rounded-full"
+          unoptimized={true}
         />
       </motion.button>
     </div>
