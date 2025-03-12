@@ -617,7 +617,7 @@ const Container = ({
   return (
     <motion.div
       ref={containerRef}
-      className={`shadow-lg bg-background rounded-xl border mr-4 overflow-hidden flex flex-col h-[calc(100vh-var(--header-height)-3rem)] max-h-[40rem] p-2 relative`}
+      className="convex-panel-card"
       variants={cardVariants}
       initial="hidden"
       animate="visible"
@@ -642,11 +642,9 @@ const Container = ({
         height: containerSize.height
       }}
     >
-      <div 
-        className="!rounded-lg"
-      >
+      <div className="convex-panel-header-container">
         <div 
-          className="!rounded-t-md px-3 h-8 shrink-0 flex w-full relative border-b border-b-neutral-n10 bg-[#38383A] select-none border-b-neutral-700" 
+          className="convex-panel-header" 
           role="presentation"
           onPointerDown={startDrag}
           style={{ cursor: 'grab' }}
@@ -654,19 +652,19 @@ const Container = ({
           <div className="px-14 w-full items-center flex justify-center relative">
             <div className="absolute top-0 left-0 h-full flex items-center gap-1.5">
               <div 
-                className="size-[10px] bg-[#FF5F57] rounded-full cursor-pointer hover:bg-[#b33e3a] relative flex items-center justify-center"
+                className="convex-panel-window-control convex-panel-close"
                 onClick={toggleOpen}
               >
                 <span className="absolute opacity-0 hover:opacity-100 text-[8px] font-bold text-[#4a1917]">×</span>
               </div>
               <div 
-                className="size-[10px] bg-[#FFBD2E] rounded-full cursor-pointer hover:bg-[#b38420] relative flex items-center justify-center"
+                className="convex-panel-window-control convex-panel-minimize"
                 onClick={toggleOpen}
               >
                 <span className="absolute opacity-0 hover:opacity-100 text-[8px] font-bold text-[#4a3917]">−</span>
               </div>
               <div 
-                className="size-[10px] bg-[#28C840] rounded-full cursor-pointer hover:bg-[#1a8f2a] relative flex items-center justify-center" 
+                className="convex-panel-window-control convex-panel-maximize" 
                 onClick={() => {
                   if (containerSize.width >= window.innerWidth - 100 && 
                       containerSize.height >= window.innerHeight - 100) {
@@ -715,7 +713,7 @@ const Container = ({
         </div>
       </div>
 
-      <div className="flex w-full select-none items-center justify-between gap-1 border-b border-b-neutral-700 bg-[#141414] text-xs">
+      <div className="convex-panel-tabs">
         <div 
           role="tablist" 
           aria-orientation="horizontal" 

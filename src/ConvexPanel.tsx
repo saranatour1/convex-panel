@@ -8,8 +8,9 @@ import { defaultTheme, buttonVariants } from './theme';
 import Container from './Container';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexClient } from 'convex/browser';
+// CSS will be imported by the user
 
-export const ConvexPanel = ({
+const ConvexPanel = ({
   children,
   initialLimit = 100,
   initialShowSuccess = true,
@@ -86,7 +87,7 @@ export const ConvexPanel = ({
   };
 
   return (
-    <div className="fixed bottom-5 right-3 z-50 flex items-end">
+    <div className="convex-panel-container">
       <AnimatePresence>
         {isOpen && (
           <Container
@@ -112,7 +113,7 @@ export const ConvexPanel = ({
       </AnimatePresence>
       
       <motion.button
-        className={`rounded-full shadow-lg flex items-center justify-center cursor-pointer !bg-[#2a2825]`}
+        className="convex-panel-button"
         onClick={toggleOpen}
         variants={buttonVariants}
         initial="rest"

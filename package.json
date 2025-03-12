@@ -1,21 +1,24 @@
 {
   "name": "convex-panel",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "A React component for monitoring and debugging Convex applications",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "style": "dist/styles/convex-panel.css",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "import": "./dist/index.esm.js",
       "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "style": "./dist/styles/convex-panel.css"
     },
     "./utils/getConvexToken": {
       "import": "./dist/utils/getConvexToken.js",
       "require": "./dist/utils/getConvexToken.js",
       "types": "./dist/utils/getConvexToken.d.ts"
-    }
+    },
+    "./styles/convex-panel.css": "./dist/styles/convex-panel.css"
   },
   "files": [
     "dist",

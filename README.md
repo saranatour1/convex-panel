@@ -14,6 +14,17 @@ pnpm add convex-panel
 
 ## Usage
 
+### Importing Styles
+
+First, import the CSS file in your application:
+
+```jsx
+// In your _app.js, layout.js, or component file
+import 'convex-panel/styles/convex-panel.css';
+```
+
+### Setting Up the Panel
+
 There are two ways to use the Convex Panel in your application:
 
 ### Option 1: Using the API Route (Recommended)
@@ -174,6 +185,13 @@ The Convex Panel accepts the following props:
 2. **No logs appearing**:
    - Verify that your `NEXT_PUBLIC_CONVEX_URL` environment variable is correctly set.
    - Check that you've passed the `convex` prop to the ConvexPanel component.
+
+3. **Styling issues or unstyled panel**:
+   - Make sure you've imported the CSS file as described in the "Importing Styles" section:
+     ```jsx
+     import 'convex-panel/styles/convex-panel.css';
+     ```
+   - If you're using a framework that requires special handling for CSS imports (like Next.js with CSS modules), you may need to adjust how you import the styles.
 
 ## Development
 
