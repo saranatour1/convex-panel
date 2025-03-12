@@ -36,6 +36,6 @@ export type ButtonProps = {
   buttonIcon?: string;
   maxStoredLogs?: number;
   convex?: ConvexReactClient;
-  DEPLOY_KEY: string; // Required
-  CLOUD_URL?: string;
+  deployKey: string; // Required
+  cloudUrl: string;
 }

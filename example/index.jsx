@@ -16,7 +16,7 @@ function App() {
       {/* Add the ConvexPanel component */}
       <ConvexPanel 
         convex={convex} 
-        DEPLOY_KEY={process.env.CONVEX_DEPLOY_KEY} 
+        deployKey={process.env.CONVEX_DEPLOY_KEY} 
       />
     </ConvexProvider>
   );

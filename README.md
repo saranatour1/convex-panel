@@ -1,6 +1,6 @@
 # Convex Panel
 
-A React component for monitoring and debugging Convex applications.
+A development panel for Convex applications that provides real-time logs, data inspection, and more.
 
 ## Installation
 
@@ -8,56 +8,135 @@ A React component for monitoring and debugging Convex applications.
 npm install convex-panel
 # or
 yarn add convex-panel
+# or
+pnpm add convex-panel
 ```
 
 ## Usage
 
-```jsx
+There are two ways to use the Convex Panel in your application:
+
+### Option 1: Using the API Route (Recommended)
+
+1. Create an API route in your application to provide the Convex access token:
+
+```typescript
+// app/api/convex-token/route.ts (Next.js App Router)
+import { NextResponse } from 'next/server';
+import { getConvexToken } from 'convex-panel/utils/getConvexToken';
+
+export async function GET() {
+  try {
+    const accessToken = await getConvexToken();
+    
+    if (!accessToken) {
+      return NextResponse.json(
+        { error: 'Convex authentication required. Run npx convex login in your terminal.' },
+        { status: 401 }
+      );
+    }
+    
+    return NextResponse.json({ accessToken });
+  } catch (error) {
+    console.error('Error processing request:', error);
+    return NextResponse.json(
+      { error: 'Failed to get access token' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+2. Import and use the Convex Panel in your application:
+
+```tsx
+import { useState } from 'react';
 import { ConvexPanel } from 'convex-panel';
-import { ConvexProvider, ConvexReactClient } from 'convex/react';
+import { useConvex } from 'convex/react';
 
-// Initialize the Convex client
-const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL);
+export default function YourComponent() {
+  const convex = useConvex();
+  const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [size, setSize] = useState({ width: 1000, height: 500 });
 
-function App() {
   return (
-    <ConvexProvider client={convex}>
-      <YourApp />
-      <ConvexPanel 
-        convex={convex} 
-        DEPLOY_KEY={process.env.CONVEX_DEPLOY_KEY} 
+    <div>
+      <button onClick={() => setIsOpen(!isOpen)}>Toggle Convex Panel</button>
+      
+      <ConvexPanel
+        isOpen={isOpen}
+        toggleOpen={() => setIsOpen(!isOpen)}
+        position={position}
+        setPosition={setPosition}
+        containerSize={size}
+        setContainerSize={setSize}
+        convex={convex}
+        // The panel will automatically fetch the token from /api/convex-token
       />
-    </ConvexProvider>
+    </div>
   );
 }
 ```
 
-## Props
+### Option 2: Providing the Access Token Directly
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| convex | ConvexReactClient | Yes | - | The Convex React client instance |
-| DEPLOY_KEY | string | Yes | - | Your Convex deployment key |
-| CLOUD_URL | string | No | - | Your Convex cloud URL (defaults to NEXT_PUBLIC_CONVEX_URL) |
-| initialLimit | number | No | 100 | Initial number of logs to fetch |
-| initialShowSuccess | boolean | No | true | Whether to show success logs initially |
-| initialLogType | LogType | No | LogType.ALL | Initial log type filter |
-| onLogFetch | function | No | - | Callback when logs are fetched |
-| onError | function | No | - | Callback when an error occurs |
-| onToggle | function | No | - | Callback when the panel is toggled |
-| theme | ThemeClasses | No | {} | Custom theme classes |
-| buttonIcon | string | No | "/convex.png" | Custom button icon |
-| maxStoredLogs | number | No | 500 | Maximum number of logs to store in memory |
+If you prefer not to create an API route, you can provide the access token directly:
 
-## Features
+```tsx
+import { useState } from 'react';
+import { ConvexPanel } from 'convex-panel';
+import { useConvex } from 'convex/react';
 
-- Real-time log monitoring
-- Database table explorer
-- System health monitoring
-- Customizable theme
-- Draggable and resizable panel
-- Filter logs by type and status
-- Search logs by request ID
+// Get the token from your environment or another source
+const CONVEX_ACCESS_TOKEN = process.env.CONVEX_ACCESS_TOKEN;
+
+export default function YourComponent() {
+  const convex = useConvex();
+  const [isOpen, setIsOpen] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [size, setSize] = useState({ width: 1000, height: 500 });
+
+  return (
+    <div>
+      <button onClick={() => setIsOpen(!isOpen)}>Toggle Convex Panel</button>
+      
+      <ConvexPanel
+        convex={convex}
+        convexAccessToken={CONVEX_ACCESS_TOKEN}
+      />
+    </div>
+  );
+}
+```
+
+## Configuration
+
+The Convex Panel accepts the following props:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `isOpen` | boolean | Whether the panel is open |
+| `toggleOpen` | () => void | Function to toggle the panel open/closed |
+| `position` | { x: number, y: number } | Position of the panel |
+| `setPosition` | (pos) => void | Function to update the panel position |
+| `containerSize` | { width: number, height: number } | Size of the panel |
+| `setContainerSize` | (size) => void | Function to update the panel size |
+| `convex` | ConvexReactClient | Convex client instance |
+| `convexAccessToken` | string (optional) | Convex access token (if not using API route) |
+| `theme` | ThemeClasses (optional) | Custom theme options |
+| `initialLimit` | number (optional) | Initial log limit (default: 100) |
+| `initialShowSuccess` | boolean (optional) | Initially show success logs (default: true) |
+| `initialLogType` | LogType (optional) | Initial log type filter (default: ALL) |
+| `maxStoredLogs` | number (optional) | Maximum number of logs to store (default: 500) |
+
+## Development
+
+To contribute to this package:
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Start the development server: `npm run dev`
 
 ## License
 

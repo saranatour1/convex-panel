@@ -23,13 +23,13 @@ export const ConvexPanel = ({
   buttonIcon = "/convex.png",
   maxStoredLogs = 500,
   convex,
-  DEPLOY_KEY,
-  CLOUD_URL,
+  deployKey,
+  cloudUrl,
 }: ButtonProps) => {
   const mergedTheme = useMemo(() => ({ ...defaultTheme, ...theme }), [theme]);
 
-  const adminClient = new ConvexClient(process.env.NEXT_PUBLIC_CONVEX_URL! || CLOUD_URL!);
-  (adminClient as any).setAdminAuth(DEPLOY_KEY!);
+  const adminClient = new ConvexClient(process.env.NEXT_PUBLIC_CONVEX_URL! || cloudUrl!);
+  (adminClient as any).setAdminAuth(deployKey!);
   
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });

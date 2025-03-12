@@ -5,8 +5,22 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./utils/getConvexToken": {
+      "import": "./dist/utils/getConvexToken.js",
+      "require": "./dist/utils/getConvexToken.js",
+      "types": "./dist/utils/getConvexToken.d.ts"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "examples",
+    "README.md"
   ],
   "scripts": {
     "copy-src": "node copy-src.js",
