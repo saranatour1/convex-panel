@@ -3,6 +3,7 @@ const commonjs = require('@rollup/plugin-commonjs');
 const typescript = require('@rollup/plugin-typescript');
 const terser = require('@rollup/plugin-terser');
 const peerDepsExternal = require('rollup-plugin-peer-deps-external');
+const url = require('@rollup/plugin-url');
 const pkg = require('./package.json');
 
 module.exports = {
@@ -23,6 +24,10 @@ module.exports = {
     peerDepsExternal(),
     resolve(),
     commonjs(),
+    url({
+      include: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.svg', '**/*.gif'],
+      limit: 10000,
+    }),
     typescript({
       tsconfig: './tsconfig.json',
       exclude: ['**/__tests__/**', '**/*.test.ts', '**/*.test.tsx'],

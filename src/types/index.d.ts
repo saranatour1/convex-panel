@@ -1,9 +1,7 @@
-import { ThemeClasses } from ".";
-
-import { LogEntry } from ".";
+import { LogEntry } from "../logs/types";
 
 import { ReactNode } from "react";
-import { LogType } from ".";
+import { LogType } from "../logs/types";
 import { ConvexReactClient } from "convex/react";
 
 // Theme interface

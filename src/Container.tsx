@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import debounce from 'debounce';
@@ -12,7 +14,6 @@ import { ConvexReactClient } from 'convex/react';
 import { ConvexClient } from 'convex/browser';
 import { SettingsButton, ConvexPanelSettings } from './settings';
 import { getStorageItem, setStorageItem } from './data/utils/storage';
-import { getConvexToken } from './utils/getConvexToken';
 
 interface LogsContainerProps {
   isOpen: boolean;
@@ -32,7 +33,6 @@ interface LogsContainerProps {
   dragControls: any;
   convex: ConvexReactClient;
   adminClient: ConvexClient;
-  convexAccessToken?: string;
 }
 
 // Define settings storage key
@@ -66,8 +66,7 @@ const Container = ({
   setContainerSize,
   dragControls,
   convex,
-  adminClient,
-  convexAccessToken,
+  adminClient
 }: LogsContainerProps) => {
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -99,7 +98,7 @@ const Container = ({
   const MIN_FETCH_INTERVAL = 1000;
   const [excludeViewerQueries, setExcludeViewerQueries] = useState(true);
   const [convexUrl, setConvexUrl] = useState<string>('');
-  const [accessToken, setAccessToken] = useState<string>(convexAccessToken || '');
+  const [accessToken, setAccessToken] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'logs' | 'data-tables' | 'health'>('logs');
   const [settings, setSettings] = useState<ConvexPanelSettings>(() => {
     
@@ -133,20 +132,11 @@ const Container = ({
           }
         }
         
-        // Only fetch token if not provided as prop
-        if (!convexAccessToken) {
-          try {
-            const response = await fetch('/api/convex-token');
-            if (response.ok) {
-              const data = await response.json();
-              if (data.accessToken) {
-                setAccessToken(data.accessToken);
-              }
-            } else {
-              console.warn('Failed to fetch Convex token from /api/convex-token. Please provide a convexAccessToken prop or set up the API route.');
-            }
-          } catch (tokenError) {
-            console.error('Error fetching token:', tokenError);
+        const response = await fetch('/api/convex-token');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.accessToken) {
+            setAccessToken(data.accessToken);
           }
         }
       } catch (error) {
@@ -155,7 +145,7 @@ const Container = ({
     };
     
     getConvexCredentials();
-  }, [convexAccessToken]);
+  }, []);
 
   /**
    * Debounce filter text changes
@@ -702,7 +692,21 @@ const Container = ({
             <div className="flex items-center border border-neutral-n13 text-xs text-neutral-n7 text-center rounded-sm bg-neutral-n12 w-full max-w-72 py-0.5 truncate cursor-pointer">
               <a href="https://dashboard.convex.dev" target="_blank" rel="noreferrer">
                 <span className="inline-block size-3">
-                  <img src={require('./assets/convex.png')} alt="Convex Logo" className="w-6" />
+                  <svg className="w-6" width="100%" height="100%" viewBox="0 0 367 370" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="matrix(1,0,0,1,-129.225,-127.948)">
+                      <g transform="matrix(4.16667,0,0,4.16667,0,0)">
+                        <g transform="matrix(1,0,0,1,86.6099,107.074)">
+                          <path d="M0,-6.544C13.098,-7.973 25.449,-14.834 32.255,-26.287C29.037,2.033 -2.48,19.936 -28.196,8.94C-30.569,7.925 -32.605,6.254 -34.008,4.088C-39.789,-4.83 -41.69,-16.18 -38.963,-26.48C-31.158,-13.247 -15.3,-5.131 0,-6.544" fill="rgb(245,176,26)" fillRule="nonzero" />
+                        </g>
+                        <g transform="matrix(1,0,0,1,47.1708,74.7779)">
+                          <path d="M0,-2.489C-5.312,9.568 -5.545,23.695 0.971,35.316C-21.946,18.37 -21.692,-17.876 0.689,-34.65C2.754,-36.197 5.219,-37.124 7.797,-37.257C18.41,-37.805 29.19,-33.775 36.747,-26.264C21.384,-26.121 6.427,-16.446 0,-2.489" fill="rgb(141,37,118)" fillRule="nonzero" />
+                        </g>
+                        <g transform="matrix(1,0,0,1,91.325,66.4152)">
+                          <path d="M0,-14.199C-7.749,-24.821 -19.884,-32.044 -33.173,-32.264C-7.482,-43.726 24.112,-25.143 27.557,2.322C27.877,4.876 27.458,7.469 26.305,9.769C21.503,19.345 12.602,26.776 2.203,29.527C9.838,15.64 8.889,-1.328 0,-14.199" fill="rgb(238,52,47)" fillRule="nonzero" />
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
                 </span>
               </a>
               <div className="grow min-w-0 text-center">

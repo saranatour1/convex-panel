@@ -1,6 +1,6 @@
 {
   "name": "convex-panel",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "A React component for monitoring and debugging Convex applications",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -26,8 +26,8 @@
     "copy-src": "node copy-src.js",
     "build": "npm run copy-src && rollup -c",
     "dev": "npm run copy-src && rollup -c -w",
-    "clean": "rimraf dist src",
-    "prepublishOnly": "npm run clean && npm run build",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -56,23 +56,26 @@
     "@rollup/plugin-node-resolve": "^15.2.1",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.3",
+    "@rollup/plugin-url": "^8.0.2",
     "@types/debounce": "^1.2.1",
     "@types/node": "^22.13.10",
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
     "@types/react-window": "^1.8.8",
     "convex": "^1.0.0",
+    "copyfiles": "^2.4.1",
     "next": "^13.4.19",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rimraf": "^5.0.1",
     "rollup": "^3.29.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-url": "^3.0.1",
     "typescript": "^5.2.2"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/robertalv/convex-panel"
+    "url": "git+https://github.com/robertalv/convex-panel.git"
   },
   "bugs": {
     "url": "https://github.com/robertalv/convex-panel/issues"

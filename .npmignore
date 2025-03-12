@@ -1,5 +1,5 @@
 # Source
-convex-panel/src
+# src is needed for the build process, so don't exclude it
 
 # Config files
 .gitignore
