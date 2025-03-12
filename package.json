@@ -23,7 +23,7 @@
     "panel",
     "monitoring"
   ],
-  "author": "",
+  "author": "Robert ALvarez",
   "license": "MIT",
   "peerDependencies": {
     "convex": ">=0.9.0",
