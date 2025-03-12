@@ -16,12 +16,39 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
   const [value, setValue] = useState<string>(existingFilter?.value !== undefined ? JSON.stringify(existingFilter.value) : '');
   const [isEditing, setIsEditing] = useState<boolean>(!!existingFilter);
   const [isOpen, setIsOpen] = useState(false);
+  const [isTypeFilterOpen, setIsTypeFilterOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const typeDropdownRef = useRef<HTMLDivElement>(null);
   
-  // Use a ref to track if we're handling an internal click
   const isInternalClickRef = useRef(false);
   
+  const typeOptions = [
+    { value: 'string', label: 'string' },
+    { value: 'boolean', label: 'boolean' },
+    { value: 'number', label: 'number' },
+    { value: 'bigint', label: 'bigint' },
+    { value: 'null', label: 'null' },
+    { value: 'object', label: 'object' },
+    { value: 'array', label: 'array' },
+    { value: 'id', label: 'id' },
+    { value: 'bytes', label: 'bytes' },
+    { value: 'unset', label: 'unset' }
+  ];
+
+  const operatorOptions = [
+    { value: 'eq', label: 'equals' },
+    { value: 'neq', label: 'not equal' },
+    { value: 'gt', label: '>' },
+    { value: 'lt', label: '<' },
+    { value: 'gte', label: '>=' },
+    { value: 'lte', label: '<=' },
+    { value: 'isType', label: 'Is type' },
+    { value: 'isNotType', label: 'Is not type' },
+    { value: 'anyOf', label: 'any of' },
+    { value: 'noneOf', label: 'None of' }
+  ];
+
   useEffect(() => {
     console.log("FilterMenu mounted", { field, position });
     
@@ -135,6 +162,40 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     e.stopPropagation();
   };
 
+  const handleTypeFilterToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isInternalClickRef.current = true;
+    setIsTypeFilterOpen(!isTypeFilterOpen);
+  };
+
+  const handleTypeSelect = (typeValue: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isInternalClickRef.current = true;
+    setValue(typeValue);
+    setIsTypeFilterOpen(false);
+  };
+
+  // Update effect to handle type filter dropdown
+  useEffect(() => {
+    if (!isTypeFilterOpen) return;
+    
+    const handleClickOutsideTypeDropdown = (e: MouseEvent) => {
+      if (menuRef.current && menuRef.current.contains(e.target as Node) && 
+          typeDropdownRef.current && !typeDropdownRef.current.contains(e.target as Node)) {
+        isInternalClickRef.current = true;
+        setIsTypeFilterOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutsideTypeDropdown);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutsideTypeDropdown);
+    };
+  }, [isTypeFilterOpen]);
+
   return createPortal(
     <div 
       ref={menuRef}
@@ -159,14 +220,8 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
             onMouseDown={(e) => e.stopPropagation()}
             className="convex-panel-filter-menu-dropdown-button"
           >
-            <span>{operator === 'eq' ? 'Equals' : 
-                   operator === 'neq' ? 'Not equals' :
-                   operator === 'gt' ? 'Greater than' :
-                   operator === 'gte' ? 'Greater than or equal' :
-                   operator === 'lt' ? 'Less than' :
-                   operator === 'lte' ? 'Less than or equal' :
-                   operator === 'anyOf' ? 'Any of' :
-                   operator === 'noneOf' ? 'None of' : 'Select operation'}
+            <span>
+              {operatorOptions.find(opt => opt.value === operator)?.label || 'Select operation'}
             </span>
             <svg width="12" height="12" viewBox="0 0 15 15" fill="none">
               <path d="M3.5 5.5L7.5 9.5L11.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -179,16 +234,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               onClick={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.stopPropagation()}
             >
-              {[
-                {value: 'eq', label: 'Equals'},
-                {value: 'neq', label: 'Not equals'},
-                {value: 'gt', label: 'Greater than'},
-                {value: 'gte', label: 'Greater than or equal'},
-                {value: 'lt', label: 'Less than'}, 
-                {value: 'lte', label: 'Less than or equal'},
-                {value: 'anyOf', label: 'Any of'},
-                {value: 'noneOf', label: 'None of'}
-              ].map(option => (
+              {operatorOptions.map(option => (
                 <button
                   type="button"
                   key={option.value}
@@ -206,18 +252,61 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
       
       <div className="convex-panel-filter-menu-group-value">
         <label className="convex-panel-filter-menu-label">Value</label>
-        <textarea
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onClick={(e) => e.stopPropagation()}
-          onMouseDown={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-          className="convex-panel-filter-menu-textarea"
-          placeholder={operator === 'anyOf' || operator === 'noneOf' ? '[value1, value2, ...]' : 'Enter value (e.g. "text", 123, true)'}
-        />
-        <p className="convex-panel-filter-menu-hint">
-          For arrays or objects, use valid JSON format
-        </p>
+        {(operator === 'isType' || operator === 'isNotType') ? (
+          <div 
+            ref={typeDropdownRef}
+            className="convex-panel-filter-menu-dropdown"
+          >
+            <button
+              type="button"
+              onClick={handleTypeFilterToggle}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="convex-panel-filter-menu-dropdown-button"
+            >
+              <span>
+                {typeOptions.find(opt => opt.value === value)?.label || 'Select type'}
+              </span>
+              <svg width="12" height="12" viewBox="0 0 15 15" fill="none">
+                <path d="M3.5 5.5L7.5 9.5L11.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            
+            {isTypeFilterOpen && (
+              <div 
+                className="convex-panel-filter-menu-dropdown-content"
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                {typeOptions.map(option => (
+                  <button
+                    type="button"
+                    key={option.value}
+                    className={`convex-panel-filter-menu-option ${value === option.value ? 'convex-panel-filter-menu-option-selected' : ''}`}
+                    onClick={(e) => handleTypeSelect(option.value, e)}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            <textarea
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+              className="convex-panel-filter-menu-textarea"
+              placeholder={operator === 'anyOf' || operator === 'noneOf' ? '[value1, value2, ...]' : 'Enter value (e.g. "text", 123, true)'}
+            />
+            <p className="convex-panel-filter-menu-hint">
+              For arrays or objects, use valid JSON format
+            </p>
+          </>
+        )}
       </div>
       
       <div className="convex-panel-filter-menu-actions">

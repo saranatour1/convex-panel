@@ -201,18 +201,27 @@ export const useTableData = ({
         id: Date.now(),
       };
       
-      // Format filters according to Convex's specification
+      // Only create filterString if we have filters
       const filterString = currentFilters.clauses.length > 0 
         ? btoa(JSON.stringify({
             clauses: currentFilters.clauses.map(clause => ({
-              op: clause.op,
-              field: clause.field, // Use the field name as-is
+              op: clause.op === 'isType' ? 'type' : 
+                  clause.op === 'isNotType' ? 'notype' : 
+                  clause.op,
+              field: clause.field,
               value: clause.value,
               enabled: true,
               id: `${clause.field}_${Date.now()}`
             }))
           }))
         : null;
+
+      const args: PageArgs = {
+        paginationOpts: page,
+        table: tableName,
+        filters: filterString,
+        componentId: null,
+      };
 
       // Only log filter debug info when there are actual filters
       if (currentFilters.clauses.length > 0) {
@@ -222,17 +231,7 @@ export const useTableData = ({
           filterString,
           decodedFilters: filterString ? JSON.parse(atob(filterString)) : null
         });
-      }
 
-      const args: PageArgs = {
-        paginationOpts: page,
-        table: tableName,
-        filters: filterString,
-        componentId: null,
-      };
-
-      // Only log detailed filter info when there are actual filters
-      if (currentFilters.clauses.length > 0) {
         console.log('Sending filters:', {
           raw: currentFilters.clauses,
           encoded: filterString,
@@ -348,9 +347,18 @@ export const useTableData = ({
 
   // Add a dedicated effect to handle filter changes and fetch data
   useEffect(() => {
-    if (selectedTable && filters.clauses.length > 0) {
-      // Immediate fetch for filter changes to improve responsiveness
-      fetchTableData(selectedTable, null);
+    if (selectedTable) {
+      // Only fetch if we have filters or if this is a filter clear operation
+      const previousFilters = lastFetchRef.current.filters;
+      const hadPreviousFilters = previousFilters && Array.isArray(previousFilters.clauses) && previousFilters.clauses.length > 0;
+      
+      if (filters.clauses.length > 0 || hadPreviousFilters) {
+        // Reset cursor when filters change
+        setContinueCursor(null);
+        setHasMore(true);
+        // Immediate fetch for filter changes to improve responsiveness
+        fetchTableData(selectedTable, null);
+      }
     }
   }, [filters, selectedTable, fetchTableData]);
 

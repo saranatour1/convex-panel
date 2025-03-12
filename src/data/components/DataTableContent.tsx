@@ -17,7 +17,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
   formatValue,
   activeFilters
 }) => {
-  const [hoveredHeader, setHoveredHeader] = useState<string | null>(null);
+  const [hoveredHeader, setHoveredHeader] = useState<number | null>(null);
   
   // Find existing filter for a column
   const getExistingFilter = (field: string): FilterClause | undefined => {
@@ -37,22 +37,21 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
             <th className="convex-panel-checkbox-header">
               <input type="checkbox" className="convex-panel-checkbox" disabled />
             </th>
-            {columnHeaders.map(header => (
+            {columnHeaders.map((header, index) => (
               <th 
-                key={header} 
+                key={index} 
                 className="convex-panel-column-header"
-                onMouseEnter={() => setHoveredHeader(header)}
+                onMouseEnter={() => setHoveredHeader(index)}
                 onMouseLeave={() => setHoveredHeader(null)}
               >
-                <div className="convex-panel-header-content">
-                  <span style={{ fontStyle: 'bold' }}>{header}</span>
+                <div className={`convex-panel-header-content ${hoveredHeader === index ? 'convex-panel-header-hovered' : ''}`}>
+                  <span style={{ fontStyle: 'bold' }}>
+                    {header}
+                  </span>
                   <button
                     onClick={(e) => onFilterButtonClick(e, header)}
-                    className={`convex-panel-filter-button ${
-                      hoveredHeader === header
-                        ? 'convex-panel-filter-hovered'
-                        : 'convex-panel-filter-hidden'
-                    }`}
+                    className="convex-panel-filter-button"
+                    style={{ visibility: hoveredHeader === index ? 'visible' : 'hidden' }}
                     title={hasActiveFilter(header) ? "Edit filter" : "Add filter"}
                   >
                     <svg width="12" height="12" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">

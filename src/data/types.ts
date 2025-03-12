@@ -48,11 +48,16 @@ export interface PaginationOptions {
 }
 
 export interface FilterClause {
-  op: 'eq' | 'neq' | 'gte' | 'lte' | 'gt' | 'lt' | 'anyOf' | 'noneOf';
   field: string;
+  /**
+   * Filter operators:
+   * - Basic comparison: eq, neq, gt, gte, lt, lte
+   * - Array operations: anyOf, noneOf
+   * - Type checking: isType (maps to 'type' in Convex), isNotType (maps to 'notype' in Convex)
+   */
+  op: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'anyOf' | 'noneOf' | 'isType' | 'isNotType';
   value: any;
   enabled: boolean;
-  theme?: any;
 }
 
 export interface FilterExpression {

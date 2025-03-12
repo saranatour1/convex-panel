@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { PlayCircleIcon, PauseCircleIcon } from 'lucide-react';
 import { ThemeClasses } from '../types';
 import { LogType } from './types';
@@ -67,6 +67,9 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
 }, ref) => {
   // State to store settings loaded from localStorage
   const [localSettings, setLocalSettings] = useState<Partial<ConvexPanelSettings> | null>(null);
+  // Add state for log type dropdown
+  const [isLogTypeDropdownOpen, setIsLogTypeDropdownOpen] = useState(false);
+  const logTypeDropdownRef = useRef<HTMLDivElement>(null);
   
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -111,6 +114,22 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
     });
   }, [showRequestIdInput, showLimitInput, showSuccessCheckbox]);
 
+  // Add effect to handle clicking outside the dropdown
+  useEffect(() => {
+    if (!isLogTypeDropdownOpen) return;
+    
+    const handleClickOutside = (e: MouseEvent) => {
+      if (logTypeDropdownRef.current && !logTypeDropdownRef.current.contains(e.target as Node)) {
+        setIsLogTypeDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isLogTypeDropdownOpen]);
+
   return (
     <div ref={ref} className={`convex-panel-toolbar ${mergedTheme.toolbar}`}>
       <div className="convex-panel-toolbar-button-container">
@@ -136,22 +155,12 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
           onClick={refreshLogs}
           disabled={isLoading}
         >
-          {isLoading ? (
-            <div className="convex-inline">
-              <svg className="convex-panel-loading-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="convex-panel-spinner-track" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="convex-panel-spinner-path" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Fetching...
-            </div>
-          ) : (
-            <div className="convex-inline">
-              <svg className="convex-panel-refresh-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Refresh Logs
-            </div>
-          )}
+          <div className="convex-inline">
+            <svg className="convex-panel-refresh-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Refresh Logs
+          </div>
         </button>
       </div>
       <div className="convex-panel-filter-container">
@@ -215,15 +224,51 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
         </div>
       )}
       <div>
-        <select
-          className={`convex-panel-log-type-select ${mergedTheme.input}`}
-          value={logType}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setLogType(e.target.value as LogType)}
+        <div 
+          ref={logTypeDropdownRef}
+          className="convex-panel-filter-menu-dropdown"
         >
-          {Object.values(LogType).map((type) => (
-            <option key={type} value={type}>{type}</option>
-          ))}
-        </select>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsLogTypeDropdownOpen(!isLogTypeDropdownOpen);
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="convex-panel-filter-menu-dropdown-button"
+          >
+            <span>{logType}</span>
+            <svg width="12" height="12" viewBox="0 0 15 15" fill="none">
+              <path d="M3.5 5.5L7.5 9.5L11.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          
+          {isLogTypeDropdownOpen && (
+            <div 
+              className="convex-panel-filter-menu-dropdown-content"
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              {Object.values(LogType).map((type) => (
+                <button
+                  type="button"
+                  key={type}
+                  className={`convex-panel-filter-menu-option ${logType === type ? 'convex-panel-filter-menu-option-selected' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setLogType(type);
+                    setIsLogTypeDropdownOpen(false);
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

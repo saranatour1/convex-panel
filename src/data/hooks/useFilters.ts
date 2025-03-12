@@ -50,10 +50,7 @@ export const useFilters = ({
         : filtersOrUpdater;
       
       if (selectedTable) {
-        // Use setTimeout to avoid blocking the UI thread
-        setTimeout(() => {
-          saveTableFilters(selectedTable, newFilters);
-        }, 0);
+        saveTableFilters(selectedTable, newFilters);
       }
       
       return newFilters;
@@ -125,12 +122,15 @@ export const useFilters = ({
       clauses: filters.clauses.filter(c => c.field !== field)
     };
     
-    // Update filters state immediately
+    // Update filters state and storage synchronously
+    if (selectedTable) {
+      saveTableFilters(selectedTable, newFilters);
+    }
     setFilters(newFilters);
     
     // Call the callback
     onFilterRemove(field);
-  }, [filters, onFilterRemove, setFilters]);
+  }, [filters, onFilterRemove, setFilters, selectedTable]);
 
   const clearFilters = useCallback(() => {
     // Set filters to empty array immediately

@@ -1614,6 +1614,7 @@ tr:hover .convex-panel-filter-hidden {
 
 .convex-panel-logs-list {
   background-color: #121212;
+  height: 330px !important;
 }
 
 /* Logs container layout */
@@ -2045,10 +2046,12 @@ tr:hover .convex-panel-filter-hidden {
 
 .convex-panel-filter-menu-option:hover {
   background-color: #404040;
+  border-radius: 0.425rem;
 }
 
 .convex-panel-filter-menu-option-selected {
   background-color: #404040;
+  border-radius: 0.425rem;
 }
 
 .convex-panel-filter-menu-textarea {
