@@ -486,7 +486,7 @@ const Container = ({
   const renderErrorWithRetry = () => {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4">
-        <div className="text-red-500 mb-4">{error}</div>
+        <div className="convex-panel-error mb-4">{error}</div>
         <div className="flex gap-2">
           <button
             onClick={() => {
@@ -496,7 +496,7 @@ const Container = ({
               setConsecutiveErrors(0);
               fetchLogs();
             }}
-            className="px-4 py-2 bg-blue-600 hover:bg-[#3f529599] bg-[#3f5295] rounded"
+            className="convex-panel-button-sm"
           >
             Retry
           </button>
@@ -649,19 +649,19 @@ const Container = ({
           onPointerDown={startDrag}
           style={{ cursor: 'grab' }}
         >
-          <div className="px-14 w-full items-center flex justify-center relative">
-            <div className="absolute top-0 left-0 h-full flex items-center gap-1.5">
+          <div className="convex-panel-header-content">
+            <div className="convex-panel-window-controls">
               <div 
                 className="convex-panel-window-control convex-panel-close"
                 onClick={toggleOpen}
               >
-                <span className="absolute opacity-0 hover:opacity-100 text-[8px] font-bold text-[#4a1917]">×</span>
+                <span className="convex-panel-window-control-icon convex-panel-close-icon">×</span>
               </div>
               <div 
                 className="convex-panel-window-control convex-panel-minimize"
                 onClick={toggleOpen}
               >
-                <span className="absolute opacity-0 hover:opacity-100 text-[8px] font-bold text-[#4a3917]">−</span>
+                <span className="convex-panel-window-control-icon convex-panel-minimize-icon">−</span>
               </div>
               <div 
                 className="convex-panel-window-control convex-panel-maximize" 
@@ -682,12 +682,12 @@ const Container = ({
                   }
                 }}
               >
-                <span className="absolute opacity-0 hover:opacity-100 text-[8px] font-bold text-[#1a4a1e]">+</span>
+                <span className="convex-panel-window-control-icon convex-panel-maximize-icon">+</span>
               </div>
             </div>
-            <div className="flex items-center border border-neutral-n13 text-xs text-neutral-n7 text-center rounded-sm bg-neutral-n12 w-full max-w-72 py-0.5 truncate cursor-pointer">
+            <div className="convex-panel-url-container">
               <a href="https://dashboard.convex.dev" target="_blank" rel="noreferrer">
-                <span className="inline-block size-3">
+                <span className="convex-panel-url-icon">
                   <svg className="w-6" width="100%" height="100%" viewBox="0 0 367 370" version="1.1" xmlns="http://www.w3.org/2000/svg">
                     <g transform="matrix(1,0,0,1,-129.225,-127.948)">
                       <g transform="matrix(4.16667,0,0,4.16667,0,0)">
@@ -705,7 +705,7 @@ const Container = ({
                   </svg>
                 </span>
               </a>
-              <div className="grow min-w-0 text-center">
+              <div className="convex-panel-url-text">
                 {convexUrl}
               </div>
             </div>
@@ -717,7 +717,7 @@ const Container = ({
         <div 
           role="tablist" 
           aria-orientation="horizontal" 
-          className="flex overflow-x-auto cursor-pointer" 
+          className="convex-panel-tab-list" 
           tabIndex={0} 
           data-orientation="horizontal" 
           style={{ outline: 'none' }}
@@ -729,14 +729,14 @@ const Container = ({
             aria-controls="tab-content-logs"
             data-state={activeTab === 'logs' ? 'active' : 'inactive'}
             id="tab-trigger-logs"
-            className="px-3 h-9 data-[state=inactive]:bg-[#141414] flex items-center gap-1 border-b-4 border-b-transparent data-[state=active]:border-b-[rgb(141,38,118)] data-[state=active]:bg-[rgb(141,38,118,.5)]"
+            className="convex-panel-tab-button"
             tabIndex={activeTab === 'logs' ? 0 : -1}
             data-orientation="horizontal"
             onClick={() => setActiveTab('logs')}
           >
-              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="size-[1.125rem] shrink-0 text-content-secondary" style={{ marginTop: "-4px" }}><path d="M3.89949 5.50002C3.89949 5.27911 3.7204 5.10003 3.49949 5.10003C3.27857 5.10003 3.09949 5.27911 3.09949 5.50002L3.09949 12.5343L1.78233 11.2172C1.62612 11.061 1.37285 11.061 1.21664 11.2172C1.06043 11.3734 1.06043 11.6267 1.21664 11.7829L3.21664 13.7829C3.29166 13.8579 3.3934 13.9 3.49949 13.9C3.60557 13.9 3.70732 13.8579 3.78233 13.7829L5.78233 11.7829C5.93854 11.6267 5.93854 11.3734 5.78233 11.2172C5.62612 11.061 5.37285 11.061 5.21664 11.2172L3.89949 12.5343L3.89949 5.50002ZM8.49998 13C8.22383 13 7.99998 12.7762 7.99998 12.5C7.99998 12.2239 8.22383 12 8.49998 12H14.5C14.7761 12 15 12.2239 15 12.5C15 12.7762 14.7761 13 14.5 13H8.49998ZM8.49998 10C8.22383 10 7.99998 9.77617 7.99998 9.50002C7.99998 9.22388 8.22383 9.00002 8.49998 9.00002H14.5C14.7761 9.00002 15 9.22388 15 9.50002C15 9.77617 14.7761 10 14.5 10H8.49998C8.22383 10 7.99998 9.77617 7.99998 9.50002ZM7.99998 6.50002C7.99998 6.77617 8.22383 7.00002 8.49998 7.00002H14.5C14.7761 7.00002 15 6.77617 15 6.50002C15 6.22388 14.7761 6.00002 14.5 6.00002H8.49998C8.22383 6.00002 7.99998 6.22388 7.99998 6.50002Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="convex-panel-tab-icon"><path d="M3.89949 5.50002C3.89949 5.27911 3.7204 5.10003 3.49949 5.10003C3.27857 5.10003 3.09949 5.27911 3.09949 5.50002L3.09949 12.5343L1.78233 11.2172C1.62612 11.061 1.37285 11.061 1.21664 11.2172C1.06043 11.3734 1.06043 11.6267 1.21664 11.7829L3.21664 13.7829C3.29166 13.8579 3.3934 13.9 3.49949 13.9C3.60557 13.9 3.70732 13.8579 3.78233 13.7829L5.78233 11.7829C5.93854 11.6267 5.93854 11.3734 5.78233 11.2172C5.62612 11.061 5.37285 11.061 5.21664 11.2172L3.89949 12.5343L3.89949 5.50002ZM8.49998 13C8.22383 13 7.99998 12.7762 7.99998 12.5C7.99998 12.2239 8.22383 12 8.49998 12H14.5C14.7761 12 15 12.2239 15 12.5C15 12.7762 14.7761 13 14.5 13H8.49998ZM8.49998 10C8.22383 10 7.99998 9.77617 7.99998 9.50002C7.99998 9.22388 8.22383 9.00002 8.49998 9.00002H14.5C14.7761 9.00002 15 9.22388 15 9.50002C15 9.77617 14.7761 10 14.5 10H8.49998C8.22383 10 7.99998 9.77617 7.99998 9.50002ZM7.99998 6.50002C7.99998 6.77617 8.22383 7.00002 8.49998 7.00002H14.5C14.7761 7.00002 15 6.77617 15 6.50002C15 6.22388 14.7761 6.00002 14.5 6.00002H8.49998C8.22383 6.00002 7.99998 6.22388 7.99998 6.50002Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
             <span>
-              <span className="text-neutral-100">Logs</span>
+              <span className="convex-panel-tab-text">Logs</span>
             </span>
           </button>
 
@@ -748,15 +748,15 @@ const Container = ({
             aria-controls="tab-content-data-tables"
             data-state={activeTab === 'data-tables' ? 'active' : 'inactive'}
             id="tab-trigger-data-tables"
-            className="px-3 data-[state=inactive]:bg-[#141414] flex items-center gap-1 border-b-4 border-b-transparent px-1.5 py-2 data-[state=active]:border-b-[rgb(141,38,118)] data-[state=active]:bg-[rgb(141,38,118,.5)]"
+            className="convex-panel-tab-button"
             tabIndex={activeTab === 'data-tables' ? 0 : -1}
             data-orientation="horizontal"
             onClick={() => setActiveTab('data-tables')}
           >
             <div className="flex items-center gap-1">
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="size-[.75rem] shrink-0 text-content-secondary"><path d="M8 2H12.5C12.7761 2 13 2.22386 13 2.5V5H8V2ZM7 5V2H2.5C2.22386 2 2 2.22386 2 2.5V5H7ZM2 6V9H7V6H2ZM8 6H13V9H8V6ZM8 10H13V12.5C13 12.7761 12.7761 13 12.5 13H8V10ZM2 12.5V10H7V13H2.5C2.22386 13 2 12.7761 2 12.5ZM1 2.5C1 1.67157 1.67157 1 2.5 1H12.5C13.3284 1 14 1.67157 14 2.5V12.5C14 13.3284 13.3284 14 12.5 14H2.5C1.67157 14 1 13.3284 1 12.5V2.5Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="convex-panel-tab-data-icon"><path d="M8 2H12.5C12.7761 2 13 2.22386 13 2.5V5H8V2ZM7 5V2H2.5C2.22386 2 2 2.22386 2 2.5V5H7ZM2 6V9H7V6H2ZM8 6H13V9H8V6ZM8 10H13V12.5C13 12.7761 12.7761 13 12.5 13H8V10ZM2 12.5V10H7V13H2.5C2.22386 13 2 12.7761 2 12.5ZM1 2.5C1 1.67157 1.67157 1 2.5 1H12.5C13.3284 1 14 1.67157 14 2.5V12.5C14 13.3284 13.3284 14 12.5 14H2.5C1.67157 14 1 13.3284 1 12.5V2.5Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
             <span>
-              <span className="text-neutral-n1">Data</span>
+              <span className="convex-panel-tab-text">Data</span>
             </span>
             </div>
           </button>
@@ -769,22 +769,22 @@ const Container = ({
             aria-controls="tab-content-health"
             data-state={activeTab === 'health' ? 'active' : 'inactive'}
             id="tab-trigger-health"
-            className="px-3 data-[state=inactive]:bg-[#141414] flex items-center gap-1 border-b-4 border-b-transparent px-1.5 py-2 data-[state=active]:border-b-[rgb(141,38,118)] data-[state=active]:bg-[rgb(141,38,118,.5)]"
+            className="convex-panel-tab-button"
             tabIndex={activeTab === 'health' ? 0 : -1}
             data-orientation="horizontal"
             onClick={() => setActiveTab('health')}
           >
             <div className="flex items-center gap-1">
-            <svg className="size-[1.125rem] shrink-0 text-content-secondary" width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M9.002 2.5a.75.75 0 01.691.464l6.302 15.305 2.56-6.301a.75.75 0 01.695-.468h4a.75.75 0 010 1.5h-3.495l-3.06 7.532a.75.75 0 01-1.389.004L8.997 5.21l-3.054 7.329A.75.75 0 015.25 13H.75a.75.75 0 010-1.5h4l3.558-8.538a.75.75 0 01.694-.462z"></path></svg>
+            <svg className="convex-panel-tab-health-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M9.002 2.5a.75.75 0 01.691.464l6.302 15.305 2.56-6.301a.75.75 0 01.695-.468h4a.75.75 0 010 1.5h-3.495l-3.06 7.532a.75.75 0 01-1.389.004L8.997 5.21l-3.054 7.329A.75.75 0 015.25 13H.75a.75.75 0 010-1.5h4l3.558-8.538a.75.75 0 01.694-.462z"></path></svg>
             <span>
-              <span className="text-neutral-n1">Health</span>
+              <span className="convex-panel-tab-text">Health</span>
             </span>
             </div>
           </button>
         </div>
         
         {/* Settings button on the far right */}
-        <div className="pr-2">
+        <div className="convex-panel-settings-container">
           <SettingsButton 
             onSettingsChange={handleSettingsChange}
             theme={theme}
