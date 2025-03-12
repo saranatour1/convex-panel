@@ -16,14 +16,7 @@ pnpm add convex-panel
 
 ### Styling
 
-The Convex Panel comes with built-in styling. You simply need to import the CSS file:
-
-```jsx
-// In your _app.js, layout.js, or component file
-import 'convex-panel/styles/convex-panel.css';
-```
-
-This CSS file includes all the necessary styles for the panel to look good without any additional dependencies.
+The Convex Panel comes with built-in styling. No CSS imports are required! The styles are automatically injected when the component mounts.
 
 ### Setting Up the Panel
 
@@ -189,11 +182,8 @@ The Convex Panel accepts the following props:
    - Check that you've passed the `convex` prop to the ConvexPanel component.
 
 3. **Styling issues or unstyled panel**:
-   - Make sure you've imported the CSS file as described in the "Styling" section:
-     ```jsx
-     import 'convex-panel/styles/convex-panel.css';
-     ```
-   - If you're using a framework that requires special handling for CSS imports (like Next.js with CSS modules), you may need to adjust how you import the styles.
+   - The panel includes all necessary styling automatically - no CSS imports required!
+   - If you're experiencing styling issues, it might be due to conflicting styles in your application. The panel uses `!important` flags to override conflicting styles.
 
 4. **Missing Convex logo or 400 Bad Request error**:
    - The component uses Next.js Image component to display the Convex logo

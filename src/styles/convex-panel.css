@@ -433,10 +433,173 @@
   color: #1a4a1e;
 }
 
+/* Container component specific styles */
+.convex-panel-header-content {
+  padding-left: 3.5rem;
+  padding-right: 3.5rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.convex-panel-window-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.convex-panel-window-control-icon {
+  position: absolute;
+  opacity: 0;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.convex-panel-window-control-icon:hover {
+  opacity: 1;
+}
+
+.convex-panel-close-icon {
+  color: #4a1917;
+}
+
+.convex-panel-minimize-icon {
+  color: #4a3917;
+}
+
+.convex-panel-maximize-icon {
+  color: #1a4a1e;
+}
+
+.convex-panel-url-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid #27272a;
+  font-size: 0.75rem;
+  color: #a1a1aa;
+  text-align: center;
+  border-radius: 0.125rem;
+  background-color: #18181b;
+  width: 100%;
+  max-width: 18rem;
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.convex-panel-url-icon {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.convex-panel-url-text {
+  flex-grow: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+/* Tab styles */
+.convex-panel-tab-list {
+  display: flex;
+  overflow-x: auto;
+  cursor: pointer;
+  outline: none;
+}
+
+.convex-panel-tab-button {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-bottom: 4px solid transparent;
+}
+
+.convex-panel-tab-button[data-state="inactive"] {
+  background-color: #141414;
+}
+
+.convex-panel-tab-button[data-state="active"] {
+  border-bottom-color: rgb(141, 38, 118);
+  background-color: rgba(141, 38, 118, 0.5);
+}
+
+.convex-panel-tab-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  color: #a1a1aa;
+  margin-top: -4px;
+}
+
+.convex-panel-tab-data-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex-shrink: 0;
+  color: #a1a1aa;
+}
+
+.convex-panel-tab-health-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  color: #a1a1aa;
+}
+
+.convex-panel-tab-text {
+  color: #f5f5f5;
+}
+
+.convex-panel-settings-container {
+  padding-right: 0.5rem;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .convex-panel-card {
     width: calc(100vw - 2rem) !important;
     height: calc(100vh - 6rem) !important;
   }
+}
+
+/* Additional utility classes for error display */
+.flex-col {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.items-center {
+  align-items: center !important;
+}
+
+.justify-center {
+  justify-content: center !important;
+}
+
+.h-full {
+  height: 100% !important;
+}
+
+.p-4 {
+  padding: 1rem !important;
+}
+
+.mb-4 {
+  margin-bottom: 1rem !important;
+}
+
+.gap-2 {
+  gap: 0.5rem !important;
 } 
+

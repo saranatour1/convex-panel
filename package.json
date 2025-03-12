@@ -5,20 +5,17 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
-  "style": "dist/styles/convex-panel.css",
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",
       "require": "./dist/index.js",
-      "types": "./dist/index.d.ts",
-      "style": "./dist/styles/convex-panel.css"
+      "types": "./dist/index.d.ts"
     },
     "./utils/getConvexToken": {
       "import": "./dist/utils/getConvexToken.js",
       "require": "./dist/utils/getConvexToken.js",
       "types": "./dist/utils/getConvexToken.d.ts"
-    },
-    "./styles/convex-panel.css": "./dist/styles/convex-panel.css"
+    }
   },
   "files": [
     "dist",
@@ -27,9 +24,8 @@
   ],
   "scripts": {
     "copy-src": "node copy-src.js",
-    "process-css": "node process-css.js",
-    "build": "npm run copy-src && npm run process-css && rollup -c",
-    "dev": "npm run copy-src && npm run process-css && rollup -c -w",
+    "build": "npm run copy-src && rollup -c",
+    "dev": "npm run copy-src && rollup -c -w",
     "clean": "rimraf dist",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
