@@ -193,6 +193,19 @@ The Convex Panel accepts the following props:
      ```
    - If you're using a framework that requires special handling for CSS imports (like Next.js with CSS modules), you may need to adjust how you import the styles.
 
+4. **Missing Convex logo or 400 Bad Request error**:
+   - The component uses Next.js Image component to display the Convex logo
+   - By default, it looks for `/convex.png` in your public directory
+   - You can provide a custom image by passing the `buttonIcon` prop:
+     ```jsx
+     <ConvexPanel buttonIcon="/your-custom-logo.png" />
+     ```
+   - Alternatively, you can add the Convex logo to your public directory:
+     ```
+     public/
+       └── convex.png
+     ```
+
 ## Development
 
 To contribute to this package:
