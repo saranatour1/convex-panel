@@ -16,6 +16,8 @@
   justify-content: center;
   cursor: pointer;
   background-color: #2a2825 !important;
+  width: 36px;
+  height: 36px;
 }
 
 .convex-panel-card {
@@ -31,6 +33,10 @@
   padding: 0.5rem;
   position: relative;
   margin-right: 1rem;
+}
+
+.convex-panel-header-container {
+  border-radius: 0.5rem;
 }
 
 .convex-panel-header {
@@ -65,6 +71,7 @@
   align-items: center;
   gap: 0.25rem;
   border-bottom: 4px solid transparent;
+  color: #fff;
 }
 
 .convex-panel-tab[data-state="active"] {
@@ -188,6 +195,236 @@
   width: 200px;
   border-right: 1px solid #444;
   overflow-y: auto;
+}
+
+/* Additional utility classes to replace Tailwind */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-1\.5 {
+  gap: 0.375rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.max-w-72 {
+  max-width: 18rem;
+}
+
+.grow {
+  flex-grow: 1;
+}
+
+.shrink-0 {
+  flex-shrink: 0;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.px-14 {
+  padding-left: 3.5rem;
+  padding-right: 3.5rem;
+}
+
+.py-0\.5 {
+  padding-top: 0.125rem;
+  padding-bottom: 0.125rem;
+}
+
+.px-3 {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.pr-2 {
+  padding-right: 0.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-red-500 {
+  color: #f44336;
+}
+
+.text-neutral-100 {
+  color: #f5f5f5;
+}
+
+.text-neutral-n1 {
+  color: #f5f5f5;
+}
+
+.text-neutral-n7 {
+  color: #a1a1aa;
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.rounded-sm {
+  border-radius: 0.125rem;
+}
+
+.border {
+  border: 1px solid;
+}
+
+.border-neutral-n13 {
+  border-color: #27272a;
+}
+
+.bg-neutral-n12 {
+  background-color: #18181b;
+}
+
+.bg-blue-600 {
+  background-color: #2563eb;
+}
+
+.bg-\[\#3f5295\] {
+  background-color: #3f5295;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.top-0 {
+  top: 0;
+}
+
+.left-0 {
+  left: 0;
+}
+
+.size-3 {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.size-\[10px\] {
+  width: 10px;
+  height: 10px;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.w-6 {
+  width: 1.5rem;
+}
+
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+.opacity-0 {
+  opacity: 0;
+}
+
+.hover\:opacity-100:hover {
+  opacity: 1;
+}
+
+.text-\[8px\] {
+  font-size: 8px;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-\[\#4a1917\] {
+  color: #4a1917;
+}
+
+.text-\[\#4a3917\] {
+  color: #4a3917;
+}
+
+.text-\[\#1a4a1e\] {
+  color: #1a4a1e;
+}
+
+.hover\:bg-\[\#3f529599\]:hover {
+  background-color: rgba(63, 82, 149, 0.6);
 }
 
 /* Responsive adjustments */

@@ -14,14 +14,28 @@ pnpm add convex-panel
 
 ## Usage
 
-### Importing Styles
+### Styling Options
 
-First, import the CSS file in your application:
+You have two options for styling the Convex Panel:
+
+#### Option 1: Import the CSS file (Recommended)
+
+The package includes all necessary CSS. Simply import it in your application:
 
 ```jsx
 // In your _app.js, layout.js, or component file
 import 'convex-panel/styles/convex-panel.css';
 ```
+
+This CSS file includes all the necessary styles for the panel to look good without any additional dependencies.
+
+#### Option 2: Use with Tailwind CSS
+
+If your project already uses Tailwind CSS, you can ensure the panel styles work correctly by:
+
+1. Make sure Tailwind CSS is properly configured in your project
+2. Import the CSS file as in Option 1 to get the base styles
+3. The panel uses standard Tailwind class names that will be styled by your Tailwind configuration
 
 ### Setting Up the Panel
 
@@ -187,11 +201,24 @@ The Convex Panel accepts the following props:
    - Check that you've passed the `convex` prop to the ConvexPanel component.
 
 3. **Styling issues or unstyled panel**:
-   - Make sure you've imported the CSS file as described in the "Importing Styles" section:
+   - Make sure you've imported the CSS file as described in the "Styling Options" section:
      ```jsx
      import 'convex-panel/styles/convex-panel.css';
      ```
    - If you're using a framework that requires special handling for CSS imports (like Next.js with CSS modules), you may need to adjust how you import the styles.
+   - If you're using Tailwind CSS and the panel still doesn't look right:
+     - Check that your Tailwind configuration is properly set up
+     - Make sure your Tailwind CSS is being applied to the entire application
+     - Try adding the following to your tailwind.config.js to ensure Tailwind processes the panel's classes:
+       ```js
+       module.exports = {
+         content: [
+           // ... your existing content paths
+           './node_modules/convex-panel/**/*.{js,ts,jsx,tsx}',
+         ],
+         // ... rest of your config
+       };
+       ```
 
 4. **Missing Convex logo or 400 Bad Request error**:
    - The component uses Next.js Image component to display the Convex logo
