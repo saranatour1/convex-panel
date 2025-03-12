@@ -2178,4 +2178,17 @@
   .convex-panel-tooltip-line:last-child {
     margin-bottom: 0 !important;
   }
+
+  .convex-panel-health-container {
+    overflow: auto;
+  }
+
+  .convex-panel-health-header {
+    padding: 0.5rem 1rem !important;
+    border-bottom: 1px solid #333333;
+    top: 0;
+    background-color: #1a1a1a;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
 }

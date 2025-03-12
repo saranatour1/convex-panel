@@ -262,7 +262,7 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
   if (loading) {
     return (
       <div className="cache-hit-rate-chart" style={{ width: '100%', height: 300 }}>
-        <div className="convex-panel-table-header convex-panel-table-header-theme">
+        <div className="convex-panel-health-header convex-panel-table-header-theme">
           <h3 style={{ fontSize: "14px" }}>Cache Hit Rate</h3>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             Loading...
@@ -275,7 +275,7 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
   if (error) {
     return (
       <div className="cache-hit-rate-chart" style={{ width: '100%', height: 300 }}>
-        <h3>Cache Hit Rate</h3>
+        <h3 className="convex-panel-health-header convex-panel-table-header-theme" style={{ fontSize: '14px' }}>Cache Hit Rate</h3>
         <div style={{ color: '#ff4d4f', textAlign: 'center', marginTop: '20px' }}>
           {error}
         </div>
@@ -285,7 +285,7 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
 
   return (
     <div className="cache-hit-rate-chart" style={{ width: '100%', height: 300, backgroundColor: '#1e1e1e', borderRadius: '8px' }}>
-      <h3 className="convex-panel-table-header convex-panel-table-header-theme" style={{ color: '#fff', marginBottom: '20px', fontSize: '18px' }}>
+      <h3 className="convex-panel-health-header convex-panel-table-header-theme" style={{ color: '#fff', fontSize: '14px' }}>
         Cache Hit Rate
       </h3>
 
@@ -367,8 +367,6 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
         display: 'flex', 
         justifyContent: 'center', 
         flexWrap: 'wrap',
-        margin: '20px 10px 10px',
-        paddingBottom: '10px'
       }}>
         {chartFunctionNames.map(name => (
           <div 
@@ -383,9 +381,8 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
             }}
           >
             <div style={{ 
-              width: 10, 
-              height: 10, 
-              borderRadius: '50%', 
+              width: 20, 
+              height: 5, 
               backgroundColor: colorMap[name] || generateColor(name),
               marginRight: 5
             }} />

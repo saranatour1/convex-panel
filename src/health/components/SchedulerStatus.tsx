@@ -34,7 +34,7 @@ const SchedulerStatus: React.FC<SchedulerStatusProps> = ({ status, message }) =>
 
   return (
     <div className="scheduler-status" style={{ padding: '20px' }}>
-      <h3>Scheduler Status</h3>
+      <h3 className="convex-panel-health-header convex-panel-table-header-theme">Scheduler Status</h3>
       <div style={{ 
         display: 'flex',
         flexDirection: 'column',
@@ -46,10 +46,9 @@ const SchedulerStatus: React.FC<SchedulerStatusProps> = ({ status, message }) =>
         padding: '20px'
       }}>
         <div style={{
-          fontSize: '24px',
+          fontSize: '40px',
           fontWeight: 'bold',
           color: getStatusColor(),
-          marginBottom: '10px'
         }}>
           {getStatusTitle()}
         </div>
