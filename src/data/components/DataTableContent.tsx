@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { DataTableContentProps, FilterClause } from '../types';
 import FilterMenu from './FilterMenu';
@@ -32,30 +30,28 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
   };
 
   return (
-    <div className="min-w-max">
-      <table className="w-full text-sm border-collapse">
+    <div className="convex-panel-table-wrapper">
+      <table className="convex-panel-data-table">
         <thead>
-          <tr className="bg-neutral-800">
-            <th className="sticky left-0 z-10 bg-neutral-800 w-8 p-2">
-              <input type="checkbox" className="rounded" disabled />
+          <tr className="convex-panel-table-header-row">
+            <th className="convex-panel-checkbox-header">
+              <input type="checkbox" className="convex-panel-checkbox" disabled />
             </th>
             {columnHeaders.map(header => (
               <th 
                 key={header} 
-                className="text-left p-2 font-medium border-r border-neutral-700 min-w-[150px]"
+                className="convex-panel-column-header"
                 onMouseEnter={() => setHoveredHeader(header)}
                 onMouseLeave={() => setHoveredHeader(null)}
               >
-                <div className="flex items-center gap-2">
-                  <span>{header}</span>
+                <div className="convex-panel-header-content">
+                  <span style={{ fontStyle: 'bold' }}>{header}</span>
                   <button
                     onClick={(e) => onFilterButtonClick(e, header)}
-                    className={`p-1 rounded filter-menu-button ${
-                      hasActiveFilter(header) 
-                        ? 'hover:bg-[#3f529599] bg-[#3f5295]' 
-                        : hoveredHeader === header
-                          ? 'bg-neutral-700 hover:bg-neutral-600'
-                          : 'hover:bg-neutral-700 opacity-0 group-hover:opacity-100'
+                    className={`convex-panel-filter-button ${
+                      hoveredHeader === header
+                        ? 'convex-panel-filter-hovered'
+                        : 'convex-panel-filter-hidden'
                     }`}
                     title={hasActiveFilter(header) ? "Edit filter" : "Add filter"}
                   >
@@ -91,23 +87,23 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
             {documents.map((doc, rowIndex) => (
               <tr 
                 key={doc._id || rowIndex} 
-                className="border-b border-neutral-700 hover:bg-neutral-800"
+                className="convex-panel-table-row"
               >
-                <td className="sticky left-0 z-10 bg-neutral-800 p-2 text-center">
-                  <input type="checkbox" className="rounded" />
+                <td className="convex-panel-checkbox-cell">
+                  <input type="checkbox" className="convex-panel-checkbox" />
                 </td>
                 {columnHeaders.map(header => {
                   const value = doc[header];
                   const isId = header === '_id' || header === 'userId' || header.endsWith('Id');
                   
                   return (
-                    <td key={`${doc._id}-${header}`} className="p-2 border-r border-neutral-700">
+                    <td key={`${doc._id}-${header}`} className="convex-panel-table-cell">
                       {isId ? (
-                        <span className="text-blue-400 cursor-pointer">
+                        <span className="convex-panel-id-value">
                           {formatValue(value)}
                         </span>
                       ) : (
-                        <span className={value === undefined ? "text-neutral-500 italic" : ""}>
+                        <span className={value === undefined ? "convex-panel-empty-value" : ""}>
                           {formatValue(value)}
                         </span>
                       )}
@@ -121,21 +117,21 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
       </table>
       
       {/* Loading and end of content indicators */}
-      <div className="py-4 text-center text-sm">
+      <div className="convex-panel-table-footer">
         {isLoading && documents.length === 0 ? (
-          <p className="text-neutral-400">Loading data...</p>
+          <p className="convex-panel-loading-message">Loading data...</p>
         ) : !documents.length ? (
-          <p className="text-neutral-400">No documents found in this table</p>
+          <p className="convex-panel-empty-message">No documents found in this table</p>
         ) : (
           <>
             {/* Intersection observer target */}
-            <div ref={observerTarget} className="h-8 flex items-center justify-center">
+            <div ref={observerTarget} className="convex-panel-observer-target">
               {isLoadingMore ? (
-                <p className="text-neutral-400">Loading more...</p>
+                <p className="convex-panel-loading-more-message">Loading more...</p>
               ) : hasMore ? (
-                <p className="text-neutral-400">Scroll for more</p>
+                <p className="convex-panel-scroll-message">Scroll for more</p>
               ) : (
-                <p className="text-neutral-400">End of documents</p>
+                <p className="convex-panel-end-message">End of documents</p>
               )}
             </div>
           </>

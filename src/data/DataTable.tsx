@@ -1,5 +1,3 @@
-
-
 import React, { useCallback, useEffect, useState } from 'react';
 import { FilterClause, MenuPosition, DataTableProps } from './types';
 import { useTableData, useFilters } from './hooks';
@@ -19,8 +17,8 @@ const SETTINGS_STORAGE_KEY = 'convex-panel:settings';
 
 // Default settings
 const defaultSettings = {
-  showDebugFilters: process.env.NODE_ENV !== 'production',
-  showStorageDebug: process.env.NODE_ENV !== 'production',
+  showDebugFilters: false,
+  showStorageDebug: false,
   logLevel: 'info' as const,
   healthCheckInterval: 60, // seconds
   showRequestIdInput: true,
@@ -117,16 +115,19 @@ const DataTable: React.FC<DataTableProps> = ({
 
   // Sync filters from useFilters to useTableData with priority
   useEffect(() => {
-    if (filters) {
-      // Use immediate update for better responsiveness
-      setTableFilters(filters);
+    // Always update tableFilters when filters change
+    setTableFilters(filters);
+    
+    // If filters are cleared, force a data refresh
+    if (filters.clauses.length === 0) {
+      fetchTableData(selectedTable, null);
     }
-  }, [filters, setTableFilters]);
+  }, [filters, setTableFilters, fetchTableData, selectedTable]);
 
   const columnHeaders = getColumnHeaders();
 
   return (
-    <div className="flex h-full">
+    <div className="convex-panel-data-layout">
       <DataTableSidebar
         tables={tables}
         selectedTable={selectedTable}
@@ -138,11 +139,11 @@ const DataTable: React.FC<DataTableProps> = ({
         theme={theme}
       />
 
-      <div className="flex-1 flex flex-col min-h-[420px] overflow-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-track]:bg-neutral-800 [&::-webkit-scrollbar-thumb]:bg-neutral-600 [&::-webkit-scrollbar-thumb:hover]:bg-neutral-500">          
-        <div className="flex-1">
+      <div className="convex-panel-data-content">          
+        <div className="convex-panel-data-container">
             
           {!filters || filters.clauses.length === 0 ? null : (
-            <div className="flex justify-between items-center p-2 border-b border-neutral-700">
+            <div className="convex-panel-filters-bar">
                 <ActiveFilters
                     filters={filters}
                     onRemove={handleFilterRemove}
@@ -178,6 +179,7 @@ const DataTable: React.FC<DataTableProps> = ({
             <StorageDebug 
               visible={true}
               selectedTable={selectedTable}
+              filters={filters}
             />
           )}
           

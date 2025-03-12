@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { DataTableSidebarProps } from '../types';
 
@@ -24,19 +22,19 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
 
   return (
     <div 
-      className={`${
-        isSidebarCollapsed ? 'w-12' : 'w-64'
-      } border-r border-neutral-700 flex flex-col bg-[#141414] transition-all duration-300 min-h-[420px] rounded-bl-md`}
+      className={`convex-panel-sidebar ${
+        isSidebarCollapsed ? 'convex-panel-sidebar-collapsed' : 'convex-panel-sidebar-expanded'
+      }`}
     >
-      <div className={`py-4 border-b border-neutral-700 flex flex-col ${isSidebarCollapsed ? 'items-center' : 'p-4'}`}>
+      <div className={`convex-panel-sidebar-header ${isSidebarCollapsed ? 'convex-panel-sidebar-header-collapsed' : 'convex-panel-sidebar-header-expanded'}`}>
         {!isSidebarCollapsed ? (
           <>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center justify-between w-full gap-2">
-                <h3 className="text-sm font-medium">Tables</h3>
+            <div className="convex-panel-sidebar-title-container">
+              <div className="convex-panel-sidebar-title-wrapper">
+                <h3 className="convex-panel-sidebar-title">Tables</h3>
                 <button
                   onClick={onToggleSidebar}
-                  className="p-1 hover:bg-neutral-700 rounded"
+                  className="convex-panel-sidebar-toggle-button"
                 >
                   <svg width="16" height="16" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -53,7 +51,7 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
             <input
               type="text"
               placeholder="Search tables..."
-              className={`w-full px-3 py-1.5 rounded-md focus:outline-none text-xs ${theme?.input} font-mono`}
+              className={`convex-panel-sidebar-search ${theme?.input}`}
               value={searchText}
               onChange={(e) => onSearchChange(e.target.value)}
             />
@@ -61,7 +59,7 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
         ) : (
           <button
             onClick={onToggleSidebar}
-            className="p-1 hover:bg-neutral-700 rounded mx-auto"
+            className="convex-panel-sidebar-expand-button"
           >
             <svg width="16" height="16" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
@@ -75,13 +73,13 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
           </button>
         )}
       </div>
-      <div className="overflow-y-auto flex-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-neutral-800 [&::-webkit-scrollbar-thumb]:bg-neutral-600 [&::-webkit-scrollbar-thumb:hover]:bg-neutral-500">
+      <div className="convex-panel-sidebar-content">
         {filteredTables.map(tableName => (
           <button
             key={tableName}
-            className={`w-full text-left px-4 py-2 hover:bg-neutral-800 text-sm ${
-              selectedTable === tableName ? 'bg-neutral-800 text-white' : 'text-neutral-400'
-            } ${isSidebarCollapsed ? 'text-center overflow-hidden text-ellipsis whitespace-nowrap' : ''}`}
+            className={`convex-panel-sidebar-table-button ${
+              selectedTable === tableName ? 'convex-panel-sidebar-table-selected' : 'convex-panel-sidebar-table-unselected'
+            } ${isSidebarCollapsed ? 'convex-panel-sidebar-table-collapsed' : ''}`}
             onClick={() => onTableSelect(tableName)}
             title={tableName}
           >

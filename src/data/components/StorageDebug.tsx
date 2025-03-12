@@ -1,50 +1,62 @@
-
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { clearAllStorage, getStorageItem, STORAGE_KEYS } from '../utils/storage';
 import { FilterExpression } from '../types';
 
 interface StorageDebugProps {
   visible?: boolean;
   selectedTable?: string;
+  filters?: FilterExpression;
 }
 
-const StorageDebug: React.FC<StorageDebugProps> = ({ visible = false, selectedTable = '' }) => {
+const StorageDebug: React.FC<StorageDebugProps> = ({ 
+  visible = false, 
+  selectedTable = '',
+  filters
+}) => {
   if (!visible && process.env.NODE_ENV === 'production') return null;
+  
+  // Add state to force re-render
+  const [, setForceUpdate] = useState(0);
+  
+  // Force re-render when filters change
+  useEffect(() => {
+    setForceUpdate(prev => prev + 1);
+  }, [filters]);
   
   const handleClearStorage = () => {
     clearAllStorage();
     window.location.reload();
   };
   
+  // Get fresh data from storage each render
   const activeTable = getStorageItem(STORAGE_KEYS.ACTIVE_TABLE, '');
   const tableFilters = getStorageItem<Record<string, FilterExpression>>(STORAGE_KEYS.TABLE_FILTERS, {});
   
   return (
-    <div className="p-2 border-t border-neutral-700 text-xs font-mono">
+    <div className="convex-panel-storage-debug">
       <details>
-        <summary className="cursor-pointer text-neutral-400">Storage Debug</summary>
-        <div className="mt-2 text-neutral-300">
+        <summary className="convex-panel-debug-summary">Storage Debug</summary>
+        <div className="convex-panel-debug-content">
           <div>
             <strong>Active Table:</strong> {activeTable || 'none'}
           </div>
-          <div className="mt-1">
+          <div className="convex-panel-debug-section">
             <strong>Table Filters:</strong>
-            <pre className="mt-1 text-xs overflow-auto max-h-40">
+            <pre className="convex-panel-debug-pre">
               {JSON.stringify(tableFilters, null, 2)}
             </pre>
           </div>
           {selectedTable && tableFilters[selectedTable] && (
-            <div className="mt-1 p-2 border border-blue-700 rounded bg-blue-900 bg-opacity-20">
+            <div className="convex-panel-debug-current-table">
               <strong>Current Table Filters:</strong>
-              <pre className="mt-1 text-xs overflow-auto max-h-40">
+              <pre className="convex-panel-debug-pre">
                 {JSON.stringify(tableFilters[selectedTable], null, 2)}
               </pre>
             </div>
           )}
           <button
             onClick={handleClearStorage}
-            className="mt-2 px-2 py-1 bg-red-800 hover:bg-red-700 text-white rounded text-xs"
+            className="convex-panel-debug-clear-button"
           >
             Clear All Storage
           </button>

@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { getStorageItem, setStorageItem } from '../data/utils/storage';
 
@@ -8,8 +6,8 @@ const SETTINGS_STORAGE_KEY = 'convex-panel:settings';
 
 // Default settings
 const defaultSettings = {
-  showDebugFilters: process.env.NODE_ENV !== 'production',
-  showStorageDebug: process.env.NODE_ENV !== 'production',
+  showDebugFilters: false,
+  showStorageDebug: false,
   logLevel: 'info' as const,
   healthCheckInterval: 60, // seconds
   showRequestIdInput: true,
@@ -77,24 +75,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   
   return (
     <div 
-      className={"shadow-lg bg-background rounded-xl border mr-4 overflow-hidden flex flex-col h-[calc(100vh-var(--header-height)-3rem)] max-h-[40rem] p-2 relative overflow-hidden"}
+      className="convex-panel-settings-modal"
     >
       {!containerized && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50"
+          className="convex-panel-settings-backdrop"
           onClick={onClose}
         />
       )}
       <div 
-        className={`bg-neutral-900 rounded-lg h-[200px] min-h-[200px] max-h-[200px] ${
-          containerized ? "w-full" : "w-full max-w-md mx-auto"
+        className={`convex-panel-settings-content ${
+          containerized ? "convex-panel-settings-content-full" : "convex-panel-settings-content-centered"
         }`}
       >
-        <div className="flex justify-between items-center p-2 px-4 border-b border-neutral-800">
-          <h2 className="text-lg font-normal text-white">Settings</h2>
+        <div className="convex-panel-settings-header">
+          <h2 className="convex-panel-settings-title">Settings</h2>
           <button 
             onClick={onClose}
-            className="text-neutral-400 hover:text-white"
+            className="convex-panel-settings-close-button"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -103,23 +101,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
         
-        <div className="flex flex-1 overflow-hidden h-[155px]">
+        <div className="convex-panel-settings-body">
           {/* Sidebar */}
-          <div className="w-48 border-neutral-800 border-r">
+          <div className="convex-panel-settings-sidebar">
             <button 
-              className={`w-full text-left p-2 ${activeTab === 'logs' ? 'bg-neutral-800 text-white' : 'text-neutral-300 hover:bg-neutral-800'}`}
+              className={`convex-panel-settings-tab-button ${activeTab === 'logs' ? 'convex-panel-settings-tab-active' : 'convex-panel-settings-tab-inactive'}`}
               onClick={() => setActiveTab('logs')}
             >
               Logs
             </button>
             <button 
-              className={`w-full text-left p-2 ${activeTab === 'data' ? 'bg-neutral-800 text-white' : 'text-neutral-300 hover:bg-neutral-800'}`}
+              className={`convex-panel-settings-tab-button ${activeTab === 'data' ? 'convex-panel-settings-tab-active' : 'convex-panel-settings-tab-inactive'}`}
               onClick={() => setActiveTab('data')}
             >
               Data
             </button>
             <button 
-              className={`w-full text-left p-2 ${activeTab === 'health' ? 'bg-neutral-800 text-white' : 'text-neutral-300 hover:bg-neutral-800'}`}
+              className={`convex-panel-settings-tab-button ${activeTab === 'health' ? 'convex-panel-settings-tab-active' : 'convex-panel-settings-tab-inactive'}`}
               onClick={() => setActiveTab('health')}
             >
               Health
@@ -127,75 +125,75 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
           
           {/* Content */}
-          <div className="flex-1 overflow-y-auto rounded-br-lg [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar-track]:bg-neutral-800 [&::-webkit-scrollbar-thumb]:bg-neutral-600 [&::-webkit-scrollbar-thumb:hover]:bg-neutral-500">
+          <div className="convex-panel-settings-content-area">
             {activeTab === 'logs' && (
-              <div className="p-4">
-                <div className="mb-4">
-                  <label className="flex items-center space-x-2 cursor-pointer">
+              <div className="convex-panel-settings-section">
+                <div className="convex-panel-settings-option">
+                  <label className="convex-panel-settings-label">
                     <input 
                       type="checkbox" 
                       checked={settings.showRequestIdInput}
                       onChange={(e) => updateSettings({ showRequestIdInput: e.target.checked })}
-                      className="rounded text-blue-600 focus:ring-blue-500 h-4 w-4 bg-neutral-700 border-neutral-600"
+                      className="convex-panel-settings-checkbox"
                     />
-                    <span className="text-neutral-200">Show Request ID Filter</span>
+                    <span className="convex-panel-settings-label-text">Show Request ID Filter</span>
                   </label>
                 </div>
 
-                <div className="mb-4">
-                  <label className="flex items-center space-x-2 cursor-pointer">
+                <div className="convex-panel-settings-option">
+                  <label className="convex-panel-settings-label">
                     <input 
                       type="checkbox" 
                       checked={settings.showLimitInput}
                       onChange={(e) => updateSettings({ showLimitInput: e.target.checked })}
-                      className="rounded text-blue-600 focus:ring-blue-500 h-4 w-4 bg-neutral-700 border-neutral-600"
+                      className="convex-panel-settings-checkbox"
                     />
-                    <span className="text-neutral-200">Show Limit Input</span>
+                    <span className="convex-panel-settings-label-text">Show Limit Input</span>
                   </label>
                 </div>
 
-                <div>
-                  <label className="flex items-center space-x-2 cursor-pointer">
+                <div className="convex-panel-settings-option">
+                  <label className="convex-panel-settings-label">
                     <input 
                       type="checkbox" 
                       checked={settings.showSuccessCheckbox}
                       onChange={(e) => updateSettings({ showSuccessCheckbox: e.target.checked })}
-                      className="rounded text-blue-600 focus:ring-blue-500 h-4 w-4 bg-neutral-700 border-neutral-600"
+                      className="convex-panel-settings-checkbox"
                     />
-                    <span className="text-neutral-200">Show Success Checkbox</span>
+                    <span className="convex-panel-settings-label-text">Show Success Checkbox</span>
                   </label>
                 </div>
               </div>
             )}
 
             {activeTab === 'data' && (
-              <div className="p-4">
-                <div className="mb-4">
-                  <label className="flex items-center space-x-2 cursor-pointer">
+              <div className="convex-panel-settings-section">
+                <div className="convex-panel-settings-option">
+                  <label className="convex-panel-settings-label">
                     <input 
                       type="checkbox" 
                       checked={settings.showDebugFilters}
                       onChange={(e) => updateSettings({ showDebugFilters: e.target.checked })}
-                      className="rounded text-blue-600 focus:ring-blue-500 h-4 w-4 bg-neutral-700 border-neutral-600"
+                      className="convex-panel-settings-checkbox"
                     />
-                    <span className="text-neutral-200">Show Debug Filters</span>
+                    <span className="convex-panel-settings-label-text">Show Debug Filters</span>
                   </label>
-                  <p className="text-neutral-400 text-xs mt-1 ml-6">
+                  <p className="convex-panel-settings-description">
                     Display the filter debug panel showing the current filter state
                   </p>
                 </div>
                 
-                <div className="mb-4">
-                  <label className="flex items-center space-x-2 cursor-pointer">
+                <div className="convex-panel-settings-option">
+                  <label className="convex-panel-settings-label">
                     <input 
                       type="checkbox" 
                       checked={settings.showStorageDebug}
                       onChange={(e) => updateSettings({ showStorageDebug: e.target.checked })}
-                      className="rounded text-blue-600 focus:ring-blue-500 h-4 w-4 bg-neutral-700 border-neutral-600"
+                      className="convex-panel-settings-checkbox"
                     />
-                    <span className="text-neutral-200">Show Storage Debug</span>
+                    <span className="convex-panel-settings-label-text">Show Storage Debug</span>
                   </label>
-                  <p className="text-neutral-400 text-xs mt-1 ml-6">
+                  <p className="convex-panel-settings-description">
                     Display the storage debug panel showing localStorage state
                   </p>
                 </div>
@@ -204,6 +202,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             
             {activeTab === 'health' && (
               <div 
+                className="convex-panel-settings-health-placeholder"
                 style={{
                   height: "100%",
                   fontFamily: "ui-monospace, Menlo, Monaco, Cascadia Mono, Segoe UI Mono, Roboto Mono, Oxygen Mono, Ubuntu Mono, Source Code Pro, Fira Mono, Droid Sans Mono, Consolas, Courier New, monospace",
@@ -220,7 +219,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   backgroundSize: "12px 12px"
                 }}
               >
-                <h3 className="text-xs font-medium h-full w-full flex items-center justify-center text-white">Health settings coming soon</h3>
+                <h3 className="convex-panel-settings-health-text">Health settings coming soon</h3>
               </div>
             )}
           </div>

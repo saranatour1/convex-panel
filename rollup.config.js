@@ -24,6 +24,20 @@ cssFiles.forEach(file => {
   fs.copyFileSync(srcPath, destPath);
 });
 
+// Custom plugin to handle CSS imports as strings
+const cssImport = () => ({
+  name: 'css-import',
+  transform(code, id) {
+    if (id.endsWith('.css')) {
+      const css = fs.readFileSync(id, 'utf-8');
+      return {
+        code: `export default ${JSON.stringify(css)};`,
+        map: { mappings: '' }
+      };
+    }
+  }
+});
+
 module.exports = {
   input: 'src/index.ts',
   output: [
@@ -44,6 +58,7 @@ module.exports = {
     peerDepsExternal(),
     resolve(),
     commonjs(),
+    cssImport(),
     url({
       include: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.svg', '**/*.gif'],
       limit: 10000,

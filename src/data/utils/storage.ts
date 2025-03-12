@@ -100,7 +100,13 @@ export function saveTableFilters(tableName: string, filters: any) {
   
   // Update the all filters cache
   const allFilters = getStorageItem<Record<string, any>>(STORAGE_KEYS.TABLE_FILTERS, {});
-  allFilters[tableName] = filters;
+  
+  // If filters are empty, remove the entry completely
+  if (filters.clauses.length === 0) {
+    delete allFilters[tableName];
+  } else {
+    allFilters[tableName] = filters;
+  }
   
   // Save to localStorage
   setStorageItem(STORAGE_KEYS.TABLE_FILTERS, allFilters);

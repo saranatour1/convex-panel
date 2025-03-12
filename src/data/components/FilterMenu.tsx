@@ -1,4 +1,4 @@
-
+"use client";
 
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -17,20 +17,70 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
   const [isEditing, setIsEditing] = useState<boolean>(!!existingFilter);
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Use a ref to track if we're handling an internal click
+  const isInternalClickRef = useRef(false);
   
   useEffect(() => {
+    console.log("FilterMenu mounted", { field, position });
+    
     // Handle click outside to close the menu
     const handleClickOutside = (e: MouseEvent) => {
+      // If this is an internal click that we're tracking, don't close
+      if (isInternalClickRef.current) {
+        isInternalClickRef.current = false;
+        return;
+      }
+      
+      // Only close if the click is outside the menu
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         onClose();
       }
     };
     
+    // Handle escape key to close the menu
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    
+    // Use mousedown for outside clicks (happens before mouseup/click)
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [onClose]);
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose, field, position]);
 
-  const handleApply = () => {
+  // Handle dropdown click outside
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const handleClickOutsideDropdown = (e: MouseEvent) => {
+      // Don't close the dropdown if we're clicking inside the menu but outside the dropdown
+      if (menuRef.current && menuRef.current.contains(e.target as Node) && 
+          dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        // Mark this as an internal click so the menu doesn't close
+        isInternalClickRef.current = true;
+        setIsOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutsideDropdown);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutsideDropdown);
+    };
+  }, [isOpen]);
+
+  const handleApply = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     try {
       // Parse the value as JSON
       let parsedValue;
@@ -55,26 +105,59 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     }
   };
 
+  const handleCancel = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onClose();
+  };
+
+  const handleDropdownToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Mark this as an internal click
+    isInternalClickRef.current = true;
+    setIsOpen(!isOpen);
+  };
+
+  const handleOptionSelect = (optionValue: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Mark this as an internal click
+    isInternalClickRef.current = true;
+    setOperator(optionValue as FilterClause['op']);
+    setIsOpen(false);
+  };
+
+  // Handle mousedown inside the menu to prevent it from closing
+  const handleMenuMouseDown = (e: React.MouseEvent) => {
+    // Mark this as an internal click
+    isInternalClickRef.current = true;
+    e.stopPropagation();
+  };
+
   return createPortal(
     <div 
       ref={menuRef}
-      className="fixed z-50 bg-neutral-900 rounded-lg shadow-lg p-3 min-w-[300px] filter-menu border border-neutral-700"
+      className="convex-panel-filter-menu"
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
       }}
       onClick={(e) => e.stopPropagation()}
+      onMouseDown={handleMenuMouseDown}
     >
       
-      <div className="mb-3">
-        <label className="block text-xs text-neutral-300 mb-1">Operator</label>
-        <div className="relative">
+      <div className="convex-panel-filter-menu-group">
+        <label className="convex-panel-filter-menu-label">Operator</label>
+        <div 
+          ref={dropdownRef}
+          className="convex-panel-filter-menu-dropdown"
+        >
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsOpen(!isOpen);
-            }}
-            className="w-full px-3 py-1.5 rounded-lg focus:outline-none text-xs bg-[#2a2a2a] text-white border border-[#333333] font-mono flex justify-between items-center"
+            type="button"
+            onClick={handleDropdownToggle}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="convex-panel-filter-menu-dropdown-button"
           >
             <span>{operator === 'eq' ? 'Equals' : 
                    operator === 'neq' ? 'Not equals' :
@@ -91,7 +174,11 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
           </button>
           
           {isOpen && (
-            <div className="absolute z-50 w-full mt-1 bg-[#2a2a2a] border border-[#333333] rounded-lg shadow-lg">
+            <div 
+              className="convex-panel-filter-menu-dropdown-content"
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+            >
               {[
                 {value: 'eq', label: 'Equals'},
                 {value: 'neq', label: 'Not equals'},
@@ -103,13 +190,11 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
                 {value: 'noneOf', label: 'None of'}
               ].map(option => (
                 <button
+                  type="button"
                   key={option.value}
-                  className={`w-full text-left px-3 py-1.5 text-xs rounded-sm hover:bg-neutral-700 font-mono ${operator === option.value ? 'bg-neutral-700' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOperator(option.value as FilterClause['op']);
-                    setIsOpen(false);
-                  }}
+                  className={`convex-panel-filter-menu-option ${operator === option.value ? 'convex-panel-filter-menu-option-selected' : ''}`}
+                  onClick={(e) => handleOptionSelect(option.value, e)}
+                  onMouseDown={(e) => e.stopPropagation()}
                 >
                   {option.label}
                 </button>
@@ -119,37 +204,36 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
         </div>
       </div>
       
-      <div className="mb-4">
-        <label className="block text-xs text-neutral-300 mb-1">Value</label>
+      <div className="convex-panel-filter-menu-group-value">
+        <label className="convex-panel-filter-menu-label">Value</label>
         <textarea
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
-          className="w-full bg-neutral-700 border border-neutral-600 rounded p-2 text-sm text-white font-mono h-20 resize-none"
+          className="convex-panel-filter-menu-textarea"
           placeholder={operator === 'anyOf' || operator === 'noneOf' ? '[value1, value2, ...]' : 'Enter value (e.g. "text", 123, true)'}
         />
-        <p className="text-xs text-neutral-400 mt-1">
+        <p className="convex-panel-filter-menu-hint">
           For arrays or objects, use valid JSON format
         </p>
       </div>
       
-      <div className="flex justify-between">
+      <div className="convex-panel-filter-menu-actions">
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          className="px-3 py-1.5 bg-neutral-700 hover:bg-neutral-600 text-white rounded text-xs"
+          type="button"
+          onClick={handleCancel}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="convex-panel-filter-menu-cancel-button"
         >
           Cancel
         </button>
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleApply();
-          }}
-          className={`px-3 py-1.5 hover:bg-[#3f529599] bg-[#3f5295] text-white rounded text-xs`}
+          type="button"
+          onClick={handleApply}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="convex-panel-filter-menu-apply-button"
         >
           {isEditing ? 'Update Filter' : 'Apply Filter'}
         </button>

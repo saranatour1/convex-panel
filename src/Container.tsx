@@ -12,6 +12,7 @@ import { ConvexReactClient } from 'convex/react';
 import { ConvexClient } from 'convex/browser';
 import { SettingsButton, ConvexPanelSettings } from './settings';
 import { getStorageItem, setStorageItem } from './data/utils/storage';
+import { HealthContainer } from './health';
 
 interface LogsContainerProps {
   isOpen: boolean;
@@ -38,8 +39,8 @@ const SETTINGS_STORAGE_KEY = 'convex-panel:settings';
 
 // Default settings
 const defaultSettings = {
-  showDebugFilters: process.env.NODE_ENV !== 'production',
-  showStorageDebug: process.env.NODE_ENV !== 'production',
+  showDebugFilters: false,
+  showStorageDebug: false,
   logLevel: 'info' as const,
   healthCheckInterval: 60, // seconds
   showRequestIdInput: true,
@@ -649,7 +650,7 @@ const Container = ({
           onPointerDown={startDrag}
           style={{ cursor: 'grab' }}
         >
-          <div className="convex-panel-header-content">
+          <div className="convex-panel-header-content convex-panel-header-content-main"> 
             <div className="convex-panel-window-controls">
               <div 
                 className="convex-panel-window-control convex-panel-close"
@@ -686,7 +687,12 @@ const Container = ({
               </div>
             </div>
             <div className="convex-panel-url-container">
-              <a href="https://dashboard.convex.dev" target="_blank" rel="noreferrer">
+              <a 
+                href={convexUrl ? `https://${convexUrl.replace('https://', '')}` : "https://dashboard.convex.dev"} 
+                target="_blank" 
+                rel="noreferrer"
+                className="convex-panel-url-link"
+              >
                 <span className="convex-panel-url-icon">
                   <svg className="w-6" width="100%" height="100%" viewBox="0 0 367 370" version="1.1" xmlns="http://www.w3.org/2000/svg">
                     <g transform="matrix(1,0,0,1,-129.225,-127.948)">
@@ -704,10 +710,10 @@ const Container = ({
                     </g>
                   </svg>
                 </span>
+                <div className="convex-panel-url-text">
+                  {convexUrl}
+                </div>
               </a>
-              <div className="convex-panel-url-text">
-                {convexUrl}
-              </div>
             </div>
           </div>
         </div>
@@ -792,7 +798,7 @@ const Container = ({
         </div>
       </div>
       
-      {activeTab === 'logs' ? (
+      {activeTab === 'logs' && (
         <>
           <LogsToolbar
             mergedTheme={mergedTheme}
@@ -831,7 +837,9 @@ const Container = ({
             isPaused={isPaused}
           />
         </>
-      ) : (
+      )}
+
+      {activeTab === 'data-tables' && (
         <DataTable
           key={`data-table-${JSON.stringify(settings)}`}
           convexUrl={convexUrl}
@@ -845,6 +853,9 @@ const Container = ({
         />
       )}
       
+      {activeTab === 'health' && (
+        <HealthContainer />
+      )}
     </motion.div>
   );
 };

@@ -1,5 +1,3 @@
-
-
 import React, { useState, useCallback } from 'react';
 import SettingsModal, { ConvexPanelSettings } from './SettingsModal';
 
@@ -26,7 +24,7 @@ const SettingsButton: React.FC<SettingsButtonProps> = ({
     <>
       <button
         onClick={openModal}
-        className="p-1 rounded-md text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+        className="convex-panel-settings-button"
         title="Settings"
       >
         <svg 
@@ -47,7 +45,7 @@ const SettingsButton: React.FC<SettingsButtonProps> = ({
       
       {isModalOpen && (
         <div 
-          className="fixed z-50" 
+          className="convex-panel-modal-overlay"
           style={{
             position: 'fixed',
             top: 0,
@@ -56,15 +54,16 @@ const SettingsButton: React.FC<SettingsButtonProps> = ({
             bottom: 0,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            zIndex: 50
           }}
         >
           <div 
-            className="absolute inset-0 bg-black/80 bg-opacity-30" 
+            className="convex-panel-modal-backdrop"
             onClick={closeModal}
             style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
           ></div>
-          <div className="z-10 w-[600px] max-w-[90%]">
+          <div className="convex-panel-modal-container">
             <SettingsModal
               isOpen={isModalOpen}
               onClose={closeModal}

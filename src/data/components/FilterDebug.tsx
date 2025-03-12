@@ -1,16 +1,22 @@
-
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FilterDebugProps } from '../types';
 
 const FilterDebug: React.FC<FilterDebugProps> = ({ filters, selectedTable }) => {
   if (process.env.NODE_ENV === 'production' || !selectedTable) return null;
   
+  // Add state to force re-render
+  const [, setForceUpdate] = useState(0);
+  
+  // Force re-render when filters change
+  useEffect(() => {
+    setForceUpdate(prev => prev + 1);
+  }, [filters]);
+  
   return (
-    <div className="p-2 border-t border-neutral-700 text-xs font-mono">
+    <div className="convex-panel-filter-debug">
       <details>
-        <summary className="cursor-pointer text-neutral-400">Debug Filters</summary>
-        <pre className="mt-2 text-neutral-300">
+        <summary className="convex-panel-debug-summary">Debug Filters</summary>
+        <pre className="convex-panel-debug-pre">
           {JSON.stringify(filters, null, 2)}
         </pre>
       </details>

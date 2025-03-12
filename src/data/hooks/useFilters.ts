@@ -120,15 +120,23 @@ export const useFilters = ({
   }, [filters, setFilters, onFilterApply]);
 
   const handleFilterRemove = useCallback((field: string) => {
-    setFilters(prev => ({
-      clauses: prev.clauses.filter(c => c.field !== field)
-    }));
+    // Create a new filters object with the filter removed
+    const newFilters = {
+      clauses: filters.clauses.filter(c => c.field !== field)
+    };
     
+    // Update filters state immediately
+    setFilters(newFilters);
+    
+    // Call the callback
     onFilterRemove(field);
-  }, [onFilterRemove, setFilters]);
+  }, [filters, onFilterRemove, setFilters]);
 
   const clearFilters = useCallback(() => {
+    // Set filters to empty array immediately
     setFilters({ clauses: [] });
+    
+    // Call the callback
     onFilterClear();
   }, [onFilterClear, setFilters]);
 

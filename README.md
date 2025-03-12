@@ -2,6 +2,18 @@
 
 A development panel for Convex applications that provides real-time logs, data inspection, and more.
 
+![Convex Panel Data View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2F260_1x_shots_so.png?alt=media&token=ab319476-3e64-4348-83bc-0d2ca126533e)
+
+## Features
+
+- 📊 **Real-time Data Inspection**: Browse and filter your Convex tables with ease
+- 📝 **Live Logs**: Monitor function calls, HTTP actions, and system events in real-time
+- 🔍 **Advanced Filtering**: Filter logs and data with powerful query capabilities
+- 🔄 **Health Monitoring**: Track the health of your Convex deployment
+- 🎨 **Beautiful UI**: Sleek, developer-friendly interface that integrates with your app
+
+![Convex Panel Logs View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2F617_1x_shots_so.png?alt=media&token=0232b53b-a618-4a35-af46-c9c6b13324e4)
+
 ## Installation
 
 ```bash
@@ -17,6 +29,17 @@ pnpm add convex-panel
 ### Styling
 
 The Convex Panel comes with built-in styling. No CSS imports are required! The styles are automatically injected when the component mounts.
+
+#### CSS Isolation
+
+Convex Panel uses a CSS isolation mechanism to ensure its styles don't interfere with your application:
+
+- All styles are prefixed with `convex-panel-` to avoid naming conflicts
+- Styles are injected into a separate `<style>` element with a unique ID
+- Most style properties use `!important` to ensure they work correctly within your app
+- The panel is rendered in a portal, keeping its DOM structure separate from your app
+
+This approach ensures that Convex Panel's styles won't affect your application's styling, and vice versa.
 
 ### Setting Up the Panel
 

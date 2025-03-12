@@ -1,5 +1,3 @@
-
-
 import { motion } from 'framer-motion';
 import { CopyIcon } from 'lucide-react';
 import type { ThemeClasses } from '../types';
@@ -23,17 +21,18 @@ const LogDetailPanel = ({ selectedLog, mergedTheme, setIsDetailPanelOpen }: LogD
   
   return (
     <motion.div 
-      className={`w-1/2 ${mergedTheme.container} overflow-y-auto bg-[#121212]`}
+      className={`convex-panel-detail-panel ${mergedTheme.container}`}
       variants={detailPanelVariants}
       initial="hidden"
       animate="visible"
       exit="hidden"
+      layout
     >
-      <div className="p-2 bg-[#2a2a2a] flex justify-between items-center sticky top-0 z-10">
-        <h3 className={`text-xs font-semibold text-gray-400`}>LOG DETAILS</h3>
+      <div className="convex-panel-detail-header">
+        <h3 className="convex-panel-detail-title">LOG DETAILS</h3>
         <button 
           onClick={() => setIsDetailPanelOpen(false)}
-          className="text-gray-400 hover:text-white"
+          className="convex-panel-detail-close-button"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -42,48 +41,48 @@ const LogDetailPanel = ({ selectedLog, mergedTheme, setIsDetailPanelOpen }: LogD
         </button>
       </div>
       
-      <div className="p-4 space-y-4">
+      <div className="convex-panel-detail-content">
         {/* Basic Info */}
-        <div>
-          <h4 className="text-sm font-semibold text-gray-400 mb-2 uppercase">Basic Information</h4>
-          <div className="space-y-1">
-            <div className="flex">
-              <span className="text-xs text-gray-400 w-24">Timestamp:</span>
-              <span className="text-xs text-white font-mono">{timestamp}</span>
+        <div className="convex-panel-detail-section">
+          <h4 className="convex-panel-detail-section-title">Basic Information</h4>
+          <div className="convex-panel-detail-fields">
+            <div className="convex-panel-detail-field">
+              <span className="convex-panel-detail-label">Timestamp:</span>
+              <span className="convex-panel-detail-timestamp">{timestamp}</span>
             </div>
-            <div className="flex">
-              <span className="text-xs text-gray-400 w-24">Request ID:</span>
-              <span className="text-xs text-blue-400 font-mono">{selectedLog.function?.request_id || 'N/A'}</span>
+            <div className="convex-panel-detail-field">
+              <span className="convex-panel-detail-label">Request ID:</span>
+              <span className="convex-panel-detail-request-id">{selectedLog.function?.request_id || 'N/A'}</span>
             </div>
-            <div className="flex">
-              <span className="text-xs text-gray-400 w-24">Status:</span>
-              <span className={`text-xs ${selectedLog.status === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+            <div className="convex-panel-detail-field">
+              <span className="convex-panel-detail-label">Status:</span>
+              <span className={`convex-panel-detail-status ${selectedLog.status === 'success' ? 'convex-panel-success-text' : 'convex-panel-error-text'}`}>
                 {selectedLog.status || 'N/A'}
               </span>
             </div>
-            <div className="flex">
-              <span className="text-xs text-gray-400 w-24">Execution Time:</span>
-              <span className="text-xs text-purple-400">{executionTime}</span>
+            <div className="convex-panel-detail-field">
+              <span className="convex-panel-detail-label">Execution Time:</span>
+              <span className="convex-panel-detail-execution-time">{executionTime}</span>
             </div>
           </div>
         </div>
         
         {/* Function Info */}
         {selectedLog.function && (
-          <div>
-            <h4 className="text-sm font-semibold text-gray-400 mb-2 uppercase">Function Information</h4>
-            <div className="space-y-1">
-              <div className="flex">
-                <span className="text-xs text-gray-400 w-24">Type:</span>
-                <span className="text-xs text-white">{selectedLog.function.type || 'N/A'}</span>
+          <div className="convex-panel-detail-section">
+            <h4 className="convex-panel-detail-section-title">Function Information</h4>
+            <div className="convex-panel-detail-fields">
+              <div className="convex-panel-detail-field">
+                <span className="convex-panel-detail-label">Type:</span>
+                <span className="convex-panel-detail-function-type">{selectedLog.function.type || 'N/A'}</span>
               </div>
-              <div className="flex">
-                <span className="text-xs text-gray-400 w-24">Path:</span>
-                <span className="text-xs text-blue-400 font-mono">{selectedLog.function.path || 'N/A'}</span>
+              <div className="convex-panel-detail-field">
+                <span className="convex-panel-detail-label">Path:</span>
+                <span className="convex-panel-detail-function-path">{selectedLog.function.path || 'N/A'}</span>
               </div>
-              <div className="flex">
-                <span className="text-xs text-gray-400 w-24">Cached:</span>
-                <span className="text-xs text-white">{selectedLog.function.cached ? 'Yes' : 'No'}</span>
+              <div className="convex-panel-detail-field">
+                <span className="convex-panel-detail-label">Cached:</span>
+                <span className="convex-panel-detail-function-cached">{selectedLog.function.cached ? 'Yes' : 'No'}</span>
               </div>
             </div>
           </div>
@@ -91,11 +90,11 @@ const LogDetailPanel = ({ selectedLog, mergedTheme, setIsDetailPanelOpen }: LogD
         
         {/* Log Lines */}
         {selectedLog.raw && selectedLog.raw.logLines && selectedLog.raw.logLines.length > 0 && (
-          <div>
-            <h4 className="text-sm font-semibold text-gray-400 mb-2 uppercase">Log Output</h4>
-            <div className="bg-[#1a1a1a] p-2 rounded-md">
+          <div className="convex-panel-detail-section">
+            <h4 className="convex-panel-detail-section-title">Log Output</h4>
+            <div className="convex-panel-detail-log-output">
               {selectedLog.raw.logLines.map((line: string, i: number) => (
-                <div key={i} className="text-xs text-gray-300 font-mono whitespace-pre-wrap">{line}</div>
+                <div key={i} className="convex-panel-detail-log-line">{line}</div>
               ))}
             </div>
           </div>
@@ -103,25 +102,25 @@ const LogDetailPanel = ({ selectedLog, mergedTheme, setIsDetailPanelOpen }: LogD
         
         {/* Error Message */}
         {selectedLog.error_message && (
-          <div>
-            <h4 className="text-sm font-semibold text-red-400 mb-2 uppercase">Error</h4>
-            <div className="bg-[#1a1a1a] p-2 rounded-md">
-              <div className="text-xs text-red-400 font-mono whitespace-pre-wrap">{selectedLog.error_message}</div>
+          <div className="convex-panel-detail-section">
+            <h4 className="convex-panel-detail-error-title">Error</h4>
+            <div className="convex-panel-detail-error-container">
+              <div className="convex-panel-detail-error-message">{selectedLog.error_message}</div>
             </div>
           </div>
         )}
         
         {/* Raw Data */}
-        <div>
-          <h4 className="text-sm font-semibold text-gray-400 uppercase mb-2">Raw Data</h4>
-          <div className="bg-[#1a1a1a] p-2 rounded-md overflow-x-auto relative group">
+        <div className="convex-panel-detail-section">
+          <h4 className="convex-panel-detail-section-title">Raw Data</h4>
+          <div className="convex-panel-detail-raw-container">
             <button
-              className="absolute top-2 right-2 invisible group-hover:visible text-gray-400 hover:text-gray-300 transition-colors"
+              className="convex-panel-detail-copy-button"
               onClick={() => navigator.clipboard.writeText(formatJson(selectedLog.raw))}
             >
-              <CopyIcon className="w-4 h-4" />
+              <CopyIcon className="convex-panel-copy-icon" />
             </button>
-            <pre className="text-xs text-gray-300 font-mono">{formatJson(selectedLog.raw)}</pre>
+            <pre className="convex-panel-detail-raw-json">{formatJson(selectedLog.raw)}</pre>
           </div>
         </div>
       </div>
