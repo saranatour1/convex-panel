@@ -13,7 +13,7 @@ interface UseTableDataProps {
   convexUrl: string;
   accessToken: string;
   baseUrl: string;
-  adminClient: ConvexClient;
+  adminClient: ConvexClient | null;
   onError?: (error: string) => void;
 }
 
@@ -131,8 +131,8 @@ export const useTableData = ({
       if (storedActiveTable && tableData[storedActiveTable]) {
         // Use the stored table if it exists
         setSelectedTable(storedActiveTable);
-      } else if (Object.keys(tableData).length > 0) {
-        // Otherwise use the first table
+      } else if (Object.keys(tableData).length > 0 && adminClient) {
+        // Otherwise use the first table if adminClient is available
         try {
           const result = await adminClient.query("_system/frontend/tableSize:default" as any, {
             componentId: null,
@@ -249,6 +249,13 @@ export const useTableData = ({
           args,
           cursor
         });
+      }
+
+      if (!adminClient) {
+        setIsLoading(false);
+        setIsLoadingMore(false);
+        if (onError) onError("Admin client is not available");
+        return;
       }
 
       const result = await adminClient.query(

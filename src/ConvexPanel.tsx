@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, useDragControls } from 'framer-motion';
@@ -28,8 +26,14 @@ export const ConvexPanel = ({
 }: ButtonProps) => {
   const mergedTheme = useMemo(() => ({ ...defaultTheme, ...theme }), [theme]);
 
-  const adminClient = new ConvexClient(process.env.NEXT_PUBLIC_CONVEX_URL! || cloudUrl!);
-  (adminClient as any).setAdminAuth(deployKey!);
+  // Only create adminClient if we have a URL and deployKey
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || cloudUrl;
+  const adminClient = convexUrl && deployKey ? new ConvexClient(convexUrl) : null;
+  
+  // Only set admin auth if we have an adminClient and deployKey
+  if (adminClient && deployKey) {
+    (adminClient as any).setAdminAuth(deployKey);
+  }
   
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });

@@ -71,7 +71,7 @@ export interface DataTableProps {
   theme?: ThemeClasses;
   baseUrl: string;
   convex: ConvexReactClient;
-  adminClient: ConvexClient;
+  adminClient: ConvexClient | null;
   settings?: ConvexPanelSettings;
 }
 

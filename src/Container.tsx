@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import debounce from 'debounce';
@@ -32,7 +30,7 @@ interface LogsContainerProps {
   setContainerSize: (size: { width: number; height: number }) => void;
   dragControls: any;
   convex: ConvexReactClient;
-  adminClient: ConvexClient;
+  adminClient: ConvexClient | null;
 }
 
 // Define settings storage key
