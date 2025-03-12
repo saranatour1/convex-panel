@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FilterClause, MenuPosition, DataTableProps } from './types';
 import { useTableData, useFilters } from './hooks';
 import { 
@@ -9,7 +9,7 @@ import {
   StorageDebug,
   FilterMenu
 } from './components';
-import { getStorageItem, STORAGE_KEYS } from './utils/storage';
+import { getStorageItem } from './utils/storage';
 import { ConvexPanelSettings } from '../settings';
 
 // Define settings storage key

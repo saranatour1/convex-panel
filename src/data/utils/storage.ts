@@ -149,8 +149,6 @@ export function clearAllStorage(): void {
         window.localStorage.removeItem(key);
       }
     });
-    
-    console.log('Cleared all convex-panel storage and cache');
   } catch (error) {
     console.error('Error clearing convex-panel storage:', error);
   }

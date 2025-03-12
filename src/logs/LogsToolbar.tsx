@@ -75,16 +75,12 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
   useEffect(() => {
     const savedSettings = getStorageItem<Partial<ConvexPanelSettings>>(SETTINGS_STORAGE_KEY, {});
     setLocalSettings(savedSettings);
-    
-    // Log the settings to verify what's being loaded
-    console.log('Loaded settings from localStorage:', savedSettings);
   }, []);
   
   // Update localSettings when propSettings changes
   useEffect(() => {
     if (propSettings) {
       setLocalSettings(propSettings);
-      console.log('Settings updated from props:', propSettings);
     }
   }, [propSettings]);
   
@@ -104,15 +100,6 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
   const showSuccessCheckbox = effectiveSettings.showSuccessCheckbox !== undefined
     ? effectiveSettings.showSuccessCheckbox
     : defaultSettings.showSuccessCheckbox;
-
-  // Log the effective settings being used
-  useEffect(() => {
-    console.log('Effective settings being used:', {
-      showRequestIdInput,
-      showLimitInput,
-      showSuccessCheckbox
-    });
-  }, [showRequestIdInput, showLimitInput, showSuccessCheckbox]);
 
   // Add effect to handle clicking outside the dropdown
   useEffect(() => {

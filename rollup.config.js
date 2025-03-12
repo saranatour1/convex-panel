@@ -71,7 +71,7 @@ module.exports = {
     {
       name: 'copy-css',
       buildEnd() {
-        console.log('CSS files copied to dist/styles');
+        console.info('CSS files copied to dist/styles');
       }
     }
   ],

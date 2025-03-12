@@ -15,7 +15,7 @@ function processCss() {
     
     fs.copyFileSync(srcPath, destPath);
 
-    console.log('CSS file copied successfully!');
+    console.info('CSS file copied successfully!');
   } catch (error) {
     console.error('Error copying CSS file:', error);
     process.exit(1);

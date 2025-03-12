@@ -59,11 +59,9 @@ if (fs.existsSync(srcAssetsDir)) {
     const destPath = path.join(assetsDir, file);
     fs.copyFileSync(srcPath, destPath);
   });
-  
-  console.log('Asset files copied to dist/assets');
 }
 
 // Copy the source directory to the destination
 copyDir(srcDir, distDir);
 
-console.log('Source files copied successfully!'); 
+console.info('Source files copied successfully!'); 

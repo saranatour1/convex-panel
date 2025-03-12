@@ -50,8 +50,6 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
   ];
 
   useEffect(() => {
-    console.log("FilterMenu mounted", { field, position });
-    
     // Handle click outside to close the menu
     const handleClickOutside = (e: MouseEvent) => {
       // If this is an internal click that we're tracking, don't close

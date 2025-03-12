@@ -32,10 +32,12 @@ interface LogsContainerProps {
   dragControls: any;
   convex: ConvexReactClient;
   adminClient: ConvexClient | null;
+  initialActiveTab: 'logs' | 'data-tables' | 'health';
 }
 
 // Define settings storage key
 const SETTINGS_STORAGE_KEY = 'convex-panel:settings';
+const ACTIVE_TAB_STORAGE_KEY = 'convex-panel:activeTab';
 
 // Default settings
 const defaultSettings = {
@@ -65,7 +67,8 @@ const Container = ({
   setContainerSize,
   dragControls,
   convex,
-  adminClient
+  adminClient,
+  initialActiveTab,
 }: LogsContainerProps) => {
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -98,7 +101,13 @@ const Container = ({
   const [excludeViewerQueries, setExcludeViewerQueries] = useState(true);
   const [convexUrl, setConvexUrl] = useState<string>('');
   const [accessToken, setAccessToken] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'logs' | 'data-tables' | 'health'>('logs');
+  const [activeTab, setActiveTab] = useState<'logs' | 'data-tables' | 'health'>(() => {
+    // Initialize from localStorage if available, otherwise use initialActiveTab
+    if (typeof window !== 'undefined') {
+      return getStorageItem<'logs' | 'data-tables' | 'health'>(ACTIVE_TAB_STORAGE_KEY, initialActiveTab);
+    }
+    return initialActiveTab;
+  });
   const [settings, setSettings] = useState<ConvexPanelSettings>(() => {
     
     // Initialize from localStorage if available, otherwise use defaults
@@ -607,10 +616,12 @@ const Container = ({
     // before setting back to the original tab
     requestAnimationFrame(() => {
       setActiveTab('logs');
+      setStorageItem(ACTIVE_TAB_STORAGE_KEY, 'logs');
       
       // Use another requestAnimationFrame to switch back to the original tab
       requestAnimationFrame(() => {
         setActiveTab(currentTab);
+        setStorageItem(ACTIVE_TAB_STORAGE_KEY, currentTab);
       });
     });
   }, [activeTab]);
@@ -738,7 +749,10 @@ const Container = ({
             className="convex-panel-tab-button"
             tabIndex={activeTab === 'logs' ? 0 : -1}
             data-orientation="horizontal"
-            onClick={() => setActiveTab('logs')}
+            onClick={() => {
+              setActiveTab('logs');
+              setStorageItem(ACTIVE_TAB_STORAGE_KEY, 'logs');
+            }}
           >
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="convex-panel-tab-icon"><path d="M3.89949 5.50002C3.89949 5.27911 3.7204 5.10003 3.49949 5.10003C3.27857 5.10003 3.09949 5.27911 3.09949 5.50002L3.09949 12.5343L1.78233 11.2172C1.62612 11.061 1.37285 11.061 1.21664 11.2172C1.06043 11.3734 1.06043 11.6267 1.21664 11.7829L3.21664 13.7829C3.29166 13.8579 3.3934 13.9 3.49949 13.9C3.60557 13.9 3.70732 13.8579 3.78233 13.7829L5.78233 11.7829C5.93854 11.6267 5.93854 11.3734 5.78233 11.2172C5.62612 11.061 5.37285 11.061 5.21664 11.2172L3.89949 12.5343L3.89949 5.50002ZM8.49998 13C8.22383 13 7.99998 12.7762 7.99998 12.5C7.99998 12.2239 8.22383 12 8.49998 12H14.5C14.7761 12 15 12.2239 15 12.5C15 12.7762 14.7761 13 14.5 13H8.49998ZM8.49998 10C8.22383 10 7.99998 9.77617 7.99998 9.50002C7.99998 9.22388 8.22383 9.00002 8.49998 9.00002H14.5C14.7761 9.00002 15 9.22388 15 9.50002C15 9.77617 14.7761 10 14.5 10H8.49998C8.22383 10 7.99998 9.77617 7.99998 9.50002ZM7.99998 6.50002C7.99998 6.77617 8.22383 7.00002 8.49998 7.00002H14.5C14.7761 7.00002 15 6.77617 15 6.50002C15 6.22388 14.7761 6.00002 14.5 6.00002H8.49998C8.22383 6.00002 7.99998 6.22388 7.99998 6.50002Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
             <span>
@@ -757,7 +771,10 @@ const Container = ({
             className="convex-panel-tab-button"
             tabIndex={activeTab === 'data-tables' ? 0 : -1}
             data-orientation="horizontal"
-            onClick={() => setActiveTab('data-tables')}
+            onClick={() => {
+              setActiveTab('data-tables');
+              setStorageItem(ACTIVE_TAB_STORAGE_KEY, 'data-tables');
+            }}
           >
             <div className="flex items-center gap-1">
             <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="convex-panel-tab-data-icon"><path d="M8 2H12.5C12.7761 2 13 2.22386 13 2.5V5H8V2ZM7 5V2H2.5C2.22386 2 2 2.22386 2 2.5V5H7ZM2 6V9H7V6H2ZM8 6H13V9H8V6ZM8 10H13V12.5C13 12.7761 12.7761 13 12.5 13H8V10ZM2 12.5V10H7V13H2.5C2.22386 13 2 12.7761 2 12.5ZM1 2.5C1 1.67157 1.67157 1 2.5 1H12.5C13.3284 1 14 1.67157 14 2.5V12.5C14 13.3284 13.3284 14 12.5 14H2.5C1.67157 14 1 13.3284 1 12.5V2.5Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
@@ -778,7 +795,10 @@ const Container = ({
             className="convex-panel-tab-button"
             tabIndex={activeTab === 'health' ? 0 : -1}
             data-orientation="horizontal"
-            onClick={() => setActiveTab('health')}
+            onClick={() => {
+              setActiveTab('health');
+              setStorageItem(ACTIVE_TAB_STORAGE_KEY, 'health');
+            }}
           >
             <div className="flex items-center gap-1">
             <svg className="convex-panel-tab-health-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M9.002 2.5a.75.75 0 01.691.464l6.302 15.305 2.56-6.301a.75.75 0 01.695-.468h4a.75.75 0 010 1.5h-3.495l-3.06 7.532a.75.75 0 01-1.389.004L8.997 5.21l-3.054 7.329A.75.75 0 015.25 13H.75a.75.75 0 010-1.5h4l3.558-8.538a.75.75 0 01.694-.462z"></path></svg>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -7,7 +7,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from 'recharts';
 import { fetchCacheHitRate } from '../utils/api';
 
@@ -30,6 +29,34 @@ interface TimeStamp {
 type TimeSeriesData = [TimeStamp, number | null][];
 type APIResponse = [string, TimeSeriesData][];
 
+// Color generator for different function names
+const generateColor = (name: string): string => {
+  if (name === '_rest') return '#2196F3'; // Blue for "All other queries"
+  
+  // Hash the function name to get a consistent color
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  // Generate HSL color with good saturation and lightness
+  const hue = hash % 360;
+  return `hsl(${hue}, 70%, 60%)`;
+};
+
+// Format function name for display
+const formatFunctionName = (name: string) => {
+  if (name === '_rest') return 'All other queries';
+  return name.replace('.js:', ':');
+};
+
+// Get next minute for tooltip
+const getNextMinute = (timeStr: string): string => {
+  const date = new Date(`1970/01/01 ${timeStr}`);
+  date.setMinutes(date.getMinutes() + 1);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
 const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
   deploymentUrl,
   authToken,
@@ -38,6 +65,68 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
   const [data, setData] = useState<CacheHitData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [functionNames, setFunctionNames] = useState<string[]>([]);
+  const [visibleLines, setVisibleLines] = useState<Record<string, boolean>>({});
+  const [displayMode, setDisplayMode] = useState<'all' | 'individual'>('all');
+  const [chartFunctionNames, setChartFunctionNames] = useState<string[]>([]);
+
+  // Initialize visible lines when function names change
+  useEffect(() => {
+    if (functionNames.length > 0) {
+      const initialVisibility = functionNames.reduce((acc, name) => ({
+        ...acc,
+        [name]: true
+      }), { _rest: true });
+      setVisibleLines(initialVisibility);
+    }
+  }, [functionNames]);
+
+  // Verify all function names have a visibility state
+  useEffect(() => {
+    if (chartFunctionNames.length > 0) {
+      setVisibleLines(prev => {
+        const updatedVisibility = { ...prev };
+        let changed = false;
+        
+        chartFunctionNames.forEach(name => {
+          if (updatedVisibility[name] === undefined) {
+            updatedVisibility[name] = true;
+            changed = true;
+          }
+        });
+        
+        return changed ? updatedVisibility : prev;
+      });
+    }
+  }, [chartFunctionNames]);
+
+  // Update chart function names whenever data changes
+  useEffect(() => {
+    if (data.length > 0) {
+      const names = Array.from(
+        new Set(
+          data.flatMap(d => Object.keys(d.values))
+        )
+      ).filter(name => {
+        if (name === '_rest') return false;
+        return true;
+      }).sort();
+      
+      if (!names.includes('_rest')) {
+        names.push('_rest');
+      }
+      
+      setChartFunctionNames(names);
+    }
+  }, [data]);
+
+  // Generate color map from function names
+  const colorMap = useMemo<Record<string, string>>(() => {
+    return chartFunctionNames.reduce<Record<string, string>>((acc, name) => ({
+      ...acc,
+      [name]: generateColor(name)
+    }), {});
+  }, [chartFunctionNames]);
 
   const fetchData = async () => {
     try {
@@ -54,23 +143,33 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
       // Create sorted array of timestamps
       const sortedTimestamps = Array.from(timestamps).sort();
 
-      // Initialize data points for each timestamp
-      const transformedData = sortedTimestamps.map(timestamp => ({
-        timestamp: new Date(timestamp * 1000).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        values: {} as Record<string, number | null>
-      }));
+      // Get all function names from the response
+      const newFunctionNames = response.map(([name]) => name);
+      
+      // Make sure to include _rest in function names if not already present
+      if (!newFunctionNames.includes('_rest')) {
+        newFunctionNames.push('_rest');
+      }
+      
+      setFunctionNames(newFunctionNames);
 
-      // Initialize all function names with null values
-      const allFunctionNames = response.map(([name]) => name);
-      transformedData.forEach(dataPoint => {
-        allFunctionNames.forEach(name => {
-          dataPoint.values[name] = null;
-        });
-        // Add a special key for all other queries
-        dataPoint.values['_rest'] = null;
+      // Initialize data points for each timestamp
+      const transformedData = sortedTimestamps.map(timestamp => {
+        // Create an object with null values for all functions
+        const values = Object.fromEntries(
+          newFunctionNames.map(name => [name, null])
+        );
+        
+        // Make sure _rest is included
+        values['_rest'] = null;
+        
+        return {
+          timestamp: new Date(timestamp * 1000).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          values: values as Record<string, number | null>
+        };
       });
 
       // Fill in values for each function
@@ -81,12 +180,24 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
 
         transformedData.forEach(dataPoint => {
           const timestamp = sortedTimestamps[transformedData.indexOf(dataPoint)];
-          dataPoint.values[functionName] = timeValueMap.get(timestamp) ?? null;
+          const value = timeValueMap.get(timestamp);
+          if (value !== undefined) {
+            dataPoint.values[functionName] = value;
+          }
         });
       });
 
-      console.log('Transformed data:', transformedData);
       setData(transformedData);
+      
+      // Ensure all function names have visibility set to true
+      const allVisibleLines = newFunctionNames.reduce((acc, name) => ({
+        ...acc,
+        [name]: true
+      }), { _rest: true });
+      
+      setVisibleLines(allVisibleLines);
+      setDisplayMode('all');
+      
       setError(null);
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -102,12 +213,60 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
     return () => clearInterval(interval);
   }, [deploymentUrl, authToken, refreshInterval]);
 
+  // Handle legend item clicks
+  const handleLegendClick = (name: string) => {
+    if (!name) return;
+
+    // If in "all" mode and clicking a line, switch to individual mode showing only that line
+    if (displayMode === 'all') {
+      const newVisibleLines = Object.fromEntries(
+        chartFunctionNames.map(fn => [fn, fn === name])
+      );
+      setVisibleLines(newVisibleLines);
+      setDisplayMode('individual');
+    } 
+    // If in individual mode and clicking the only visible line, show all lines
+    else if (displayMode === 'individual') {
+      // Check if this is the only visible line
+      const countVisible = Object.values(visibleLines).filter(Boolean).length;
+      
+      if (visibleLines[name] && countVisible === 1) {
+        // If clicking the only visible line, show all lines
+        const allVisible = Object.fromEntries(
+          chartFunctionNames.map(fn => [fn, true])
+        );
+        setVisibleLines(allVisible);
+        setDisplayMode('all');
+      } else {
+        // Toggle the clicked line
+        const newVisibleLines = {
+          ...visibleLines,
+          [name]: !visibleLines[name]
+        };
+        
+        // If no lines are now visible, show all lines
+        const anyVisible = Object.values(newVisibleLines).some(Boolean);
+        if (!anyVisible) {
+          const allVisible = Object.fromEntries(
+            chartFunctionNames.map(fn => [fn, true])
+          );
+          setVisibleLines(allVisible);
+          setDisplayMode('all');
+        } else {
+          setVisibleLines(newVisibleLines);
+        }
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="cache-hit-rate-chart" style={{ width: '100%', height: 300 }}>
-        <h3>Cache Hit Rate</h3>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-          Loading...
+        <div className="convex-panel-table-header convex-panel-table-header-theme">
+          <h3 style={{ fontSize: "14px" }}>Cache Hit Rate</h3>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            Loading...
+          </div>
         </div>
       </div>
     );
@@ -124,49 +283,13 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
     );
   }
 
-  // Get unique function names from the data
-  const functionNames = Array.from(
-    new Set(
-      data.flatMap(d => Object.keys(d.values))
-    )
-  ).filter(name => name !== '_rest' && name !== undefined); // Filter out _rest and undefined
-
-  // Generate colors for each function
-  const colorMap: Record<string, string> = {
-    'organization.js:checkUserOrganizationSlug': '#4CAF50', // Green
-    'stats.js:getFilteredData': '#9e9e9e',  // Gray
-    'companies.js:getCompanies': '#e91e63', // Pink/Magenta
-    '_rest': '#2196F3' // Blue
-  };
-
-  // Function to format the function name for display
-  const formatFunctionName = (name: string) => {
-    if (name === '_rest') return 'All other queries';
-    if (name.includes('organization.js:')) return '...kUserOrganizationSlug';
-    if (name.includes('stats.js:')) return 'stats:getFilteredData';
-    if (name.includes('companies.js:')) return 'companies:getCompanies';
-    return name;
-  };
-
-  // Order of functions in the legend
-  const orderedFunctions = [
-    'stats.js:getFilteredData',
-    'organization.js:checkUserOrganizationSlug',
-    'companies.js:getCompanies',
-    '_rest'
-  ];
-
-  // Function to get the next minute for the tooltip
-  const getNextMinute = (timeStr: string): string => {
-    const date = new Date(`1970/01/01 ${timeStr}`);
-    date.setMinutes(date.getMinutes() + 1);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
-
   return (
-    <div className="cache-hit-rate-chart" style={{ width: '100%', height: 300, backgroundColor: '#1e1e1e', borderRadius: '8px', padding: '16px' }}>
-      <h3 style={{ color: '#fff', marginBottom: '20px', fontSize: '18px' }}>Cache Hit Rate</h3>
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="cache-hit-rate-chart" style={{ width: '100%', height: 300, backgroundColor: '#1e1e1e', borderRadius: '8px' }}>
+      <h3 className="convex-panel-table-header convex-panel-table-header-theme" style={{ color: '#fff', marginBottom: '20px', fontSize: '18px' }}>
+        Cache Hit Rate
+      </h3>
+
+      <ResponsiveContainer width="100%" height="70%">
         <LineChart
           data={data}
           margin={{
@@ -208,7 +331,8 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
               borderRadius: '4px'
             }}
             formatter={(value: any, name: string) => {
-              const formattedName = formatFunctionName(name);
+              const functionName = name.replace('values.', '');
+              const formattedName = formatFunctionName(functionName);
               if (value === null || value === undefined) return ['0%', formattedName];
               return [`${Number(value).toFixed(0)}%`, formattedName];
             }}
@@ -220,33 +344,60 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
             itemStyle={{ padding: '2px 0' }}
             separator=" "
           />
-          <Legend 
-            formatter={formatFunctionName}
-            iconType="circle"
-            layout="horizontal"
-            align="center"
-            verticalAlign="bottom"
-            wrapperStyle={{
-              bottom: -20,
-              fontSize: '12px',
-              color: '#cccccc'
-            }}
-          />
-          {orderedFunctions.map((name) => (
+          
+          {chartFunctionNames.map((name) => (
             <Line
               key={name}
-              type="linear"
-              dataKey={`values.${name}`}
+              type="monotone"
+              dataKey={(dataPoint) => dataPoint.values[name]}
               name={name}
-              stroke={colorMap[name]}
-              dot={{ r: 2.5, fill: colorMap[name], strokeWidth: 0 }}
-              activeDot={{ r: 3.5, fill: colorMap[name], strokeWidth: 0 }}
-              strokeWidth={1.5}
+              stroke={colorMap[name] || generateColor(name)}
+              dot={false}
+              activeDot={{ r: 4, fill: colorMap[name] || generateColor(name), strokeWidth: 0 }}
+              strokeWidth={2}
               connectNulls
+              hide={!visibleLines[name]}
             />
           ))}
         </LineChart>
       </ResponsiveContainer>
+      
+      {/* Custom legend */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        flexWrap: 'wrap',
+        margin: '20px 10px 10px',
+        paddingBottom: '10px'
+      }}>
+        {chartFunctionNames.map(name => (
+          <div 
+            key={name}
+            onClick={() => handleLegendClick(name)}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              margin: '0 16px 8px 0',
+              cursor: 'pointer',
+              opacity: visibleLines[name] ? 1 : 0.5
+            }}
+          >
+            <div style={{ 
+              width: 10, 
+              height: 10, 
+              borderRadius: '50%', 
+              backgroundColor: colorMap[name] || generateColor(name),
+              marginRight: 5
+            }} />
+            <span style={{ 
+              color: visibleLines[name] ? '#fff' : '#888', 
+              fontSize: '12px'
+            }}>
+              {formatFunctionName(name)}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

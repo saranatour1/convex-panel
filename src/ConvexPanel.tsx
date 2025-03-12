@@ -9,6 +9,7 @@ import Container from './Container';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexClient } from 'convex/browser';
 import cssText from './styles/convex-panel.css';
+import { getStorageItem } from './data';
 
 // Function to inject CSS with a unique ID to avoid conflicts
 const injectStyles = () => {
@@ -122,11 +123,21 @@ const ConvexPanel = ({
     const newIsOpen = !isOpen;
     setIsOpen(newIsOpen);
     
+    // If we're opening the container, load the saved tab
+    if (newIsOpen && typeof window !== 'undefined') {
+      const savedTab = getStorageItem<'logs' | 'data-tables' | 'health'>('convex-panel:activeTab', 'logs');
+      // We'll pass this as a prop to Container
+      setInitialTab(savedTab);
+    }
+    
     // Call the onToggle callback if provided
     if (onToggle) {
       onToggle(newIsOpen);
     }
   };
+
+  // Add state for initial tab
+  const [initialTab, setInitialTab] = useState<'logs' | 'data-tables' | 'health'>('logs');
 
   // Don't render anything on the server
   if (!isMounted) {
@@ -155,6 +166,7 @@ const ConvexPanel = ({
             setContainerSize={setContainerSize}
             dragControls={dragControls}
             adminClient={adminClient}
+            initialActiveTab={initialTab}
           />
         )}
       </AnimatePresence>

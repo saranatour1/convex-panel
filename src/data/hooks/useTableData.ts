@@ -45,7 +45,7 @@ export const useTableData = ({
   accessToken,
   baseUrl,
   adminClient,
-  onError
+  onError,
 }: UseTableDataProps): UseTableDataReturn => {
   const [tables, setTables] = useState<TableDefinition>({});
   const [selectedTable, setSelectedTableState] = useState<string>('');
@@ -93,7 +93,6 @@ export const useTableData = ({
     setError(null);
     
     try {
-      console.log('Fetching tables from:', `${convexUrl}/api/shapes2`);
       const response = await fetch(`${convexUrl}/api/shapes2`, {
         headers: {
           "authorization": `Convex ${accessToken}`,
@@ -112,8 +111,6 @@ export const useTableData = ({
         setInsertionStatus('Invalid data structure received');
         return;
       }
-
-      console.log('Received tables data:', data);
       
       // Filter out "Never" type tables
       const tableData = Object.entries(data).reduce((acc, [tableName, tableSchema]) => {
@@ -134,11 +131,10 @@ export const useTableData = ({
       } else if (Object.keys(tableData).length > 0 && adminClient) {
         // Otherwise use the first table if adminClient is available
         try {
-          const result = await adminClient.query("_system/frontend/tableSize:default" as any, {
+          await adminClient.query("_system/frontend/tableSize:default" as any, {
             componentId: null,
             tableName: Object.keys(tableData)[0]
           });
-          console.log("result", result);
         } catch (err) {
           console.error("Error fetching table size:", err);
         }
@@ -174,7 +170,6 @@ export const useTableData = ({
       cursor === lastFetch.cursor &&
       filtersJson === lastFiltersJson
     ) {
-      console.log('Skipping duplicate fetch request');
       return;
     }
     
@@ -223,33 +218,6 @@ export const useTableData = ({
         componentId: null,
       };
 
-      // Only log filter debug info when there are actual filters
-      if (currentFilters.clauses.length > 0) {
-        console.log('Filter debug:', {
-          tableName,
-          filterClauses: currentFilters.clauses,
-          filterString,
-          decodedFilters: filterString ? JSON.parse(atob(filterString)) : null
-        });
-
-        console.log('Sending filters:', {
-          raw: currentFilters.clauses,
-          encoded: filterString,
-          decoded: filterString ? JSON.parse(atob(filterString)) : null,
-          args,
-          tableName
-        });
-
-        console.log('Detailed filter debug:', {
-          tableName,
-          filterClauses: currentFilters.clauses,
-          filterString,
-          decodedFilters: filterString ? JSON.parse(atob(filterString)) : null,
-          args,
-          cursor
-        });
-      }
-
       if (!adminClient) {
         setIsLoading(false);
         setIsLoadingMore(false);
@@ -261,13 +229,6 @@ export const useTableData = ({
         "_system/frontend/paginatedTableDocuments:default" as any,
         args
       );
-      
-      console.log('Query result details:', {
-        resultLength: result.page?.length,
-        firstDocument: result.page?.[0],
-        isDone: result.isDone,
-        continueCursor: result.continueCursor
-      });
 
       if (result.page === null || result.page === undefined) {
         console.error('Received null/undefined page in result:', result);
