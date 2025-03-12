@@ -38,8 +38,6 @@ const FilterTag = memo(({
       case 'gte': return '≥';
       case 'lt': return '<';
       case 'lte': return '≤';
-      case 'anyOf': return 'in';
-      case 'noneOf': return 'not in';
       case 'isType': return 'is type';
       case 'isNotType': return 'is not type';
       default: return filter.op;

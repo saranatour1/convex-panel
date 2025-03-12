@@ -9,7 +9,8 @@ A development panel for Convex applications that provides real-time logs, data i
 - 📊 **Real-time Data View**: Browse and filter your Convex tables with ease
 - 📝 **Live Logs**: Monitor function calls, HTTP actions, and system events in real-time
 - 🔍 **Advanced Filtering**: Filter logs and data with query capabilities
-- 🔄 **Health Monitoring**: Track the health of your application and see your cache rates, schedulers are more.
+- 🔄 **Health Monitoring**: Track the health of your application with metrics for cache rates, scheduler health, database performance, and system latency
+- ✏️ **In-place Data Editing**: Directly edit your data values with double-click editing capability
 - 🎨 **Beautiful UI**: Sleek, developer-friendly interface that integrates with your app
 
 ![Convex Panel Logs View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fconvex-panel2.png?alt=media&token=685faba4-d9f8-4ca7-8112-2825cf3040ec)
@@ -138,6 +139,25 @@ The Convex Panel accepts the following props:
 | `initialShowSuccess` | boolean (optional) | Initially show success logs (default: true) |
 | `initialLogType` | LogType (optional) | Initial log type filter (default: ALL) |
 | `maxStoredLogs` | number (optional) | Maximum number of logs to store (default: 500) |
+
+## Features Documentation
+
+### Health Monitoring
+
+The health dashboard provides real-time insights into your Convex application's performance metrics:
+
+- **Cache Rates**: Monitor your application's cache hit rates and efficiency
+- **Scheduler Health**: Track the health and performance of your scheduled functions
+- **Database Metrics**: View database throughput, operation counts, and response times
+- **System Latency**: Visualize overall system response times and identify bottlenecks
+
+### Data Editing
+
+Convex Panel now supports in-place editing of table data:
+
+- **Double-click Editing**: Simply double-click on any editable cell to modify its value
+- **Smart Value Parsing**: Automatically converts edited values to the appropriate type (number, boolean, array, object)
+- **Real-time Updates**: Changes are immediately reflected in your Convex database
 
 ## Troubleshooting
 

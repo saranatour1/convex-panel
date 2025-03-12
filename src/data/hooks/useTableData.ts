@@ -22,6 +22,7 @@ interface UseTableDataReturn {
   selectedTable: string;
   setSelectedTable: (tableName: string) => void;
   documents: TableDocument[];
+  setDocuments: React.Dispatch<React.SetStateAction<TableDocument[]>>;
   isLoading: boolean;
   error: string | null;
   documentCount: number;
@@ -324,37 +325,26 @@ export const useTableData = ({
   }, [filters, selectedTable, fetchTableData]);
 
   const patchDocumentFields = async (table: string, ids: string[], fields: Record<string, any>) => {
-    const response = await fetch(`${baseUrl}/api/run_mutation`, {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-        "authorization": `Convex ${accessToken}`,
-        "convex-client": "dashboard-0.0.0"
-      },
-      body: JSON.stringify({
-        mutation: `
-          import { mutation } from "convex:/_system/repl/wrappers.js";
-          import { patchDocumentsFields } from "convex:/_system/frontend/patchDocumentsFields";
-          
-          export default mutation({
-            handler: async (ctx) => {
-              return await patchDocumentsFields(ctx, {
-                table: "${table}",
-                componentId: null,
-                ids: ${JSON.stringify(ids)},
-                fields: ${JSON.stringify(fields)}
-              });
-            },
-          });
-        `
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to patch documents: HTTP ${response.status}`);
+    if (!adminClient) {
+      throw new Error("Admin client is not available");
     }
     
-    return response.json();
+    try {
+      const result = await adminClient.mutation(
+        "_system/frontend/patchDocumentsFields" as any,
+        {
+          table,
+          componentId: null,
+          ids,
+          fields
+        }
+      );
+      
+      return result;
+    } catch (error) {
+      console.error("Error updating document:", error);
+      throw error;
+    }
   };
 
   const observerTarget = useCallback((node: HTMLDivElement) => {
@@ -388,10 +378,25 @@ export const useTableData = ({
     return field.shape.type;
   };
 
-  const formatValue = (value: any): string => {
+  const formatValue = (value: any, fieldName?: string): string => {
     if (value === undefined || value === null) {
       return 'unset';
     }
+    
+    // Format _creationTime in M/D/YYYY, h:mm:ss AM/PM format
+    if (fieldName === '_creationTime' && typeof value === 'number') {
+      const date = new Date(value);
+      return date.toLocaleString('en-US', {
+        month: 'numeric',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+    }
+    
     if (typeof value === 'object') {
       return JSON.stringify(value);
     }
@@ -432,6 +437,7 @@ export const useTableData = ({
     selectedTable,
     setSelectedTable,
     documents,
+    setDocuments,
     isLoading,
     error,
     documentCount,

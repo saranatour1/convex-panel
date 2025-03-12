@@ -1302,6 +1302,7 @@
   }
 
   .convex-panel-table-cell {
+    cursor: pointer !important;
     padding: 0.5rem !important;
     border-right: 1px solid #404040 !important;
     font-size: 0.75rem;
@@ -2190,5 +2191,45 @@
     background-color: #1a1a1a;
     text-transform: uppercase;
     margin-bottom: 5px;
+  }
+
+  /* Editable cell styles */
+  .convex-panel-editable-cell {
+    cursor: pointer !important;
+    position: relative !important;
+    transition: background-color 0.2s ease !important;
+  }
+
+  .convex-panel-editable-cell:hover {
+    background-color: transparent !important;
+  }
+
+  .convex-panel-table-cell.editing {
+    padding: 0 !important;
+    border: 2px solid #3f5295 !important;
+  }
+
+  .convex-panel-table-cell.updating {
+    opacity: 0.7 !important;
+    background-color: rgba(63, 82, 149, 0.2) !important;
+  }
+
+  .convex-panel-cell-edit-input {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0.5rem !important;
+    background-color: #1a1a1a !important;
+    border: none !important;
+    color: white !important;
+    font-size: 0.75rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .convex-panel-cell-edit-input:focus {
+    outline: none !important;
+  }
+
+  .convex-panel-column-header:hover {
+    background-color: #333 !important;
   }
 }

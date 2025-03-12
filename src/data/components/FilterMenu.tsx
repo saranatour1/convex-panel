@@ -4,6 +4,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { FilterMenuProps, FilterClause } from '../types';
 
+const getPortalContainer = () => {
+  let container = document.getElementById('portal-root');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'portal-root';
+    container.className = 'convex-panel-container';
+    document.body.appendChild(container);
+  }
+  return container;
+};
+
 const FilterMenu: React.FC<FilterMenuProps> = ({ 
   field, 
   position, 
@@ -45,11 +56,12 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     { value: 'lte', label: '<=' },
     { value: 'isType', label: 'Is type' },
     { value: 'isNotType', label: 'Is not type' },
-    { value: 'anyOf', label: 'any of' },
-    { value: 'noneOf', label: 'None of' }
   ];
 
   useEffect(() => {
+    console.log('FilterMenu mounted for field:', field);
+    console.log('Position:', position);
+    
     // Handle click outside to close the menu
     const handleClickOutside = (e: MouseEvent) => {
       // If this is an internal click that we're tracking, don't close
@@ -76,6 +88,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     document.addEventListener('keydown', handleKeyDown);
     
     return () => {
+      console.log('FilterMenu unmounted for field:', field);
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
@@ -201,11 +214,18 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
+        zIndex: 9999, // Make sure it's on top
+        position: 'fixed', // Ensure fixed positioning
+        background: '#171717', // Make sure background is visible
+        border: '2px solid #404040', // Add visible border
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)', // Add visible shadow
       }}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        console.log('FilterMenu clicked');
+        e.stopPropagation();
+      }}
       onMouseDown={handleMenuMouseDown}
     >
-      
       <div className="convex-panel-filter-menu-group">
         <label className="convex-panel-filter-menu-label">Operator</label>
         <div 
@@ -298,7 +318,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               onMouseDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
               className="convex-panel-filter-menu-textarea"
-              placeholder={operator === 'anyOf' || operator === 'noneOf' ? '[value1, value2, ...]' : 'Enter value (e.g. "text", 123, true)'}
+              placeholder='Enter value (e.g. "text", 123, true)'
             />
             <p className="convex-panel-filter-menu-hint">
               For arrays or objects, use valid JSON format
@@ -326,8 +346,8 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
         </button>
       </div>
     </div>,
-    document.body
+    getPortalContainer()
   );
 };
 
-export default FilterMenu; 
+export default FilterMenu;

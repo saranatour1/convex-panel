@@ -52,10 +52,9 @@ export interface FilterClause {
   /**
    * Filter operators:
    * - Basic comparison: eq, neq, gt, gte, lt, lte
-   * - Array operations: anyOf, noneOf
    * - Type checking: isType (maps to 'type' in Convex), isNotType (maps to 'notype' in Convex)
    */
-  op: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'anyOf' | 'noneOf' | 'isType' | 'isNotType';
+  op: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'isType' | 'isNotType';
   value: any;
   enabled: boolean;
 }
@@ -126,6 +125,8 @@ export interface DataTableContentProps {
   filterMenuPosition: MenuPosition | null;
   handleFilterApply: (filter: FilterClause) => void;
   onFilterMenuClose: () => void;
-  formatValue: (value: any) => string;
+  formatValue: (value: any, fieldName?: string) => string;
   activeFilters: FilterExpression;
+  onUpdateDocument?: (params: { table: string, ids: string[], fields: Record<string, any> }) => Promise<void>;
+  tableName?: string;
 } 

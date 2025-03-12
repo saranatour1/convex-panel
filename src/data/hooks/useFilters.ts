@@ -38,6 +38,7 @@ export const useFilters = ({
 
   // Define closeFilterMenu early so it can be used in other callbacks
   const closeFilterMenu = useCallback(() => {
+    console.log('closeFilterMenu called - closing filter menu');
     setFilterMenuField(null);
     setFilterMenuPosition(null);
   }, []);
@@ -77,14 +78,57 @@ export const useFilters = ({
 
   const handleFilterButtonClick = useCallback((e: React.MouseEvent, header: string) => {
     e.stopPropagation();
+    e.preventDefault();
+    
     const button = e.currentTarget;
     const rect = button.getBoundingClientRect();
+
+    console.log('Button rect:', rect);
+    console.log('Button:', button);
+    console.log('Header:', header);
     
-    // Position the menu below the button
-    setFilterMenuPosition({
-      top: rect.bottom + 8, // 8px offset from the button
-      left: Math.max(rect.left - 150, 10) // Center the menu on the button, but keep it on screen
-    });
+    // Get the viewport dimensions
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Calculate position to ensure it's visible
+    const menuWidth = 300; // Approximate width of the menu
+    const menuHeight = 300; // Approximate height of the menu
+    
+    // Position the menu so it fits on screen
+    let left = rect.left;
+    // If menu would overflow right edge, position it to the left of the button
+    if (left + menuWidth > viewportWidth - 20) {
+      left = Math.max(viewportWidth - menuWidth - 20, 10);
+    }
+    
+    // Ensure it's not too close to the bottom of the viewport
+    let top = rect.bottom + 8;
+    if (top + menuHeight > viewportHeight - 20) {
+      // Position above the button if there's not enough space below
+      top = Math.max(rect.top - menuHeight - 8, 10);
+    }
+    
+    const menuPosition = {
+      top: top,
+      left: left,
+    };
+    
+    console.log('Setting menu position:', menuPosition);
+    
+    // Add delayed check for menu element
+    setTimeout(() => {
+      console.log('Checking for menu in DOM after timeout');
+      const menuElements = document.querySelectorAll('.convex-panel-filter-menu');
+      console.log('Found filter menu elements:', menuElements.length);
+      
+      if (menuElements.length > 0) {
+        console.log('Menu element styles:', menuElements[0].getAttribute('style'));
+        console.log('Menu element rect:', menuElements[0].getBoundingClientRect());
+      }
+    }, 500);
+    
+    setFilterMenuPosition(menuPosition);
     setFilterMenuField(header);
   }, []);
 
@@ -144,10 +188,17 @@ export const useFilters = ({
     const handleClickOutside = (e: MouseEvent) => {
       if (filterMenuField && filterMenuPosition) {
         const target = e.target as HTMLElement;
-        const isFilterButton = target.closest('.filter-menu-button');
-        const isFilterMenu = target.closest('.filter-menu');
+        console.log('Click outside check - target:', target);
         
+        // Find if click is on button or menu
+        const isFilterButton = target.closest('.convex-panel-filter-button');
+        const isFilterMenu = target.closest('.convex-panel-filter-menu');
+        
+        console.log('Click outside check - isFilterButton:', !!isFilterButton, 'isFilterMenu:', !!isFilterMenu);
+        
+        // Only close if click is outside both the button and menu
         if (!isFilterButton && !isFilterMenu) {
+          console.log('Click detected outside filter button and menu - closing menu');
           closeFilterMenu();
         }
       }

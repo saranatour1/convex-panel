@@ -113,7 +113,6 @@ const HealthContainer: React.FC<HealthContainerProps> = ({
       
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
       }}>
         <div style={{
           backgroundColor: '#1e1e1e',

@@ -11,6 +11,7 @@ import {
 } from './components';
 import { getStorageItem } from './utils/storage';
 import { ConvexPanelSettings } from '../settings';
+import './styles/DataTable.css';
 
 // Define settings storage key
 const SETTINGS_STORAGE_KEY = 'convex-panel:settings';
@@ -63,6 +64,7 @@ const DataTable: React.FC<DataTableProps> = ({
     selectedTable,
     setSelectedTable,
     documents,
+    setDocuments,
     isLoading,
     hasMore,
     isLoadingMore,
@@ -71,7 +73,8 @@ const DataTable: React.FC<DataTableProps> = ({
     getColumnHeaders,
     observerTarget,
     filters: tableFilters,
-    setFilters: setTableFilters
+    setFilters: setTableFilters,
+    patchDocumentFields
   } = useTableData({
     convexUrl,
     accessToken,
@@ -123,6 +126,41 @@ const DataTable: React.FC<DataTableProps> = ({
       fetchTableData(selectedTable, null);
     }
   }, [filters, setTableFilters, fetchTableData, selectedTable]);
+
+  // Create a wrapper function for patchDocumentFields to match the expected interface
+  const handleUpdateDocument = useCallback(
+    async (params: { table: string; ids: string[]; fields: Record<string, any> }) => {
+      try {
+        // Patch the document fields on the server
+        await patchDocumentFields(params.table, params.ids, params.fields);
+        
+        // If setDocuments is available, update the documents locally
+        if (setDocuments && documents) {
+          // Create updated documents by replacing the modified fields
+          const updatedDocuments = documents.map(doc => {
+            // Check if this document is one of the ones being updated
+            if (params.ids.includes(doc._id?.toString() || '')) {
+              // Return a new document with merged fields
+              return { ...doc, ...params.fields };
+            }
+            // Return unchanged document
+            return doc;
+          });
+          
+          // Update the documents state
+          setDocuments(updatedDocuments);
+        } else {
+          // Fall back to refetching if local update is not possible
+          fetchTableData(params.table, null);
+        }
+      } catch (error) {
+        // If there's an error, refetch to ensure data consistency
+        console.error('Error updating document:', error);
+        fetchTableData(params.table, null);
+      }
+    },
+    [patchDocumentFields, fetchTableData, documents, setDocuments]
+  );
 
   const columnHeaders = getColumnHeaders();
 
@@ -198,6 +236,8 @@ const DataTable: React.FC<DataTableProps> = ({
               onFilterMenuClose={closeFilterMenu}
               formatValue={formatValue}
               activeFilters={filters}
+              onUpdateDocument={handleUpdateDocument}
+              tableName={selectedTable}
             />
           )}
         </div>
