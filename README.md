@@ -16,7 +16,7 @@ pnpm add convex-panel
 
 ### Styling
 
-The Convex Panel comes with built-in styling powered by Tailwind CSS. You simply need to import the CSS file:
+The Convex Panel comes with built-in styling. You simply need to import the CSS file:
 
 ```jsx
 // In your _app.js, layout.js, or component file

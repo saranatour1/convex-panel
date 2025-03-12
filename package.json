@@ -27,9 +27,9 @@
   ],
   "scripts": {
     "copy-src": "node copy-src.js",
-    "process-tailwind": "node process-tailwind.js",
-    "build": "npm run copy-src && npm run process-tailwind && rollup -c",
-    "dev": "npm run copy-src && npm run process-tailwind && rollup -c -w",
+    "process-css": "node process-css.js",
+    "build": "npm run copy-src && npm run process-css && rollup -c",
+    "dev": "npm run copy-src && npm run process-css && rollup -c -w",
     "clean": "rimraf dist",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -66,18 +66,15 @@
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
     "@types/react-window": "^1.8.8",
-    "autoprefixer": "^10.4.21",
     "convex": "^1.0.0",
     "copyfiles": "^2.4.1",
     "next": "^13.4.19",
-    "postcss": "^8.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rimraf": "^5.0.1",
     "rollup": "^3.29.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-url": "^3.0.1",
-    "tailwindcss": "^3.3.5",
     "typescript": "^5.2.2"
   },
   "repository": {
