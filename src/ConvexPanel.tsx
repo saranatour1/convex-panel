@@ -27,6 +27,8 @@ const ConvexPanel = ({
 }: ButtonProps) => {
   const mergedTheme = useMemo(() => ({ ...defaultTheme, ...theme }), [theme]);
   const [isMounted, setIsMounted] = useState(false);
+  const [logoSrc, setLogoSrc] = useState<string>(buttonIcon);
+  const [logoError, setLogoError] = useState(false);
 
   // Only create adminClient if we have a URL and deployKey
   const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || cloudUrl;
@@ -46,6 +48,14 @@ const ConvexPanel = ({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Handle image error by using a fallback URL
+  const handleImageError = () => {
+    // If the image fails to load, use a data URL as fallback
+    setLogoError(true);
+    // Use a simple purple circle as fallback
+    setLogoSrc("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Ccircle cx='18' cy='18' r='18' fill='%238D2676'/%3E%3C/svg%3E");
+  };
 
   /**
    * Load saved position and container size from localStorage on component mount
@@ -138,12 +148,13 @@ const ConvexPanel = ({
         transition={{ duration: 0.3 }}
       >
         <Image 
-          src={buttonIcon}
+          src={logoSrc}
           alt="Convex Logo" 
           width={36} 
           height={36} 
           className="rounded-full"
           unoptimized={true}
+          onError={handleImageError}
         />
       </motion.button>
     </div>

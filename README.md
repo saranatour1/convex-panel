@@ -198,11 +198,12 @@ The Convex Panel accepts the following props:
 4. **Missing Convex logo or 400 Bad Request error**:
    - The component uses Next.js Image component to display the Convex logo
    - By default, it looks for `/convex.png` in your public directory
+   - If the image is not found, a fallback purple circle will be displayed automatically
    - You can provide a custom image by passing the `buttonIcon` prop:
      ```jsx
      <ConvexPanel buttonIcon="/your-custom-logo.png" />
      ```
-   - Alternatively, you can add the Convex logo to your public directory:
+   - To use the default Convex logo, add it to your public directory:
      ```
      public/
        └── convex.png

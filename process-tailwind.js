@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const postcss = require('postcss');
-const tailwindcss = require('tailwindcss');
 const autoprefixer = require('autoprefixer');
 
 async function processTailwind() {
@@ -20,7 +19,7 @@ async function processTailwind() {
 
     // Process the CSS with PostCSS and Tailwind
     const result = await postcss([
-      tailwindcss(require('./tailwind.config.js')),
+      require('tailwindcss')(require('./tailwind.config.js')),
       autoprefixer,
     ]).process(tailwindSource, {
       from: path.join(__dirname, 'src', 'styles', 'tailwind.css'),

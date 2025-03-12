@@ -7,6 +7,12 @@ if (!fs.existsSync(destDir)) {
   fs.mkdirSync(destDir, { recursive: true });
 }
 
+// Create assets directory in dist if it doesn't exist
+const assetsDir = path.join(__dirname, 'dist', 'assets');
+if (!fs.existsSync(assetsDir)) {
+  fs.mkdirSync(assetsDir, { recursive: true });
+}
+
 // Function to copy a directory recursively
 function copyDir(src, dest) {
   // Create destination directory if it doesn't exist
@@ -41,6 +47,20 @@ const distDir = path.join(__dirname, 'dist');
 if (!fs.existsSync(srcDir)) {
   console.error(`Error: Source directory '${srcDir}' does not exist.`);
   process.exit(1);
+}
+
+// Copy assets files to dist/assets
+const srcAssetsDir = path.join(__dirname, 'src', 'assets');
+if (fs.existsSync(srcAssetsDir)) {
+  const assetFiles = fs.readdirSync(srcAssetsDir);
+  
+  assetFiles.forEach(file => {
+    const srcPath = path.join(srcAssetsDir, file);
+    const destPath = path.join(assetsDir, file);
+    fs.copyFileSync(srcPath, destPath);
+  });
+  
+  console.log('Asset files copied to dist/assets');
 }
 
 // Copy the source directory to the destination
