@@ -57,7 +57,7 @@ You can use the panel in two ways:
    ```tsx
    <ConvexPanel
      accessToken="YOUR_ACCESS_TOKEN"
-     deployUrl={process.env.NEXT_PUBLIC_CONVEX_URL}
+     deployUrl={process.env.CONVEX_DEPLOYMENT}
      convex={convex}
    />
    ```
@@ -76,7 +76,7 @@ export default function YourComponent() {
       {/* Your app content */}
       <ConvexPanel
         accessToken="YOUR_ACCESS_TOKEN"
-        deployUrl={process.env.NEXT_PUBLIC_CONVEX_URL}
+        deployUrl={process.env.CONVEX_DEPLOYMENT}
         convex={convex}
       />
     </>
@@ -91,7 +91,7 @@ The Convex Panel accepts the following props:
 | Prop | Type | Description |
 |------|------|-------------|
 | `accessToken` | string | Your Convex access token (from `convex config`) |
-| `deployUrl` | string | Your Convex deployment URL (or use NEXT_PUBLIC_CONVEX_URL env var) |
+| `deployUrl` | string | Your Convex deployment URL (or use CONVEX_DEPLOYMENT env var) |
 | `convex` | ConvexReactClient | Convex client instance |
 | `isOpen` | boolean | Whether the panel is open |
 | `toggleOpen` | () => void | Function to toggle the panel open/closed |
@@ -134,7 +134,7 @@ Convex Panel now supports in-place editing of table data:
    - Get your access token by running `npx convex auth get`
 
 2. **No logs appearing**:
-   - Verify that your `deployUrl` prop or `NEXT_PUBLIC_CONVEX_URL` environment variable is correctly set
+   - Verify that your `deployUrl` prop or `CONVEX_DEPLOYMENT` environment variable is correctly set
    - Check that you've passed the `convex` prop to the ConvexPanel component
    - Verify that your access token is valid
 
