@@ -1,5 +1,7 @@
 # Convex Panel
 
+![NPM Version](https://img.shields.io/npm/v/convex-panel)
+
 A development panel for Convex applications that provides real-time logs, data inspection, and more.
 
 ![Convex Panel Data View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fconvex-panel1.png?alt=media&token=d4b6da5e-db91-4b94-9d7a-a716ebebdedf)
@@ -63,6 +65,8 @@ You can use the panel in two ways:
    ```
 
 Here's a complete example:
+> **Warning**: This component must be placed inside a `ConvexProvider` or `ConvexReactProvider` component.
+
 
 ```tsx
 import { ConvexPanel } from 'convex-panel';
@@ -88,23 +92,19 @@ export default function YourComponent() {
 
 The Convex Panel accepts the following props:
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `accessToken` | string | Your Convex access token (from `convex config`) |
-| `deployUrl` | string | Your Convex deployment URL (or use CONVEX_DEPLOYMENT env var) |
-| `convex` | ConvexReactClient | Convex client instance |
-| `isOpen` | boolean | Whether the panel is open |
-| `toggleOpen` | () => void | Function to toggle the panel open/closed |
-| `position` | { x: number, y: number } | Position of the panel |
-| `setPosition` | (pos) => void | Function to update the panel position |
-| `containerSize` | { width: number, height: number } | Size of the panel |
-| `setContainerSize` | (size) => void | Function to update the panel size |
-| `theme` | ThemeClasses (optional) | Custom theme options |
-| `initialLimit` | number (optional) | Initial log limit (default: 100) |
-| `initialShowSuccess` | boolean (optional) | Initially show success logs (default: true) |
-| `initialLogType` | LogType (optional) | Initial log type filter (default: ALL) |
-| `maxStoredLogs` | number (optional) | Maximum number of logs to store (default: 500) |
-| `deployKey` | string (optional) | Convex deploy key (for admin features) |
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `accessToken` | string | Yes | Your Convex access token (from `convex config`) |
+| `deployKey` | string | Yes | Your Convex deployment URL (or use CONVEX_DEPLOYMENT env var) |
+| `convex` | ConvexReactClient | Yes | Convex client instance |
+| `theme` | ThemeClasses | No | Custom theme options |
+| `initialLimit` | number | No | Initial log limit (default: 100) |
+| `initialShowSuccess` | boolean | No | Initially show success logs (default: true) |
+| `initialLogType` | LogType | No | Initial log type filter (default: ALL) |
+| `maxStoredLogs` | number | No | Maximum number of logs to store (default: 500) |
+| `onLogFetch` | (logs: LogEntry[]) => void | No | Callback function when logs are fetched |
+| `onError` | (error: string) => void | No | Callback function when an error occurs |
+| `onToggle` | (isOpen: boolean) => void | No | Callback function when panel is opened/closed |
 
 ## Features Documentation
 
@@ -131,10 +131,10 @@ Convex Panel now supports in-place editing of table data:
 
 1. **"Convex authentication required"**:
    - Make sure you've provided a valid access token via the `accessToken` prop
-   - Get your access token by running `npx convex auth get`
+   - Get your access token by running `cat ~/.convex/config.json` or `more %USERPROFILE%\.convex\config.json`
 
 2. **No logs appearing**:
-   - Verify that your `deployUrl` prop or `CONVEX_DEPLOYMENT` environment variable is correctly set
+   - Verify that your `deployKey` prop or `CONVEX_DEPLOYMENT` environment variable is correctly set
    - Check that you've passed the `convex` prop to the ConvexPanel component
    - Verify that your access token is valid
 
