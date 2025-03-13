@@ -17,6 +17,7 @@ function App() {
       <ConvexPanel 
         convex={convex} 
         deployKey={process.env.CONVEX_DEPLOY_KEY} 
+        deployUrl={process.env.NEXT_PUBLIC_CONVEX_URL} // Optional
       />
     </ConvexProvider>
   );

@@ -1,8 +1,40 @@
-import { LogEntry } from "../logs/types";
-
 import React, { ReactNode } from "react";
-import { LogType } from "../logs/types";
+import { LogType } from "../utils/constants";
 import { ConvexReactClient } from "convex/react";
+import { ConvexClient } from 'convex/browser';
+
+/**
+ * Logs
+ */
+// Convex log schema
+export interface LogEntry {
+  timestamp: number;
+  topic: string;
+  function?: {
+    type?: string;
+    path?: string; 
+    cached?: boolean;
+    request_id?: string;
+  };
+  log_level?: string;
+  message?: string;
+  execution_time_ms?: number;
+  status?: string;
+  error_message?: string;
+  usage?: {
+    database_read_bytes?: number;
+    database_write_bytes?: number;
+    file_storage_read_bytes?: number;
+    file_storage_write_bytes?: number;
+    vector_storage_read_bytes?: number;
+    vector_storage_write_bytes?: number;
+    action_memory_used_mb?: number;
+  };
+  system_code?: string;
+  audit_log_action?: string;
+  audit_log_metadata?: string;
+  raw: any;
+}
 
 /**
  * Theme interface
@@ -67,39 +99,6 @@ export interface ContainerProps {
   initialActiveTab: TabTypes;
   accessToken: string;
   deployUrl?: string;
-}
-
-/**
- * Logs
- */
-// Convex log schema
-export interface LogEntry {
-  timestamp: number;
-  topic: string;
-  function?: {
-    type?: string;
-    path?: string; 
-    cached?: boolean;
-    request_id?: string;
-  };
-  log_level?: string;
-  message?: string;
-  execution_time_ms?: number;
-  status?: string;
-  error_message?: string;
-  usage?: {
-    database_read_bytes?: number;
-    database_write_bytes?: number;
-    file_storage_read_bytes?: number;
-    file_storage_write_bytes?: number;
-    vector_storage_read_bytes?: number;
-    vector_storage_write_bytes?: number;
-    action_memory_used_mb?: number;
-  };
-  system_code?: string;
-  audit_log_action?: string;
-  audit_log_metadata?: string;
-  raw: any;
 }
 
 // LogsContainer props
@@ -193,3 +192,311 @@ export interface LogDetailPanelProps {
   mergedTheme: ThemeClasses;
   setIsDetailPanelOpen: (isOpen: boolean) => void;
 }
+
+/**
+ * Data Table
+ */
+export interface DataTableProps {
+  convexUrl: string;
+  accessToken: string;
+  onError?: (error: string) => void;
+  theme?: ThemeClasses;
+  baseUrl: string;
+  convex: ConvexReactClient;
+  adminClient: ConvexClient | null;
+  settings?: ConvexPanelSettings;
+}
+
+// Table Field Props
+export interface TableField {
+  fieldName: string;
+  optional: boolean;
+  shape: {
+    type: string;
+    fields?: TableField[];
+    tableName?: string;
+    float64Range?: {
+      hasSpecialValues: boolean;
+    };
+    shape?: {
+      type: string;
+      tableName?: string;
+    };
+  };
+}
+
+// Table Schema Props
+export interface TableSchema {
+  type: string;
+  fields: TableField[];
+}
+
+// Table Definition Props
+export interface TableDefinition {
+  [key: string]: TableSchema;
+}
+
+// Table Document Props
+export interface TableDocument {
+  _id: string;
+  [key: string]: any;
+}
+
+// Page Args Props
+export interface PageArgs {
+  paginationOpts: PaginationOptions;
+  table: string;
+  filters: string | null;
+  componentId?: string | null;
+}
+
+// Pagination Options Props
+export interface PaginationOptions {
+  cursor: string | null;
+  numItems: number;
+  id?: number;
+}
+
+/**
+ * Filter Menu
+ */
+export interface FilterMenuState {
+  isOpen: boolean;
+  position: MenuPosition;
+  editingFilter?: FilterClause;
+}
+
+// Filter Clause Props
+export interface FilterClause {
+  field: string;
+  /**
+   * Filter operators:
+   * - Basic comparison: eq, neq, gt, gte, lt, lte
+   * - Type checking: isType (maps to 'type' in Convex), isNotType (maps to 'notype' in Convex)
+   */
+  op: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'isType' | 'isNotType';
+  value: any;
+  enabled: boolean;
+}
+
+// Filter Expression Props
+export interface FilterExpression {
+  clauses: FilterClause[];
+}
+
+// Menu Position Props
+export interface MenuPosition {
+  top: number;
+  left: number;
+}
+
+// Filter Menu Props
+export interface FilterMenuProps {
+  field: string;
+  position: MenuPosition;
+  onApply: (filter: FilterClause) => void;
+  onClose: () => void;
+  existingFilter?: FilterClause;
+  theme?: ThemeClasses;
+}
+
+// Filter Debug Props
+export interface FilterDebugProps {
+  filters: FilterExpression;
+  selectedTable: string;
+}
+
+// Active Filters Props
+export interface ActiveFiltersProps {
+  filters: FilterExpression;
+  onRemove: (field: string) => void;
+  onClearAll: () => void;
+  selectedTable: string;
+  theme?: ThemeClasses;
+  onEdit?: (e: React.MouseEvent, field: string) => void;
+}
+
+// Data Table Sidebar Props
+export interface DataTableSidebarProps {
+  tables: TableDefinition;
+  selectedTable: string;
+  searchText: string;
+  onSearchChange: (text: string) => void;
+  onTableSelect: (tableName: string) => void;
+  isSidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
+  theme?: any;
+}
+
+// Data Table Content Props
+export interface DataTableContentProps {
+  documents: TableDocument[];
+  columnHeaders: string[];
+  isLoading: boolean;
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  observerTarget: (node: HTMLDivElement) => void;
+  onFilterButtonClick: (e: React.MouseEvent, header: string) => void;
+  filterMenuField: string | null;
+  filterMenuPosition: MenuPosition | null;
+  handleFilterApply: (filter: FilterClause) => void;
+  onFilterMenuClose: () => void;
+  formatValue: (value: any, fieldName?: string) => string;
+  activeFilters: FilterExpression;
+  onUpdateDocument?: (params: { table: string, ids: string[], fields: Record<string, any> }) => Promise<void>;
+  tableName?: string;
+} 
+
+// Storage Debug Props
+export interface StorageDebugProps {
+  visible?: boolean;
+  selectedTable?: string;
+  filters?: FilterExpression;
+}
+
+/**
+ * Use Filters
+ */
+export interface UseFiltersProps {
+  onFilterApply: (filter: FilterClause) => void;
+  onFilterRemove: (field: string) => void;
+  onFilterClear: () => void;
+  selectedTable: string;
+  initialFilters?: FilterExpression;
+}
+
+export interface UseFiltersReturn {
+  filters: FilterExpression;
+  filterMenuField: string | null;
+  filterMenuPosition: MenuPosition | null;
+  handleFilterButtonClick: (e: React.MouseEvent, header: string) => void;
+  handleFilterApply: (filter: FilterClause) => void;
+  handleFilterRemove: (field: string) => void;
+  clearFilters: () => void;
+  closeFilterMenu: () => void;
+  setFilters: React.Dispatch<React.SetStateAction<FilterExpression>>;
+}
+
+/**
+ * Use Table Data
+ */
+// Use Table Data Props
+export interface UseTableDataProps {
+  convexUrl: string;
+  accessToken: string;
+  baseUrl: string;
+  adminClient: ConvexClient | null;
+  onError?: (error: string) => void;
+}
+
+// Use Table Data Return
+export interface UseTableDataReturn {
+  tables: TableDefinition;
+  selectedTable: string;
+  setSelectedTable: (tableName: string) => void;
+  documents: TableDocument[];
+  setDocuments: React.Dispatch<React.SetStateAction<TableDocument[]>>;
+  isLoading: boolean;
+  error: string | null;
+  documentCount: number;
+  continueCursor: string | null;
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  fetchTableData: (tableName: string, cursor: string | null) => Promise<void>;
+  fetchTables: () => Promise<void>;
+  patchDocumentFields: (table: string, ids: string[], fields: Record<string, any>) => Promise<any>;
+  getTableFields: (tableName: string) => string[];
+  getColumnHeaders: () => string[];
+  formatValue: (value: any) => string;
+  renderFieldType: (field: any) => string;
+  observerTarget: (node: HTMLDivElement) => void;
+  filters: FilterExpression;
+  setFilters: React.Dispatch<React.SetStateAction<FilterExpression>>;
+}
+
+/**
+ * Fetch Options and Responses
+ */
+export interface FetchLogsOptions {
+  cursor: number | string;
+  convexUrl: string;
+  accessToken: string;
+  signal?: AbortSignal;
+}
+
+export interface FetchLogsResponse {
+  logs: LogEntry[];
+  newCursor?: number | string;
+  hostname: string;
+}
+
+export interface FetchTablesOptions {
+  convexUrl: string;
+  accessToken: string;
+  adminClient?: ConvexClient | null;
+}
+
+export interface FetchTablesResponse {
+  tables: TableDefinition;
+  selectedTable: string;
+}
+
+/**
+ * Health
+ */
+// Health Container Props
+export interface HealthContainerProps {
+  deploymentUrl: string;
+  authToken: string;
+  convexVersion?: string; // Optional prop for version
+}
+
+// Cache Hit Data
+export interface CacheHitData {
+  timestamp: string;
+  values: Record<string, number | null>;
+}
+
+// Cache Hit Rate Chart Props
+export interface CacheHitRateChartProps {
+  deploymentUrl: string;
+  authToken: string;
+  refreshInterval?: number;
+}
+
+// Timestamp
+export interface TimeStamp {
+  secs_since_epoch: number;
+  nanos_since_epoch: number;
+}
+
+// Failure Data
+export interface FailureData {
+  timestamp: string;
+  values: Record<string, number | null>;
+}
+
+// Failure Rate Chart Props
+interface FailureRateChartProps {
+  deploymentUrl: string;
+  authToken: string;
+  refreshInterval?: number;
+}
+
+// Scheduler Lag Chart Props
+export interface SchedulerLagChartProps {
+  deploymentUrl: string;
+  authToken: string;
+  refreshInterval?: number;
+  showChart: boolean;
+}
+
+// Scheduler Status Props
+export interface SchedulerStatusProps {
+  status: 'on_time' | 'delayed' | 'error';
+  message: string;
+}
+
+// Types
+export type TimeSeriesData = [TimeStamp, number | null][];
+export type APIResponse = [string, TimeSeriesData][];

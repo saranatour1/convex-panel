@@ -1,53 +1,63 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ConvexClient } from 'convex/browser';
 import { 
   TableDefinition, 
   TableDocument, 
   PaginationOptions, 
   PageArgs, 
-  FilterExpression 
+  FilterExpression, 
+  UseTableDataProps,
+  UseTableDataReturn
 } from '../types';
-import { getActiveTable, saveActiveTable, getTableFilters } from '../utils/storage';
-
-interface UseTableDataProps {
-  convexUrl: string;
-  accessToken: string;
-  baseUrl: string;
-  adminClient: ConvexClient | null;
-  onError?: (error: string) => void;
-}
-
-interface UseTableDataReturn {
-  tables: TableDefinition;
-  selectedTable: string;
-  setSelectedTable: (tableName: string) => void;
-  documents: TableDocument[];
-  setDocuments: React.Dispatch<React.SetStateAction<TableDocument[]>>;
-  isLoading: boolean;
-  error: string | null;
-  documentCount: number;
-  continueCursor: string | null;
-  hasMore: boolean;
-  isLoadingMore: boolean;
-  fetchTableData: (tableName: string, cursor: string | null) => Promise<void>;
-  fetchTables: () => Promise<void>;
-  patchDocumentFields: (table: string, ids: string[], fields: Record<string, any>) => Promise<any>;
-  getTableFields: (tableName: string) => string[];
-  getColumnHeaders: () => string[];
-  formatValue: (value: any) => string;
-  renderFieldType: (field: any) => string;
-  observerTarget: (node: HTMLDivElement) => void;
-  filters: FilterExpression;
-  setFilters: React.Dispatch<React.SetStateAction<FilterExpression>>;
-}
+import { saveActiveTable, getTableFilters } from '../utils/storage';
+import { fetchTablesFromApi } from '../utils/api';
+import { patchDocumentFields } from '../utils/functions';
 
 export const useTableData = ({
+  /**
+   * The URL of the Convex instance.
+   * Used to configure the connection to the Convex backend.
+   * @required
+   */
   convexUrl,
+
+  /**
+   * Authentication token for accessing Convex API.
+   * Required for securing access to data.
+   * Should be kept private and not exposed to clients.
+   * @required
+   */
   accessToken,
+
+  /**
+   * The base URL for the API.
+   * Used to configure the connection to the backend.
+   * @required
+   */
   baseUrl,
+
+  /**
+   * Convex admin client instance.
+   * Required for making API calls to your Convex backend.
+   * Must be initialized and configured before passing.
+   * @required
+   */
   adminClient,
+
+  /**
+   * Error handling callback.
+   * Called when errors occur during data fetching or processing.
+   * Receives error message string as parameter.
+   * @param error Error message
+   */
   onError,
 }: UseTableDataProps): UseTableDataReturn => {
+  // Use a ref to track if filters have been loaded from storage
+  const filtersLoadedRef = useRef<Record<string, boolean>>({});
+  // Add a ref to track the previous table
+  const prevTableRef = useRef<string | null>(null);
+  // Add a ref to track the current filters
+  const filtersRef = useRef<FilterExpression>({ clauses: [] });
+  
   const [tables, setTables] = useState<TableDefinition>({});
   const [selectedTable, setSelectedTableState] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -59,15 +69,11 @@ export const useTableData = ({
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [filters, setFilters] = useState<FilterExpression>({ clauses: [] });
-  
-  // Use a ref to track if filters have been loaded from storage
-  const filtersLoadedRef = useRef<Record<string, boolean>>({});
-  // Add a ref to track the previous table
-  const prevTableRef = useRef<string | null>(null);
-  // Add a ref to track the current filters
-  const filtersRef = useRef<FilterExpression>({ clauses: [] });
 
-  // Add a dependency tracking ref to prevent unnecessary fetches
+  /**
+   * Use a ref to track the last fetch request
+   * This helps prevent duplicate requests and ensures consistent filtering
+   */
   const lastFetchRef = useRef<{
     tableName: string | null;
     filters: FilterExpression | null;
@@ -78,70 +84,30 @@ export const useTableData = ({
     cursor: null
   });
 
-  // Wrapper for setSelectedTable that also updates localStorage
+  /**
+   * Wrapper for setSelectedTable that also updates localStorage
+   */
   const setSelectedTable = useCallback((tableName: string) => {
     setSelectedTableState(tableName);
     saveActiveTable(tableName);
   }, []);
 
+  /**
+   * Fetch all tables from the Convex instance
+   */
   const fetchTables = useCallback(async () => {
-    if (!convexUrl || !accessToken) {
-      setInsertionStatus('Missing URL or access token');
-      return;
-    }
-    
     setIsLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(`${convexUrl}/api/shapes2`, {
-        headers: {
-          "authorization": `Convex ${accessToken}`,
-          "convex-client": "dashboard-0.0.0"
-        }
+      const { tables: tableData, selectedTable: newSelectedTable } = await fetchTablesFromApi({
+        convexUrl,
+        accessToken,
+        adminClient
       });
       
-      if (!response.ok) {
-        throw new Error(`Failed to fetch tables: HTTP ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Verify data structure
-      if (!data || typeof data !== 'object') {
-        setInsertionStatus('Invalid data structure received');
-        return;
-      }
-      
-      // Filter out "Never" type tables
-      const tableData = Object.entries(data).reduce((acc, [tableName, tableSchema]) => {
-        if ((tableSchema as any).type !== 'Never') {
-          acc[tableName] = tableSchema as any;
-        }
-        return acc;
-      }, {} as TableDefinition);
-      
       setTables(tableData);
-      
-      // Check if we have a stored active table
-      const storedActiveTable = getActiveTable();
-      
-      if (storedActiveTable && tableData[storedActiveTable]) {
-        // Use the stored table if it exists
-        setSelectedTable(storedActiveTable);
-      } else if (Object.keys(tableData).length > 0 && adminClient) {
-        // Otherwise use the first table if adminClient is available
-        try {
-          await adminClient.query("_system/frontend/tableSize:default" as any, {
-            componentId: null,
-            tableName: Object.keys(tableData)[0]
-          });
-        } catch (err) {
-          console.error("Error fetching table size:", err);
-        }
-        
-        setSelectedTable(Object.keys(tableData)[0] || '');
-      }
+      setSelectedTable(newSelectedTable);
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -154,6 +120,9 @@ export const useTableData = ({
     }
   }, [convexUrl, accessToken, onError, adminClient, setSelectedTable]);
 
+  /**
+   * Fetch table data
+   */
   const fetchTableData = useCallback(async (tableName: string, cursor: string | null = null) => {
     if (!tableName || !adminClient) return;
     
@@ -256,12 +225,16 @@ export const useTableData = ({
     }
   }, [adminClient]);
 
-  // Update filtersRef when filters change
+  /**
+   * Update filtersRef when filters change
+   */
   useEffect(() => {
     filtersRef.current = filters;
   }, [filters]);
 
-  // Load saved filters when selected table changes
+  /**
+   * Load saved filters when selected table changes
+   */
   useEffect(() => {
     if (selectedTable) {
       setContinueCursor(null);
@@ -295,7 +268,9 @@ export const useTableData = ({
     }
   }, [selectedTable]);
   
-  // Fetch data when selected table or filters change
+  /**
+   * Fetch data when selected table or filters change
+   */
   useEffect(() => {
     if (selectedTable) {
       // Use a shorter timeout for better responsiveness
@@ -307,7 +282,9 @@ export const useTableData = ({
     }
   }, [selectedTable, fetchTableData]);
 
-  // Add a dedicated effect to handle filter changes and fetch data
+  /**
+   * Add a dedicated effect to handle filter changes and fetch data
+   */
   useEffect(() => {
     if (selectedTable) {
       // Only fetch if we have filters or if this is a filter clear operation
@@ -324,29 +301,16 @@ export const useTableData = ({
     }
   }, [filters, selectedTable, fetchTableData]);
 
-  const patchDocumentFields = async (table: string, ids: string[], fields: Record<string, any>) => {
-    if (!adminClient) {
-      throw new Error("Admin client is not available");
-    }
-    
-    try {
-      const result = await adminClient.mutation(
-        "_system/frontend/patchDocumentsFields" as any,
-        {
-          table,
-          componentId: null,
-          ids,
-          fields
-        }
-      );
-      
-      return result;
-    } catch (error) {
-      console.error("Error updating document:", error);
-      throw error;
-    }
-  };
+  /**
+   * Patch fields
+   */
+  const patchFields = useCallback(async (table: string, ids: string[], fields: Record<string, any>) => {
+    return patchDocumentFields(table, ids, fields, adminClient);
+  }, [adminClient]);
 
+  /**
+   * Observer target
+   */
   const observerTarget = useCallback((node: HTMLDivElement) => {
     if (!node || !hasMore || isLoading || isLoadingMore) return;
     
@@ -364,10 +328,16 @@ export const useTableData = ({
     return () => observer.disconnect();
   }, [hasMore, isLoading, isLoadingMore, selectedTable, continueCursor, fetchTableData]);
 
+  /**
+   * Fetch tables
+   */
   useEffect(() => {
     fetchTables();
   }, [fetchTables]);
 
+  /**
+   * Render field type
+   */
   const renderFieldType = (field: any): string => {
     if (field.shape.type === 'Id') {
       return `Id<"${field.shape.tableName}">`;
@@ -378,6 +348,9 @@ export const useTableData = ({
     return field.shape.type;
   };
 
+  /**
+   * Format value
+   */
   const formatValue = (value: any, fieldName?: string): string => {
     if (value === undefined || value === null) {
       return 'unset';
@@ -403,11 +376,17 @@ export const useTableData = ({
     return String(value);
   };
 
+  /**
+   * Get table fields
+   */
   const getTableFields = (tableName: string) => {
     if (!tables[tableName] || !tables[tableName].fields) return [];
     return tables[tableName].fields.map(field => field.fieldName);
   };
 
+  /**
+   * Get column headers
+   */
   const getColumnHeaders = () => {
     if (!selectedTable) return [];
     
@@ -446,7 +425,7 @@ export const useTableData = ({
     isLoadingMore,
     fetchTableData,
     fetchTables,
-    patchDocumentFields,
+    patchDocumentFields: patchFields,
     getTableFields,
     getColumnHeaders,
     formatValue,

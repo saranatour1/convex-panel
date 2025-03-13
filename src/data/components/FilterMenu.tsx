@@ -2,8 +2,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { FilterMenuProps, FilterClause } from '../types';
+import { FilterMenuProps, FilterClause } from '../../types';
+import { operatorOptions, typeOptions } from 'src/utils/constants';
+import { ChevronDownIcon } from 'src/components/icons';
 
+/**
+ * Get portal container.
+ */
 const getPortalContainer = () => {
   let container = document.getElementById('portal-root');
   if (!container) {
@@ -15,53 +20,67 @@ const getPortalContainer = () => {
   return container;
 };
 
+/**
+ * Filter menu.
+ */
 const FilterMenu: React.FC<FilterMenuProps> = ({ 
+  /**
+   * The field to which the filter is applied.
+   * Used to identify the column or attribute being filtered.
+   * @required
+   */
   field, 
+
+  /**
+   * The position of the filter menu.
+   * Determines where the filter menu is displayed on the screen.
+   * @required
+   */
   position, 
+
+  /**
+   * Callback function to apply the filter.
+   * Called when the user applies the filter.
+   * Receives the filter clause as a parameter.
+   * @param filter FilterClause
+   */
   onApply, 
+
+  /**
+   * Callback function to close the filter menu.
+   * Called when the user closes the filter menu.
+   */
   onClose, 
+
+  /**
+   * The existing filter clause, if any.
+   * Used to pre-populate the filter menu with existing filter values.
+   * @optional
+   */
   existingFilter,
+
+  /**
+   * Theme customization object to override default styles.
+   * Supports customizing colors, spacing, and component styles.
+   * See ThemeClasses interface for available options.
+   * @default {}
+   */
   theme = {}
 }) => {
+  const isInternalClickRef = useRef(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const typeDropdownRef = useRef<HTMLDivElement>(null);
   const [operator, setOperator] = useState<FilterClause['op']>(existingFilter?.op || 'eq');
   const [value, setValue] = useState<string>(existingFilter?.value !== undefined ? JSON.stringify(existingFilter.value) : '');
   const [isEditing, setIsEditing] = useState<boolean>(!!existingFilter);
   const [isOpen, setIsOpen] = useState(false);
   const [isTypeFilterOpen, setIsTypeFilterOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const typeDropdownRef = useRef<HTMLDivElement>(null);
-  
-  const isInternalClickRef = useRef(false);
-  
-  const typeOptions = [
-    { value: 'string', label: 'string' },
-    { value: 'boolean', label: 'boolean' },
-    { value: 'number', label: 'number' },
-    { value: 'bigint', label: 'bigint' },
-    { value: 'null', label: 'null' },
-    { value: 'object', label: 'object' },
-    { value: 'array', label: 'array' },
-    { value: 'id', label: 'id' },
-    { value: 'bytes', label: 'bytes' },
-    { value: 'unset', label: 'unset' }
-  ];
 
-  const operatorOptions = [
-    { value: 'eq', label: 'equals' },
-    { value: 'neq', label: 'not equal' },
-    { value: 'gt', label: '>' },
-    { value: 'lt', label: '<' },
-    { value: 'gte', label: '>=' },
-    { value: 'lte', label: '<=' },
-    { value: 'isType', label: 'Is type' },
-    { value: 'isNotType', label: 'Is not type' },
-  ];
-
+  /**
+   * Handle click outside to close the menu.
+   */
   useEffect(() => {
-    console.log('FilterMenu mounted for field:', field);
-    console.log('Position:', position);
-    
     // Handle click outside to close the menu
     const handleClickOutside = (e: MouseEvent) => {
       // If this is an internal click that we're tracking, don't close
@@ -88,13 +107,14 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     document.addEventListener('keydown', handleKeyDown);
     
     return () => {
-      console.log('FilterMenu unmounted for field:', field);
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [onClose, field, position]);
 
-  // Handle dropdown click outside
+  /**
+   * Handle dropdown click outside.
+   */
   useEffect(() => {
     if (!isOpen) return;
     
@@ -115,6 +135,9 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     };
   }, [isOpen]);
 
+  /**
+   * Handle apply filter.
+   */
   const handleApply = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -143,36 +166,52 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     }
   };
 
+  /**
+   * Handle cancel.
+   */
   const handleCancel = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     onClose();
   };
 
+  /**
+   * Handle dropdown toggle.
+   */
   const handleDropdownToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
     // Mark this as an internal click
     isInternalClickRef.current = true;
     setIsOpen(!isOpen);
   };
 
+  /**
+   * Handle option select.
+   */
   const handleOptionSelect = (optionValue: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
     // Mark this as an internal click
     isInternalClickRef.current = true;
     setOperator(optionValue as FilterClause['op']);
     setIsOpen(false);
   };
 
-  // Handle mousedown inside the menu to prevent it from closing
+  /**
+   * Handle mousedown inside the menu to prevent it from closing.
+   */
   const handleMenuMouseDown = (e: React.MouseEvent) => {
     // Mark this as an internal click
     isInternalClickRef.current = true;
     e.stopPropagation();
   };
 
+  /**
+   * Handle type filter toggle.
+   */
   const handleTypeFilterToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -180,6 +219,9 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     setIsTypeFilterOpen(!isTypeFilterOpen);
   };
 
+  /**
+   * Handle type select.
+   */
   const handleTypeSelect = (typeValue: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -188,7 +230,9 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     setIsTypeFilterOpen(false);
   };
 
-  // Update effect to handle type filter dropdown
+  /**
+   * Update effect to handle type filter dropdown.
+   */
   useEffect(() => {
     if (!isTypeFilterOpen) return;
     
@@ -216,12 +260,11 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
         left: `${position.left}px`,
         zIndex: 9999, // Make sure it's on top
         position: 'fixed', // Ensure fixed positioning
-        background: '#171717', // Make sure background is visible
-        border: '2px solid #404040', // Add visible border
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)', // Add visible shadow
+        background: '#171717',
+        border: '2px solid #404040',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
       }}
       onClick={(e) => {
-        console.log('FilterMenu clicked');
         e.stopPropagation();
       }}
       onMouseDown={handleMenuMouseDown}
@@ -241,9 +284,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
             <span>
               {operatorOptions.find(opt => opt.value === operator)?.label || 'Select operation'}
             </span>
-            <svg width="12" height="12" viewBox="0 0 15 15" fill="none">
-              <path d="M3.5 5.5L7.5 9.5L11.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <ChevronDownIcon />
           </button>
           
           {isOpen && (
@@ -284,9 +325,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               <span>
                 {typeOptions.find(opt => opt.value === value)?.label || 'Select type'}
               </span>
-              <svg width="12" height="12" viewBox="0 0 15 15" fill="none">
-                <path d="M3.5 5.5L7.5 9.5L11.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <ChevronDownIcon />
             </button>
             
             {isTypeFilterOpen && (

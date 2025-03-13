@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
 import { PlayCircleIcon, PauseCircleIcon } from 'lucide-react';
-import { LogType } from '../types';
+import { LogType } from '../../utils/constants';
 import { ConvexPanelSettings } from '../../settings/SettingsModal';
-import { getStorageItem } from '../../data/utils/storage';
+import { getStorageItem } from '../../utils/storage';
 import { defaultSettings, STORAGE_KEYS } from '../../utils/constants';
 import { LogsToolbarProps } from '../../types';
+import { ChevronDownIcon, RefreshIcon } from 'src/components/icons';
 
 const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
   /** 
@@ -226,9 +227,7 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
           disabled={isLoading}
         >
           <div className="convex-inline">
-            <svg className="convex-panel-refresh-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            <RefreshIcon />
             Refresh Logs
           </div>
         </button>
@@ -309,9 +308,7 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
             className="convex-panel-filter-menu-dropdown-button"
           >
             <span>{logType}</span>
-            <svg width="12" height="12" viewBox="0 0 15 15" fill="none">
-              <path d="M3.5 5.5L7.5 9.5L11.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <ChevronDownIcon />
           </button>
           
           {isLogTypeDropdownOpen && (

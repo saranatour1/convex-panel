@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import debounce from 'debounce';
-import { ContainerProps, ThemeClasses } from "./types";
-import { LogType, LogEntry } from './logs/types';
+import { ContainerProps, LogEntry } from "./types";
+import { LogType } from './utils/constants';
 import { cardVariants } from './theme';
 import { getLogId } from './utils';
 import DataTable from './data/DataTable';
 import { SettingsButton, ConvexPanelSettings } from './settings';
-import { getStorageItem, setStorageItem } from './data/utils/storage';
+import { getStorageItem, setStorageItem } from './utils/storage';
 import { HealthContainer } from './health';
 import { defaultSettings, INTERVALS, STORAGE_KEYS, TabTypes } from './utils/constants';
 import { fetchLogsFromApi } from './utils/api';
 import { createFilterPredicate } from './utils/filters';
 import { TabButton } from './components/TabButton';
 import LogsContainer from './logs/LogsContainer';
+import { ConvexFavicon } from './components/icons';
 
 const TABS = [
   { id: 'logs' as const, label: 'Logs' },
@@ -166,8 +167,6 @@ const Container = ({
 }: ContainerProps) => {
   let baseUrl;
 
-  console.log("Access token", accessToken);
-
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFetchTime = useRef<number>(0);
   const resizeStartPosition = useRef({ x: 0, y: 0 });
@@ -248,19 +247,18 @@ const Container = ({
   const fetchLogs = useCallback(async () => {
     if (!isOpen || isPaused || !convexUrl || !accessToken) return;
     
-    // Prevent frequent polling
+    // Prevent frequent polling with a more strict check
     const now = Date.now();
-    if (now - lastFetchTime.current < INTERVALS.MIN_FETCH_INTERVAL) {
+    const timeSinceLastFetch = now - lastFetchTime.current;
+    if (timeSinceLastFetch < INTERVALS.MIN_FETCH_INTERVAL) {
       return;
     }
-    lastFetchTime.current = now;
     
-    // Cancel pending requests
-    if (pendingRequest.current) {
+    // Only cancel previous request if it's still pending
+    if (pendingRequest.current?.signal.aborted === false) {
       pendingRequest.current.abort();
     }
     
-    // Create abort controller
     pendingRequest.current = new AbortController();
     
     setIsLoading(true);
@@ -383,25 +381,33 @@ const Container = ({
   ]);
 
   /**
-   * Fetch logs when the container is opened
+   * Auto-refresh logs when watching
    */
   useEffect(() => {
-    if (isOpen && !isPaused && convexUrl && accessToken) {
-      setError("Waiting for logs...");
-      fetchLogs();
-    }
-  }, [isOpen, isPaused, convexUrl, accessToken, fetchLogs]);
-
-  /**
-   * Abort pending requests on unmount
-   */
-  useEffect(() => {
-    return () => {
-      if (pendingRequest.current) {
-        pendingRequest.current.abort();
+    let timeoutId: NodeJS.Timeout | null = null;
+    
+    const scheduleNextFetch = () => {
+      if (isOpen && !isPaused && isWatching && !isPermanentlyDisabled) {
+        timeoutId = setTimeout(() => {
+          fetchLogs().finally(() => {
+            // Schedule next fetch only after current one completes
+            scheduleNextFetch();
+          });
+        }, INTERVALS.MIN_FETCH_INTERVAL);
       }
     };
-  }, []);
+    
+    // Initial fetch when watching starts
+    if (isOpen && !isPaused && isWatching && !isPermanentlyDisabled) {
+      scheduleNextFetch();
+    }
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isOpen, isPaused, isWatching, isPermanentlyDisabled, fetchLogs]);
 
   /**
    * Refresh logs when the container is opened
@@ -411,6 +417,13 @@ const Container = ({
       fetchLogs();
     }
   }, [fetchLogs, isPaused, isPermanentlyDisabled, isOpen]);
+
+  // call refreshLogs when the container is opened
+  useEffect(() => {
+    if (isOpen) {
+      refreshLogs();
+    }
+  }, [isOpen, refreshLogs]);
 
   /**
    * Toggle the pause state of the logs
@@ -560,78 +573,6 @@ const Container = ({
   };
 
   /**
-   * Auto-refresh logs when watching
-   */
-  useEffect(() => {
-    let refreshInterval: NodeJS.Timeout | null = null;
-    
-    if (isOpen && !isPaused && isWatching && !isPermanentlyDisabled) {
-      // Refresh logs every 2 seconds when watching
-      refreshInterval = setInterval(async () => {
-        if (!convexUrl || !accessToken) return;
-        
-        try {
-          const response = await fetchLogsFromApi({
-            cursor,
-            convexUrl,
-            accessToken,
-            signal: pendingRequest.current?.signal
-          });
-
-          if (response.logs.length > 0) {
-            // Get just the latest log
-            const latestLog = response.logs[0];
-            const logId = getLogId(latestLog);
-
-            // Only add if not duplicate
-            if (!logIds.has(logId)) {
-              logIds.add(logId);
-              setLogs(prev => {
-                const newLogs = [latestLog, ...prev];
-                return newLogs.slice(0, maxStoredLogs);
-              });
-
-              if (onLogFetch) {
-                onLogFetch([latestLog]);
-              }
-            }
-          }
-
-          // Update cursor for next poll
-          if (response.newCursor && response.newCursor !== cursor) {
-            setCursor(response.newCursor);
-          }
-
-        } catch (err) {
-          // Error handling remains same as fetchLogs
-          if (onError && err instanceof Error) {
-            onError(err.message);
-          }
-        }
-      }, 2000);
-    }
-    
-    return () => {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-      }
-    };
-  }, [
-    isOpen, 
-    isPaused, 
-    isWatching, 
-    isPermanentlyDisabled, 
-    convexUrl, 
-    accessToken, 
-    cursor, 
-    getLogId, 
-    logIds, 
-    maxStoredLogs, 
-    onLogFetch, 
-    onError
-  ]);
-
-  /**
    * Optimized filtering logic using memoized filter predicates
    */
   const filteredLogs = useMemo(() => {
@@ -674,9 +615,22 @@ const Container = ({
     });
   }, [activeTab]);
 
+  /**
+   * Handle tab changes
+   */
   const handleTabChange = useCallback((tab: TabTypes) => {
     setActiveTab(tab);
     setStorageItem(STORAGE_KEYS.ACTIVE_TAB, tab);
+  }, []);
+
+  // Cleanup effect to cancel pending requests on unmount
+  useEffect(() => {
+    return () => {
+      if (pendingRequest.current) {
+        pendingRequest.current.abort();
+        pendingRequest.current = null;
+      }
+    };
   }, []);
 
   return (
@@ -758,21 +712,7 @@ const Container = ({
                 className="convex-panel-url-link"
               >
                 <span className="convex-panel-url-icon">
-                  <svg className="w-6" width="100%" height="100%" viewBox="0 0 367 370" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                    <g transform="matrix(1,0,0,1,-129.225,-127.948)">
-                      <g transform="matrix(4.16667,0,0,4.16667,0,0)">
-                        <g transform="matrix(1,0,0,1,86.6099,107.074)">
-                          <path d="M0,-6.544C13.098,-7.973 25.449,-14.834 32.255,-26.287C29.037,2.033 -2.48,19.936 -28.196,8.94C-30.569,7.925 -32.605,6.254 -34.008,4.088C-39.789,-4.83 -41.69,-16.18 -38.963,-26.48C-31.158,-13.247 -15.3,-5.131 0,-6.544" fill="rgb(245,176,26)" fillRule="nonzero" />
-                        </g>
-                        <g transform="matrix(1,0,0,1,47.1708,74.7779)">
-                          <path d="M0,-2.489C-5.312,9.568 -5.545,23.695 0.971,35.316C-21.946,18.37 -21.692,-17.876 0.689,-34.65C2.754,-36.197 5.219,-37.124 7.797,-37.257C18.41,-37.805 29.19,-33.775 36.747,-26.264C21.384,-26.121 6.427,-16.446 0,-2.489" fill="rgb(141,37,118)" fillRule="nonzero" />
-                        </g>
-                        <g transform="matrix(1,0,0,1,91.325,66.4152)">
-                          <path d="M0,-14.199C-7.749,-24.821 -19.884,-32.044 -33.173,-32.264C-7.482,-43.726 24.112,-25.143 27.557,2.322C27.877,4.876 27.458,7.469 26.305,9.769C21.503,19.345 12.602,26.776 2.203,29.527C9.838,15.64 8.889,-1.328 0,-14.199" fill="rgb(238,52,47)" fillRule="nonzero" />
-                        </g>
-                      </g>
-                    </g>
-                  </svg>
+                  <ConvexFavicon />
                 </span>
                 <div className="convex-panel-url-text">
                   {convexUrl}

@@ -1,49 +1,59 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { FilterExpression, FilterClause, MenuPosition } from '../types';
+import { FilterExpression, FilterClause, MenuPosition, UseFiltersReturn, UseFiltersProps } from '../types';
 import { saveTableFilters } from '../utils/storage';
 
-interface UseFiltersProps {
-  onFilterApply: (filter: FilterClause) => void;
-  onFilterRemove: (field: string) => void;
-  onFilterClear: () => void;
-  selectedTable: string;
-  initialFilters?: FilterExpression;
-}
-
-interface UseFiltersReturn {
-  filters: FilterExpression;
-  filterMenuField: string | null;
-  filterMenuPosition: MenuPosition | null;
-  handleFilterButtonClick: (e: React.MouseEvent, header: string) => void;
-  handleFilterApply: (filter: FilterClause) => void;
-  handleFilterRemove: (field: string) => void;
-  clearFilters: () => void;
-  closeFilterMenu: () => void;
-  setFilters: React.Dispatch<React.SetStateAction<FilterExpression>>;
-}
-
 export const useFilters = ({
+  /**
+   * Callback fired when a filter is applied.
+   * Receives the applied filter clause as a parameter.
+   * @param filter Filter clause object
+   */
   onFilterApply,
+
+  /**
+   * Callback fired when a filter is removed.
+   * Receives the field name of the removed filter as a parameter.
+   * @param field Field name of the removed filter
+   */
   onFilterRemove,
+
+  /**
+   * Callback fired when all filters are cleared.
+   * Clears all applied filters.
+   */
   onFilterClear,
+
+  /**
+   * The name of the currently selected table.
+   * Used to scope filters to the selected table.
+   * @required
+   */
   selectedTable,
+
+  /**
+   * Initial set of filters to apply.
+   * Used to initialize the filter state.
+   * @default { clauses: [] }
+   */
   initialFilters = { clauses: [] }
 }: UseFiltersProps): UseFiltersReturn => {
+  const initializedRef = useRef<Record<string, boolean>>({});
+
   const [filters, setFiltersState] = useState<FilterExpression>(initialFilters);
   const [filterMenuField, setFilterMenuField] = useState<string | null>(null);
   const [filterMenuPosition, setFilterMenuPosition] = useState<MenuPosition | null>(null);
-  
-  // Use a ref to track if we've initialized with the initial filters
-  const initializedRef = useRef<Record<string, boolean>>({});
 
-  // Define closeFilterMenu early so it can be used in other callbacks
+  /**
+   * Closes the filter menu
+   */
   const closeFilterMenu = useCallback(() => {
-    console.log('closeFilterMenu called - closing filter menu');
     setFilterMenuField(null);
     setFilterMenuPosition(null);
   }, []);
 
-  // Wrapper for setFilters that also updates localStorage
+  /**
+   * Wrapper for setFilters that also updates localStorage
+   */
   const setFilters = useCallback((filtersOrUpdater: React.SetStateAction<FilterExpression>) => {
     setFiltersState(prev => {
       const newFilters = typeof filtersOrUpdater === 'function' 
@@ -58,7 +68,9 @@ export const useFilters = ({
     });
   }, [selectedTable]);
 
-  // Update filters when initialFilters changes, but only once per table
+  /**
+   * Updates filters when initialFilters changes, but only once per table
+   */
   useEffect(() => {
     if (selectedTable && initialFilters) {
       // Only update if we haven't initialized this table yet or if the filters have changed
@@ -76,16 +88,15 @@ export const useFilters = ({
     }
   }, [selectedTable, initialFilters, filters]);
 
+  /**
+   * Handles the click event for the filter button
+   */
   const handleFilterButtonClick = useCallback((e: React.MouseEvent, header: string) => {
     e.stopPropagation();
     e.preventDefault();
     
     const button = e.currentTarget;
     const rect = button.getBoundingClientRect();
-
-    console.log('Button rect:', rect);
-    console.log('Button:', button);
-    console.log('Header:', header);
     
     // Get the viewport dimensions
     const viewportWidth = window.innerWidth;
@@ -114,24 +125,13 @@ export const useFilters = ({
       left: left,
     };
     
-    console.log('Setting menu position:', menuPosition);
-    
-    // Add delayed check for menu element
-    setTimeout(() => {
-      console.log('Checking for menu in DOM after timeout');
-      const menuElements = document.querySelectorAll('.convex-panel-filter-menu');
-      console.log('Found filter menu elements:', menuElements.length);
-      
-      if (menuElements.length > 0) {
-        console.log('Menu element styles:', menuElements[0].getAttribute('style'));
-        console.log('Menu element rect:', menuElements[0].getBoundingClientRect());
-      }
-    }, 500);
-    
     setFilterMenuPosition(menuPosition);
     setFilterMenuField(header);
   }, []);
 
+  /**
+   * Handles the apply event for the filter
+   */
   const handleFilterApply = useCallback((filter: FilterClause) => {
     // Check if we're editing an existing filter
     const existingFilterIndex = filters.clauses.findIndex(f => f.field === filter.field);
@@ -160,6 +160,9 @@ export const useFilters = ({
     }
   }, [filters, setFilters, onFilterApply]);
 
+  /**
+   * Handles the remove event for the filter
+   */
   const handleFilterRemove = useCallback((field: string) => {
     // Create a new filters object with the filter removed
     const newFilters = {
@@ -176,6 +179,9 @@ export const useFilters = ({
     onFilterRemove(field);
   }, [filters, onFilterRemove, setFilters, selectedTable]);
 
+  /**
+   * Clears the filters
+   */
   const clearFilters = useCallback(() => {
     // Set filters to empty array immediately
     setFilters({ clauses: [] });
@@ -184,21 +190,20 @@ export const useFilters = ({
     onFilterClear();
   }, [onFilterClear, setFilters]);
 
+  /**
+   * Handles the click outside event for the filter menu
+   */
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (filterMenuField && filterMenuPosition) {
         const target = e.target as HTMLElement;
-        console.log('Click outside check - target:', target);
         
         // Find if click is on button or menu
         const isFilterButton = target.closest('.convex-panel-filter-button');
         const isFilterMenu = target.closest('.convex-panel-filter-menu');
         
-        console.log('Click outside check - isFilterButton:', !!isFilterButton, 'isFilterMenu:', !!isFilterMenu);
-        
         // Only close if click is outside both the button and menu
         if (!isFilterButton && !isFilterMenu) {
-          console.log('Click detected outside filter button and menu - closing menu');
           closeFilterMenu();
         }
       }

@@ -8,59 +8,32 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { fetchFailureRate } from '../utils/api';
-
-interface FailureData {
-  timestamp: string;
-  values: Record<string, number | null>;
-}
-
-interface FailureRateChartProps {
-  deploymentUrl: string;
-  authToken: string;
-  refreshInterval?: number;
-}
-
-interface TimeStamp {
-  secs_since_epoch: number;
-  nanos_since_epoch: number;
-}
-
-type TimeSeriesData = [TimeStamp, number | null][];
-type APIResponse = [string, TimeSeriesData][];
-
-// Color generator for different function names
-const generateColor = (name: string): string => {
-  if (name === '_rest') return '#ff4d4f'; // Red for "All other functions"
-  
-  // Hash the function name to get a consistent color
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  
-  // Generate HSL color with good saturation and lightness - using reds/oranges
-  const hue = (hash % 60) + 0; // 0-60 range (reds/oranges)
-  return `hsl(${hue}, 90%, 60%)`;
-};
-
-// Format function name for display
-const formatFunctionName = (name: string) => {
-  if (name === '_rest') return 'All other functions';
-  return name.replace('.js:', ':');
-};
-
-// Get next minute for tooltip
-const getNextMinute = (timeStr: string): string => {
-  const date = new Date(`1970/01/01 ${timeStr}`);
-  date.setMinutes(date.getMinutes() + 1);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-};
+import { fetchFailureRate } from '../../utils/api';
+import { FailureData, FailureRateChartProps, APIResponse } from '../../types';
+import { generateColor, formatFunctionName, getNextMinute } from '../../utils';
 
 const FailureRateChart: React.FC<FailureRateChartProps> = ({
+  /**
+   * URL of the deployment to fetch failure rate data from.
+   * Required for making API calls to the backend.
+   * @required
+   */
   deploymentUrl,
+
+  /**
+   * Authentication token for accessing the API.
+   * Required for securing access to data.
+   * Should be kept private and not exposed to clients.
+   * @required
+   */
   authToken,
-  refreshInterval = 60000 // Default to 1 minute
+
+  /**
+   * Interval in milliseconds to refresh the failure rate data.
+   * Controls how frequently the chart updates with new data.
+   * @default 60000 (1 minute)
+   */
+  refreshInterval = 60000
 }) => {
   const [data, setData] = useState<FailureData[]>([]);
   const [error, setError] = useState<string | null>(null);

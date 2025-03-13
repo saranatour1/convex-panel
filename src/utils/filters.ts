@@ -1,4 +1,5 @@
-import { LogEntry, LogType } from '../logs/types';
+import { LogType } from '../utils/constants';
+import { LogEntry } from '../types';
 
 // Memoizable filter predicates
 const createLogTypeFilter = (logType: LogType) => (log: LogEntry): boolean => {

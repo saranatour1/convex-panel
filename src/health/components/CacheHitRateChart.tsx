@@ -8,59 +8,32 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { fetchCacheHitRate } from '../utils/api';
-
-interface CacheHitData {
-  timestamp: string;
-  values: Record<string, number | null>;
-}
-
-interface CacheHitRateChartProps {
-  deploymentUrl: string;
-  authToken: string;
-  refreshInterval?: number;
-}
-
-interface TimeStamp {
-  secs_since_epoch: number;
-  nanos_since_epoch: number;
-}
-
-type TimeSeriesData = [TimeStamp, number | null][];
-type APIResponse = [string, TimeSeriesData][];
-
-// Color generator for different function names
-const generateColor = (name: string): string => {
-  if (name === '_rest') return '#2196F3'; // Blue for "All other queries"
-  
-  // Hash the function name to get a consistent color
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  
-  // Generate HSL color with good saturation and lightness
-  const hue = hash % 360;
-  return `hsl(${hue}, 70%, 60%)`;
-};
-
-// Format function name for display
-const formatFunctionName = (name: string) => {
-  if (name === '_rest') return 'All other queries';
-  return name.replace('.js:', ':');
-};
-
-// Get next minute for tooltip
-const getNextMinute = (timeStr: string): string => {
-  const date = new Date(`1970/01/01 ${timeStr}`);
-  date.setMinutes(date.getMinutes() + 1);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-};
+import { fetchCacheHitRate } from '../../utils/api';
+import { CacheHitRateChartProps, CacheHitData, APIResponse } from 'src/types';
+import { generateColor, formatFunctionName, getNextMinute } from 'src/utils';
 
 const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
+  /**
+   * URL of the deployment to fetch cache hit rate data from.
+   * Required for making API calls to the backend.
+   * @required
+   */
   deploymentUrl,
+
+  /**
+   * Authentication token for accessing the API.
+   * Required for securing access to data.
+   * Should be kept private and not exposed to clients.
+   * @required
+   */
   authToken,
-  refreshInterval = 60000 // Default to 1 minute
+
+  /**
+   * Interval in milliseconds to refresh the cache hit rate data.
+   * Controls how frequently the chart updates with new data.
+   * @default 60000 (1 minute)
+   */
+  refreshInterval = 60000
 }) => {
   const [data, setData] = useState<CacheHitData[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +43,9 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
   const [displayMode, setDisplayMode] = useState<'all' | 'individual'>('all');
   const [chartFunctionNames, setChartFunctionNames] = useState<string[]>([]);
 
-  // Initialize visible lines when function names change
+  /**
+   * Initialize visible lines when function names change
+   */
   useEffect(() => {
     if (functionNames.length > 0) {
       const initialVisibility = functionNames.reduce((acc, name) => ({
@@ -81,7 +56,9 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
     }
   }, [functionNames]);
 
-  // Verify all function names have a visibility state
+  /**
+   * Verify all function names have a visibility state
+   */
   useEffect(() => {
     if (chartFunctionNames.length > 0) {
       setVisibleLines(prev => {
@@ -100,7 +77,9 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
     }
   }, [chartFunctionNames]);
 
-  // Update chart function names whenever data changes
+  /**
+   * Update chart function names whenever data changes
+   */
   useEffect(() => {
     if (data.length > 0) {
       const names = Array.from(
@@ -120,7 +99,9 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
     }
   }, [data]);
 
-  // Generate color map from function names
+  /**
+   * Generate color map from function names
+   */
   const colorMap = useMemo<Record<string, string>>(() => {
     return chartFunctionNames.reduce<Record<string, string>>((acc, name) => ({
       ...acc,
@@ -128,6 +109,9 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
     }), {});
   }, [chartFunctionNames]);
 
+  /**
+   * Fetch cache hit rate data from the API
+   */
   const fetchData = async () => {
     try {
       const response = await fetchCacheHitRate(deploymentUrl, authToken) as APIResponse;
@@ -207,13 +191,18 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
     }
   };
 
+  /**
+   * Fetch data and set up interval for refreshing data
+   */
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, refreshInterval);
     return () => clearInterval(interval);
   }, [deploymentUrl, authToken, refreshInterval]);
 
-  // Handle legend item clicks
+  /**
+   * Handle legend item clicks
+   */
   const handleLegendClick = (name: string) => {
     if (!name) return;
 
@@ -398,5 +387,7 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
     </div>
   );
 };
+
+CacheHitRateChart.displayName = 'CacheHitRateChart';
 
 export default CacheHitRateChart; 

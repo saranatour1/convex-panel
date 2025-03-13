@@ -1,32 +1,127 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { DataTableContentProps, FilterClause } from '../types';
+import { DataTableContentProps, FilterClause } from '../../types';
 import FilterMenu from './FilterMenu';
+import { FilterIcon } from 'src/components/icons';
 
 const DataTableContent: React.FC<DataTableContentProps> = ({
+  /**
+   * Array of document objects to be displayed in the table.
+   * Each document represents a row in the table.
+   * @required
+   */
   documents,
+
+  /**
+   * Array of column header strings.
+   * Used to define the columns of the table.
+   * @required
+   */
   columnHeaders,
+
+  /**
+   * Loading state for the table data.
+   * Indicates whether the table data is currently being loaded.
+   * @required
+   */
   isLoading,
+
+  /**
+   * Indicates if there are more documents to load.
+   * Used for infinite scrolling or pagination.
+   * @required
+   */
   hasMore,
+
+  /**
+   * Loading state for additional data.
+   * Indicates whether more data is currently being loaded.
+   * @required
+   */
   isLoadingMore,
+
+  /**
+   * Target element for the intersection observer.
+   * Used to detect when more data should be loaded.
+   * @required
+   */
   observerTarget,
+
+  /**
+   * Callback function for filter button click.
+   * Called when the filter button is clicked.
+   * @param field The field to filter
+   */
   onFilterButtonClick,
+
+  /**
+   * Field name for the filter menu.
+   * Used to determine which field is being filtered.
+   * @required
+   */
   filterMenuField,
+
+  /**
+   * Position of the filter menu.
+   * Used to position the filter menu relative to the table.
+   * @required
+   */
   filterMenuPosition,
+
+  /**
+   * Callback function to apply filters.
+   * Called when filters are applied.
+   * @param filters The applied filters
+   */
   handleFilterApply,
+
+  /**
+   * Callback function to close the filter menu.
+   * Called when the filter menu is closed.
+   */
   onFilterMenuClose,
+
+  /**
+   * Function to format cell values.
+   * Used to format the values displayed in the table cells.
+   * @param value The value to format
+   * @returns The formatted value
+   */
   formatValue,
+
+  /**
+   * Active filters applied to the table.
+   * Used to filter the table data.
+   * @required
+   */
   activeFilters,
+
+  /**
+   * Callback function to update a document.
+   * Called when a document is updated.
+   * @param docId The ID of the document to update
+   * @param field The field to update
+   * @param value The new value
+   */
   onUpdateDocument,
+
+  /**
+   * The name of the table.
+   * Used to identify the table being displayed.
+   * @required
+   */
   tableName
 }) => {
+  const tableRef = useRef<HTMLTableElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [hoveredHeader, setHoveredHeader] = useState<number | null>(null);
   const [editingCell, setEditingCell] = useState<{docId: string, field: string} | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [updatingCells, setUpdatingCells] = useState<{[key: string]: boolean}>({});
-  const tableRef = useRef<HTMLTableElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   
-  // Focus the input element when editing starts
+  /**
+   * Focus the input element when editing starts
+   */
   useEffect(() => {
     if (editingCell && inputRef.current) {
       inputRef.current.focus();
@@ -36,17 +131,23 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
     }
   }, [editingCell]);
   
-  // Find existing filter for a column
+  /**
+   * Find existing filter for a column
+   */
   const getExistingFilter = (field: string): FilterClause | undefined => {
     return activeFilters.clauses.find(clause => clause.field === field);
   };
   
-  // Check if a column has an active filter
+  /**
+   * Check if a column has an active filter
+   */
   const hasActiveFilter = (header: string) => {
     return activeFilters.clauses.some((filter) => filter.field === header);
   };
 
-  // Handle double click on a cell to enter edit mode
+  /**
+   * Handle double click on a cell to enter edit mode
+   */
   const handleCellDoubleClick = (doc: any, header: string) => {
     // Don't allow editing _id fields, fields that end with Id, or fields that start with _
     if (header === '_id' || header === 'userId' || header.endsWith('Id') || header.startsWith('_')) {
@@ -60,7 +161,9 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
     setEditValue(doc[header]?.toString() || '');
   };
 
-  // Handle saving the edited cell value
+  /**
+   * Handle saving the edited cell value
+   */
   const handleSaveEdit = async (docId: string, field: string, newValue: string) => {
     if (!docId || !field || !tableName || !onUpdateDocument) return;
     
@@ -119,7 +222,9 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
     }
   };
 
-  // Handle key press in edit input
+  /**
+   * Handle key press in edit input
+   */
   const handleInputKeyDown = (e: React.KeyboardEvent, docId: string, field: string) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -130,7 +235,9 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
     }
   };
 
-  // Handle clicking outside of an editing cell
+  /**
+   * Handle clicking outside of an editing cell
+   */
   const handleClickOutside = (e: React.MouseEvent) => {
     if (editingCell && inputRef.current && !inputRef.current.contains(e.target as Node)) {
       handleSaveEdit(editingCell.docId, editingCell.field, editValue);
@@ -159,22 +266,13 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
                   </span>
                   <button
                     onClick={(e) => {
-                      console.log('Filter button clicked for header:', header);
                       onFilterButtonClick(e, header);
                     }}
                     className="convex-panel-filter-button"
                     style={{ visibility: hoveredHeader === index || filterMenuField === header ? 'visible' : 'hidden' }}
                     title={hasActiveFilter(header) ? "Edit filter" : "Add filter"}
                   >
-                    <svg width="12" height="12" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M1 1L6 8V13L9 14V8L14 1H1Z"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    <FilterIcon />
                   </button>
                   {filterMenuField === header && filterMenuPosition && (
                     <FilterMenu
@@ -253,26 +351,28 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
       </table>
       
       {/* Loading and end of content indicators */}
-      <div className="convex-panel-table-footer">
-        {isLoading && documents.length === 0 ? (
+      {isLoading && documents.length === 0 ? (
+        <div className="convex-panel-table-footer">
           <p className="convex-panel-loading-message">Loading data...</p>
-        ) : !documents.length ? (
+        </div>
+      ) : !documents.length ? (
+        <div className="convex-panel-table-footer">
           <p className="convex-panel-empty-message">No documents found in this table</p>
-        ) : (
-          <>
-            {/* Intersection observer target */}
-            <div ref={observerTarget} className="convex-panel-observer-target">
-              {isLoadingMore ? (
-                <p className="convex-panel-loading-more-message">Loading more...</p>
-              ) : hasMore ? (
-                <p className="convex-panel-has-more-message">Scroll down to load more</p>
-              ) : (
-                <p className="convex-panel-end-message">End of table data</p>
-              )}
-            </div>
-          </>
-        )}
-      </div>
+        </div>
+      ) : (
+        <>
+          {/* Intersection observer target */}
+          <div ref={observerTarget} className="convex-panel-observer-target">
+            {isLoadingMore ? (
+              <p className="convex-panel-loading-more-message">Loading more...</p>
+            ) : hasMore ? (
+              <p className="convex-panel-has-more-message">Scroll down to load more</p>
+            ) : (
+              <p className="convex-panel-end-message">End of table data</p>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };

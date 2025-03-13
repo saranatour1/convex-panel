@@ -1,11 +1,17 @@
 import React from 'react';
+import { SchedulerStatusProps } from '../../types';
 
-interface SchedulerStatusProps {
-  status: 'on_time' | 'delayed' | 'error';
-  message: string;
-}
-
+/**
+ * Scheduler Status component
+ * Displays the status of the scheduler and the message associated with it
+ * @param status - The status of the scheduler
+ * @param message - The message associated with the status
+ */
 const SchedulerStatus: React.FC<SchedulerStatusProps> = ({ status, message }) => {
+  /**
+   * Get the color for the status
+   * @returns The color for the status
+   */
   const getStatusColor = () => {
     switch (status) {
       case 'on_time':
@@ -19,6 +25,10 @@ const SchedulerStatus: React.FC<SchedulerStatusProps> = ({ status, message }) =>
     }
   };
 
+  /**
+   * Get the title for the status
+   * @returns The title for the status
+   */
   const getStatusTitle = () => {
     switch (status) {
       case 'on_time':

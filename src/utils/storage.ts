@@ -1,12 +1,10 @@
-const STORAGE_PREFIX = 'convex-panel';
+import { STORAGE_KEYS, STORAGE_PREFIX } from "./constants";
 
-export const STORAGE_KEYS = {
-  ACTIVE_TABLE: `${STORAGE_PREFIX}:active-table`,
-  TABLE_FILTERS: `${STORAGE_PREFIX}:table-filters`,
-  SETTINGS: `${STORAGE_PREFIX}:settings`,
-};
-
-// Add in-memory cache to reduce localStorage reads
+/**
+ * In-memory cache
+ * @type {Record<string, any>}
+ * @description A simple in-memory cache to reduce localStorage reads
+ */
 const memoryCache: Record<string, any> = {};
 
 /**

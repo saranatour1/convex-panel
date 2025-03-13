@@ -1,21 +1,77 @@
-import React from 'react';
-import { DataTableSidebarProps } from '../types';
+import React, { useEffect } from 'react';
+import { DataTableSidebarProps } from '../../types';
+import { STORAGE_KEYS } from 'src/utils/constants';
+import { PanelCollapseIcon, PanelExpandIcon } from 'src/components/icons';
 
 const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
+  /**
+   * A collection of tables available for selection.
+   * Used to display the list of tables in the sidebar.
+   * @required
+   */
   tables,
+
+  /**
+   * The currently selected table.
+   * Used to highlight the active table in the sidebar.
+   * @required
+   */
   selectedTable,
+
+  /**
+   * The current search text for filtering tables.
+   * Used to filter the list of tables based on user input.
+   * @required
+   */
   searchText,
+
+  /**
+   * Callback function to handle search text changes.
+   * Called when the user types in the search input.
+   * Receives the new search text as a parameter.
+   * @param searchText string
+   */
   onSearchChange,
+
+  /**
+   * Callback function to handle table selection.
+   * Called when the user selects a table from the list.
+   * Receives the selected table name as a parameter.
+   * @param tableName string
+   */
   onTableSelect,
+
+  /**
+   * Whether the sidebar is collapsed.
+   * Controls the collapsed or expanded state of the sidebar.
+   * @required
+   */
   isSidebarCollapsed,
+
+  /**
+   * Callback function to toggle the sidebar state.
+   * Called when the user clicks the toggle button.
+   */
   onToggleSidebar,
+
+  /**
+   * Theme customization object to override default styles.
+   * Supports customizing colors, spacing, and component styles.
+   * See ThemeClasses interface for available options.
+   * @default {}
+   */
   theme = {}
 }) => {
-  // Store sidebar state in localStorage when it changes
-  React.useEffect(() => {
-    localStorage.setItem('datatable-sidebar-collapsed', String(isSidebarCollapsed));
+  /**
+   * Save sidebar state in localStorage
+   */
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.SIDEBAR_COLLAPSED, String(isSidebarCollapsed));
   }, [isSidebarCollapsed]);
 
+  /**
+   * Filtered tables
+   */
   const filteredTables = Object.keys(tables).filter(tableName =>
     tableName.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -36,15 +92,7 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
                   onClick={onToggleSidebar}
                   className="convex-panel-sidebar-toggle-button"
                 >
-                  <svg width="16" height="16" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M6 3.5H13M6 7.5H13M6 11.5H13M4 3.5L2 5.5L4 7.5"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <PanelCollapseIcon />
                 </button>
               </div>
             </div>
@@ -61,15 +109,7 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
             onClick={onToggleSidebar}
             className="convex-panel-sidebar-expand-button"
           >
-            <svg width="16" height="16" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-              d="M9 3.5H2M9 7.5H2M9 11.5H2M11 3.5L13 5.5L11 7.5"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              />
-            </svg>
+            <PanelExpandIcon />
           </button>
         )}
       </div>

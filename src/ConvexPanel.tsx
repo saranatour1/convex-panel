@@ -3,14 +3,14 @@ import Image from 'next/image';
 import { AnimatePresence, useDragControls } from 'framer-motion';
 import { motion } from 'framer-motion';
 import { ButtonProps } from './types';
-import { LogType } from './logs/types';
+import { LogType } from './utils/constants';
 import { defaultTheme, buttonVariants } from './theme';
 import Container from './Container';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexClient } from 'convex/browser';
 import cssText from './styles/convex-panel.css';
 import { STORAGE_KEYS, TabTypes } from './utils/constants';
-import { getStorageItem } from './data';
+import { getStorageItem } from './utils/storage';
 import { ConvexLogo } from './components/icons';
 
 /**

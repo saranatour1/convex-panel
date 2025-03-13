@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { FilterClause, MenuPosition, DataTableProps } from './types';
-import { useTableData, useFilters } from './hooks';
+import { FilterClause, DataTableProps } from '../types';
+import { useTableData } from '../hooks/useTableData';
+import { useFilters } from '../hooks/useFilters';
 import { 
   DataTableSidebar, 
   DataTableContent, 
@@ -9,52 +10,85 @@ import {
   StorageDebug,
   FilterMenu
 } from './components';
-import { getStorageItem } from './utils/storage';
+import { getStorageItem } from '../utils/storage';
 import { ConvexPanelSettings } from '../settings';
-import './styles/DataTable.css';
-
-// Define settings storage key
-const SETTINGS_STORAGE_KEY = 'convex-panel:settings';
-
-// Default settings
-const defaultSettings = {
-  showDebugFilters: false,
-  showStorageDebug: false,
-  logLevel: 'info' as const,
-  healthCheckInterval: 60, // seconds
-  showRequestIdInput: true,
-  showLimitInput: true,
-  showSuccessCheckbox: true,
-};
-
-// Define the filter menu state interface
-interface FilterMenuState {
-  isOpen: boolean;
-  position: MenuPosition;
-  editingFilter?: FilterClause;
-}
+import '../styles/DataTable.css';
+import { defaultSettings } from 'src/utils/constants';
+import { STORAGE_KEYS } from 'src/utils/constants';
+import { FilterMenuState } from '../types';
 
 const DataTable: React.FC<DataTableProps> = ({
+  /**
+   * URL for the Convex backend.
+   * Used to configure the Convex client connection.
+   * @required
+   */
   convexUrl,
+
+  /**
+   * Authentication token for accessing Convex API.
+   * Required for securing access to data.
+   * Should be kept private and not exposed to clients.
+   * @required
+   */
   accessToken,
+
+  /**
+   * Error handling callback.
+   * Called when errors occur during data fetching or processing.
+   * Receives error message string as parameter.
+   * @param error Error message
+   */
   onError,
+
+  /**
+   * Theme customization object to override default styles.
+   * Supports customizing colors, spacing, and component styles.
+   * See ThemeClasses interface for available options.
+   * @default {}
+   */
   theme = {},
+
+  /**
+   * Base URL for the API.
+   * Used to configure the API client connection.
+   * @required
+   */
   baseUrl,
+
+  /**
+   * Convex React client instance.
+   * Required for making API calls to your Convex backend.
+   * Must be initialized and configured before passing.
+   * @required
+   */
   convex,
+
+  /**
+   * Convex admin client instance.
+   * Optional client for admin-level access.
+   * Enables additional admin capabilities when provided.
+   * Should be kept secure and only used in protected environments.
+   * @optional
+   */
   adminClient,
   settings: externalSettings
 }) => {
   const [searchText, setSearchText] = React.useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
+
+  const [filterMenuState, setFilterMenuState] = useState<FilterMenuState>({
+    isOpen: false,
+    position: { top: 0, left: 0 }
+  });
+  
   const [settings, setSettings] = useState<ConvexPanelSettings>(() => {
-    // Use external settings if provided, otherwise initialize from localStorage
     if (externalSettings) {
       return externalSettings;
     }
-    
-    // Initialize from localStorage if available, otherwise use defaults
+
     if (typeof window !== 'undefined') {
-      return getStorageItem<ConvexPanelSettings>(SETTINGS_STORAGE_KEY, defaultSettings);
+      return getStorageItem<ConvexPanelSettings>(STORAGE_KEYS.SETTINGS, defaultSettings);
     }
     return defaultSettings;
   });
@@ -83,14 +117,10 @@ const DataTable: React.FC<DataTableProps> = ({
     onError
   });
 
-  // Add filter menu state
-  const [filterMenuState, setFilterMenuState] = useState<FilterMenuState>({
-    isOpen: false,
-    position: { top: 0, left: 0 }
-  });
-
+  /**
+   * Fetch table data when a filter is applied
+   */
   const onFilterApply = useCallback((filter: FilterClause) => {
-    // Reset pagination and reload data immediately
     fetchTableData(selectedTable, null);
   }, [selectedTable, fetchTableData]);
 
@@ -116,7 +146,9 @@ const DataTable: React.FC<DataTableProps> = ({
     initialFilters: tableFilters
   });
 
-  // Sync filters from useFilters to useTableData with priority
+  /**
+   * Sync filters from useFilters to useTableData with priority
+   */
   useEffect(() => {
     // Always update tableFilters when filters change
     setTableFilters(filters);
@@ -127,7 +159,9 @@ const DataTable: React.FC<DataTableProps> = ({
     }
   }, [filters, setTableFilters, fetchTableData, selectedTable]);
 
-  // Create a wrapper function for patchDocumentFields to match the expected interface
+  /**
+   * Create a wrapper function for patchDocumentFields to match the expected interface
+   */
   const handleUpdateDocument = useCallback(
     async (params: { table: string; ids: string[]; fields: Record<string, any> }) => {
       try {
@@ -162,6 +196,9 @@ const DataTable: React.FC<DataTableProps> = ({
     [patchDocumentFields, fetchTableData, documents, setDocuments]
   );
 
+  /**
+   * Get column headers
+   */
   const columnHeaders = getColumnHeaders();
 
   return (
@@ -188,10 +225,10 @@ const DataTable: React.FC<DataTableProps> = ({
                     onClearAll={clearFilters}
                     selectedTable={selectedTable}
                     theme={theme}
-                    onEdit={(e, field) => {
-                    // Find the existing filter
-                    const existingFilter = filters.clauses.find(f => f.field === field);
-                    if (existingFilter) {
+                    onEdit={(e: React.MouseEvent, field: string) => {
+                      // Find the existing filter
+                      const existingFilter = filters.clauses.find((f: FilterClause) => f.field === field);
+                      if (existingFilter) {
                         // Open the filter menu with the existing filter values
                         setFilterMenuState({
                         isOpen: true,
@@ -247,7 +284,7 @@ const DataTable: React.FC<DataTableProps> = ({
           field={filterMenuState.editingFilter?.field || ''}
           position={filterMenuState.position}
           onClose={() => setFilterMenuState(prev => ({ ...prev, isOpen: false }))}
-          onApply={(filter) => {
+          onApply={(filter: FilterClause) => {
             handleFilterApply(filter);
             setFilterMenuState(prev => ({ ...prev, isOpen: false }));
           }}

@@ -2,7 +2,7 @@ import LogsTable from "./components/LogsTable";
 import LogsToolbar from "./components/LogsToolbar";
 import { LogsContainerProps } from "../types";
 
-const LogsContainer = ({
+export const LogsContainer = ({
   /** 
    * Theme customization object with merged default and custom styles.
    * Controls visual appearance of logs container components.

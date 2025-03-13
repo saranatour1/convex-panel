@@ -10,18 +10,37 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import SchedulerStatus from './SchedulerStatus';
-
-interface SchedulerLagChartProps {
-  deploymentUrl: string;
-  authToken: string;
-  refreshInterval?: number;
-  showChart: boolean;
-}
+import { SchedulerLagChartProps } from 'src/types';
+import { ROUTES } from 'src/utils/constants';
 
 const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
+  /**
+   * URL of the deployment to fetch scheduler lag data from.
+   * Required for making API calls to the backend.
+   * @required
+   */
   deploymentUrl,
+
+  /**
+   * Authentication token for accessing the API.
+   * Required for securing access to data.
+   * Should be kept private and not exposed to clients.
+   * @required
+   */
   authToken,
+
+  /**
+   * Interval in milliseconds to refresh the scheduler lag data.
+   * Controls how frequently the chart updates with new data.
+   * @default 60000 (1 minute)
+   */
   refreshInterval = 60000,
+
+  /**
+   * Boolean flag to control the visibility of the chart.
+   * Determines whether the chart should be displayed or not.
+   * @required
+   */
   showChart
 }) => {
   const [chartData, setChartData] = useState<any[]>([]);
@@ -31,6 +50,9 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
   const [message, setMessage] = useState<string>('Loading scheduler data...');
   const [receivedSuccessResponse, setReceivedSuccessResponse] = useState<boolean>(false);
 
+  /**
+   * Fetch scheduler lag data from the API
+   */
   const fetchData = useCallback(async () => {
     try {
       // Only show loading if we haven't received a success response yet
@@ -57,7 +79,7 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
       });
       
       const response = await fetch(
-        `${deploymentUrl}/api/app_metrics/scheduled_job_lag?${queryParams}`,
+        `${deploymentUrl}${ROUTES.SCHEDULER_LAG}?${queryParams}`,
         {
           headers: {
             'Authorization': `Convex ${authToken}`,
@@ -69,7 +91,6 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
       if (!response.ok) {
         // If response is 404, we'll try again later but not show the error
         if (response.status === 404) {
-          console.log('Scheduler lag API not available yet, will retry...');
           setLoading(true);
           return; // Exit without updating state further
         }
@@ -123,6 +144,9 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
     }
   }, [deploymentUrl, authToken, receivedSuccessResponse]);
 
+  /**
+   * Fetch data and set up interval for refreshing data
+   */
   useEffect(() => {
     fetchData();
     
