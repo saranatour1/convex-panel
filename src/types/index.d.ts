@@ -31,9 +31,35 @@ export type ButtonProps = {
   onError?: (error: string) => void;
   onToggle?: (isOpen: boolean) => void;
   theme?: ThemeClasses | undefined;
-  buttonIcon?: string;
   maxStoredLogs?: number;
   convex?: ConvexReactClient;
   deployKey?: string;
   accessToken: string; // Required
+}
+
+// Tab types
+export type TabTypes = 'logs' | 'data-tables' | 'health';
+
+// Logs container props
+export interface LogsContainerProps {
+  isOpen: boolean;
+  toggleOpen: () => void;
+  onToggle?: (isOpen: boolean) => void;
+  initialLimit?: number;
+  initialShowSuccess?: boolean;
+  initialLogType?: LogType;
+  onLogFetch?: (logs: LogEntry[]) => void;
+  onError?: (error: string) => void;
+  theme?: ThemeClasses;
+  maxStoredLogs?: number;
+  position: { x: number; y: number };
+  setPosition: (position: { x: number; y: number } | ((prev: { x: number; y: number }) => { x: number; y: number })) => void;
+  containerSize: { width: number; height: number };
+  setContainerSize: (size: { width: number; height: number }) => void;
+  dragControls: any;
+  convex: ConvexReactClient;
+  adminClient: ConvexClient | null;
+  initialActiveTab: TabTypes;
+  accessToken: string;
+  deployUrl?: string;
 }

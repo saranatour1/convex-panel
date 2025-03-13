@@ -37,15 +37,13 @@ const ConvexPanel = ({
   onError,
   onToggle,
   theme = {},
-  buttonIcon = "/convex.png",
   maxStoredLogs = 500,
   convex,
-  deployKey,
   accessToken,
+  deployKey,
 }: ButtonProps) => {
   const mergedTheme = useMemo(() => ({ ...defaultTheme, ...theme }), [theme]);
   const [isMounted, setIsMounted] = useState(false);
-  const [logoSrc, setLogoSrc] = useState<string>(buttonIcon);
   const [logoError, setLogoError] = useState(false);
 
   // Only create adminClient if we have a URL and deployKey
@@ -71,14 +69,6 @@ const ConvexPanel = ({
       injectStyles();
     }
   }, []);
-
-  // Handle image error by using a fallback URL
-  const handleImageError = () => {
-    // If the image fails to load, use the Convex logo SVG as fallback
-    setLogoError(true);
-    // Use the Convex logo SVG as fallback
-    setLogoSrc("data:image/svg+xml,%3Csvg width='36' height='36' viewBox='0 0 367 370' version='1.1' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform='matrix(1,0,0,1,-129.225,-127.948)'%3E%3Cg transform='matrix(4.16667,0,0,4.16667,0,0)'%3E%3Cg transform='matrix(1,0,0,1,86.6099,107.074)'%3E%3Cpath d='M0,-6.544C13.098,-7.973 25.449,-14.834 32.255,-26.287C29.037,2.033 -2.48,19.936 -28.196,8.94C-30.569,7.925 -32.605,6.254 -34.008,4.088C-39.789,-4.83 -41.69,-16.18 -38.963,-26.48C-31.158,-13.247 -15.3,-5.131 0,-6.544' fill='rgb(245,176,26)' fill-rule='nonzero'%3E%3C/path%3E%3C/g%3E%3Cg transform='matrix(1,0,0,1,47.1708,74.7779)'%3E%3Cpath d='M0,-2.489C-5.312,9.568 -5.545,23.695 0.971,35.316C-21.946,18.37 -21.692,-17.876 0.689,-34.65C2.754,-36.197 5.219,-37.124 7.797,-37.257C18.41,-37.805 29.19,-33.775 36.747,-26.264C21.384,-26.121 6.427,-16.446 0,-2.489' fill='rgb(141,37,118)' fill-rule='nonzero'%3E%3C/path%3E%3C/g%3E%3Cg transform='matrix(1,0,0,1,91.325,66.4152)'%3E%3Cpath d='M0,-14.199C-7.749,-24.821 -19.884,-32.044 -33.173,-32.264C-7.482,-43.726 24.112,-25.143 27.557,2.322C27.877,4.876 27.458,7.469 26.305,9.769C21.503,19.345 12.602,26.776 2.203,29.527C9.838,15.64 8.889,-1.328 0,-14.199' fill='rgb(238,52,47)' fill-rule='nonzero'%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  };
 
   /**
    * Load saved position and container size from localStorage on component mount
@@ -182,16 +172,11 @@ const ConvexPanel = ({
         animate={isOpen ? { rotate: 180 } : { rotate: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <Image 
-          src={logoSrc}
-          alt="Convex Logo" 
-          width={36} 
-          height={36} 
-          className="convex-panel-logo rounded-full"
-          unoptimized={true}
-          onError={handleImageError}
-          style={{ width: '36px', height: '36px' }}
-        />
+        <svg width="36" height="36" viewBox="0 0 184 188" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M108.092 130.021C126.258 128.003 143.385 118.323 152.815 102.167C148.349 142.128 104.653 167.385 68.9858 151.878C65.6992 150.453 62.8702 148.082 60.9288 145.034C52.9134 132.448 50.2786 116.433 54.0644 101.899C64.881 120.567 86.8748 132.01 108.092 130.021Z" fill="#F3B01C"/>
+        <path d="M53.4012 90.1735C46.0375 107.191 45.7186 127.114 54.7463 143.51C22.9759 119.608 23.3226 68.4578 54.358 44.7949C57.2286 42.6078 60.64 41.3097 64.2178 41.1121C78.9312 40.336 93.8804 46.0225 104.364 56.6193C83.0637 56.831 62.318 70.4756 53.4012 90.1735Z" fill="#8D2676"/>
+        <path d="M114.637 61.8552C103.89 46.8701 87.0686 36.6684 68.6387 36.358C104.264 20.1876 148.085 46.4045 152.856 85.1654C153.3 88.7635 152.717 92.4322 151.122 95.6775C144.466 109.195 132.124 119.679 117.702 123.559C128.269 103.96 126.965 80.0151 114.637 61.8552Z" fill="#EE342F"/>
+        </svg>
       </motion.button>
     </div>
   );
