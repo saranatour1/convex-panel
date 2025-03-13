@@ -9,9 +9,13 @@ import Container from './Container';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexClient } from 'convex/browser';
 import cssText from './styles/convex-panel.css';
+import { STORAGE_KEYS, TabTypes } from './utils/constants';
 import { getStorageItem } from './data';
+import { ConvexLogo } from './components/icons';
 
-// Function to inject CSS with a unique ID to avoid conflicts
+/**
+ * Injects the CSS styles into the document head
+ */
 const injectStyles = () => {
   // Check if the style element already exists
   const styleId = 'convex-panel-styles';
@@ -19,7 +23,6 @@ const injectStyles = () => {
     return; // Already injected
   }
 
-  // Create a new style element
   const styleElement = document.createElement('style');
   styleElement.id = styleId;
   styleElement.textContent = cssText;
@@ -28,39 +31,121 @@ const injectStyles = () => {
   document.head.appendChild(styleElement);
 };
 
+/**
+ * The main ConvexPanel component
+ */
 const ConvexPanel = ({
-  children,
+  /** 
+   * Initial number of logs to fetch and display.
+   * Controls the initial page size when loading logs.
+   * @default 100
+   */
   initialLimit = 100,
+
+  /**
+   * Whether to show successful logs in the initial view.
+   * Can be toggled by the user in the UI.
+   * @default true
+   */
   initialShowSuccess = true,
+
+  /**
+   * Initial log type filter to apply when panel first loads.
+   * Options include: ALL, SUCCESS, FAILURE, DEBUG, LOGINFO, WARNING, ERROR, HTTP
+   * Controls which types of operations are displayed.
+   * Can be changed by the user via dropdown.
+   * @default LogType.ALL
+   */
   initialLogType = LogType.ALL,
+
+  /**
+   * Callback fired whenever new logs are fetched.
+   * Receives array of log entries as parameter.
+   * Useful for external monitoring or processing of logs.
+   * @param logs Array of LogEntry objects
+   */
   onLogFetch,
+
+  /**
+   * Error handling callback.
+   * Called when errors occur during log fetching or processing.
+   * Receives error message string as parameter.
+   * @param error Error message
+   */
   onError,
-  onToggle,
+
+  /**
+   * Theme customization object to override default styles.
+   * Supports customizing colors, spacing, and component styles.
+   * See ThemeClasses interface for available options.
+   * @default {}
+   */
   theme = {},
+
+  /**
+   * Maximum number of logs to keep in memory.
+   * Prevents memory issues from storing too many logs.
+   * Older logs are removed when limit is reached.
+   * @default 500
+   */
   maxStoredLogs = 500,
+
+  /**
+   * Convex React client instance.
+   * Required for making API calls to your Convex backend.
+   * Must be initialized and configured before passing.
+   * @required
+   */
   convex,
+
+  /**
+   * Authentication token for accessing Convex API.
+   * Required for securing access to logs and data.
+   * Should be kept private and not exposed to clients.
+   * @required
+   */
   accessToken,
+
+  /**
+   * Optional deploy key for admin-level access.
+   * Enables additional admin capabilities when provided.
+   * Should be kept secure and only used in protected environments.
+   * @optional
+   */
   deployKey,
+
+  /**
+   * Optional deploy URL for the Convex deployment.
+   * Used to configure the admin client connection.
+   * Default is the environment variable CONVEX_DEPLOYMENT.
+   * @optional
+   */
+  deployUrl,
 }: ButtonProps) => {
+  const dragControls = useDragControls();
   const mergedTheme = useMemo(() => ({ ...defaultTheme, ...theme }), [theme]);
   const [isMounted, setIsMounted] = useState(false);
-  const [logoError, setLogoError] = useState(false);
-
-  // Only create adminClient if we have a URL and deployKey
-  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  const adminClient = convexUrl && deployKey ? new ConvexClient(convexUrl) : null;
-  
-  // Only set admin auth if we have an adminClient and deployKey
-  if (adminClient && deployKey) {
-    (adminClient as any).setAdminAuth(deployKey);
-  }
-  
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [containerSize, setContainerSize] = useState({ width: 1000, height: 500 });
-  const dragControls = useDragControls();
+  const [initialTab, setInitialTab] = useState<TabTypes>('logs');
 
-  // Only render on client-side to avoid hydration errors
+  /**
+   * Create admin client
+   */
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  const adminClient = convexUrl && deployKey ? new ConvexClient(convexUrl) : null;
+  
+  /**
+   * Set admin auth
+   */
+  if (adminClient && deployKey) {
+    (adminClient as any).setAdminAuth(deployKey);
+  }
+
+  /**
+   * Set mounted state
+   */
   useEffect(() => {
     setIsMounted(true);
     
@@ -76,8 +161,8 @@ const ConvexPanel = ({
   useEffect(() => {
     if (!isMounted) return;
     
-    const savedPosition = localStorage.getItem('convex-panel:position');
-    const savedSize = localStorage.getItem('convex-panel:size');
+    const savedPosition = localStorage.getItem(STORAGE_KEYS.POSITION);
+    const savedSize = localStorage.getItem(STORAGE_KEYS.SIZE);
     
     if (savedPosition) {
       try {
@@ -102,8 +187,8 @@ const ConvexPanel = ({
   useEffect(() => {
     if (!isMounted) return;
     
-    localStorage.setItem('convex-panel:position', JSON.stringify(position));
-    localStorage.setItem('convex-panel:size', JSON.stringify(containerSize));
+    localStorage.setItem(STORAGE_KEYS.POSITION, JSON.stringify(position));
+    localStorage.setItem(STORAGE_KEYS.SIZE, JSON.stringify(containerSize));
   }, [position, containerSize, isMounted]);
 
   /**
@@ -115,19 +200,11 @@ const ConvexPanel = ({
     
     // If we're opening the container, load the saved tab
     if (newIsOpen && typeof window !== 'undefined') {
-      const savedTab = getStorageItem<'logs' | 'data-tables' | 'health'>('convex-panel:activeTab', 'logs');
+      const savedTab = getStorageItem<TabTypes>(STORAGE_KEYS.ACTIVE_TAB, 'logs');
       // We'll pass this as a prop to Container
       setInitialTab(savedTab);
     }
-    
-    // Call the onToggle callback if provided
-    if (onToggle) {
-      onToggle(newIsOpen);
-    }
   };
-
-  // Add state for initial tab
-  const [initialTab, setInitialTab] = useState<'logs' | 'data-tables' | 'health'>('logs');
 
   // Don't render anything on the server
   if (!isMounted) {
@@ -142,7 +219,6 @@ const ConvexPanel = ({
             convex={convex as ConvexReactClient}
             isOpen={isOpen}
             toggleOpen={toggleOpen}
-            onToggle={onToggle}
             initialLimit={initialLimit}
             initialShowSuccess={initialShowSuccess}
             initialLogType={initialLogType}
@@ -158,6 +234,7 @@ const ConvexPanel = ({
             adminClient={adminClient}
             initialActiveTab={initialTab}
             accessToken={accessToken}
+            deployUrl={deployUrl}
           />
         )}
       </AnimatePresence>
@@ -172,14 +249,12 @@ const ConvexPanel = ({
         animate={isOpen ? { rotate: 180 } : { rotate: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <svg width="36" height="36" viewBox="0 0 184 188" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M108.092 130.021C126.258 128.003 143.385 118.323 152.815 102.167C148.349 142.128 104.653 167.385 68.9858 151.878C65.6992 150.453 62.8702 148.082 60.9288 145.034C52.9134 132.448 50.2786 116.433 54.0644 101.899C64.881 120.567 86.8748 132.01 108.092 130.021Z" fill="#F3B01C"/>
-        <path d="M53.4012 90.1735C46.0375 107.191 45.7186 127.114 54.7463 143.51C22.9759 119.608 23.3226 68.4578 54.358 44.7949C57.2286 42.6078 60.64 41.3097 64.2178 41.1121C78.9312 40.336 93.8804 46.0225 104.364 56.6193C83.0637 56.831 62.318 70.4756 53.4012 90.1735Z" fill="#8D2676"/>
-        <path d="M114.637 61.8552C103.89 46.8701 87.0686 36.6684 68.6387 36.358C104.264 20.1876 148.085 46.4045 152.856 85.1654C153.3 88.7635 152.717 92.4322 151.122 95.6775C144.466 109.195 132.124 119.679 117.702 123.559C128.269 103.96 126.965 80.0151 114.637 61.8552Z" fill="#EE342F"/>
-        </svg>
+        <ConvexLogo />
       </motion.button>
     </div>
   );
 };
+
+ConvexPanel.displayName = 'ConvexPanel';
 
 export default ConvexPanel; 

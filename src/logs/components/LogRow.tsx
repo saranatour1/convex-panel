@@ -1,21 +1,29 @@
-import { memo, useRef, useState, useEffect } from 'react';
+import { memo, useRef, useState } from 'react';
 import { InfoIcon } from 'lucide-react';
-import { ThemeClasses } from '../types';
-import { LogEntry } from './types';
 import { createPortal } from 'react-dom';
+import { LogRowProps } from '../../types';
 
-interface LogRowProps {
-  index: number;
-  style: React.CSSProperties;
-  data: {
-    logs: LogEntry[];
-    isDetailPanelOpen: boolean;
-    mergedTheme: ThemeClasses;
-    handleLogSelect: (log: LogEntry) => void;
-  };
-}
+const LogRow = memo(({
+  /** 
+   * Index of the log row in the virtualized list.
+   * Used by react-window for rendering optimization.
+   */
+  index,
 
-const LogRow = memo(({ index, style, data }: LogRowProps) => {
+  /**
+   * Style object containing positioning for virtualized row.
+   * Applied to row container for proper list virtualization.
+   * Provided by react-window.
+   */
+  style,
+
+  /**
+   * Data object containing shared props for all rows.
+   * Includes logs array, panel state, theme and handlers.
+   * Passed through react-window's itemData prop.
+   */
+  data
+}: LogRowProps) => {
   const { logs, isDetailPanelOpen, mergedTheme, handleLogSelect } = data;
   const log = logs[index];
   if (!log) return null;
@@ -24,7 +32,10 @@ const LogRow = memo(({ index, style, data }: LogRowProps) => {
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
   const [showTooltip, setShowTooltip] = useState(false);
   
-  // Function to position the tooltip
+  /**
+   * Function to position the tooltip.
+   * This is used for logs that have [INFO] in the log message.
+   */
   const positionTooltip = () => {
     if (iconRef.current) {
       const rect = iconRef.current.getBoundingClientRect();
@@ -37,27 +48,43 @@ const LogRow = memo(({ index, style, data }: LogRowProps) => {
     }
   };
   
-  // Update position on hover
+  /**
+   * Function to update the tooltip position on hover.
+   */
   const handleMouseEnter = () => {
     positionTooltip();
     setShowTooltip(true);
   };
-  
+
+  /**
+   * Function to hide the tooltip when the mouse leaves the log row.
+   */
   const handleMouseLeave = () => {
     setShowTooltip(false);
   };
   
+  /**
+   * Format the timestamp of the log.
+   */
   const timestamp = new Date(log.timestamp * 1000).toLocaleString();
+
+  /**
+   * Format the request ID of the log.
+   */
   const requestId = log.function?.request_id || '';
-  
-  // Format execution time to be more readable
+
+  /**
+   * Format the execution time of the log.
+   */
   const executionTime = log.execution_time_ms 
     ? log.execution_time_ms < 1 
       ? `${(log.execution_time_ms * 1000).toFixed(2)} μs` 
       : `${log.execution_time_ms.toFixed(2)} ms`
     : '';
   
-  // Determine log type and format accordingly
+  /**
+   * Determine the log type and format accordingly.
+   */
   let logType = '';
   let logDetails = '';
   

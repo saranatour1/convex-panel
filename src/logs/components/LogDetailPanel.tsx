@@ -1,17 +1,25 @@
 import { motion } from 'framer-motion';
 import { CopyIcon } from 'lucide-react';
-import type { ThemeClasses } from '../types';
-import { LogEntry } from './types';
-import { formatJson } from '../utils';
-import { detailPanelVariants } from '../theme';
+import { formatJson } from '../../utils';
+import { detailPanelVariants } from '../../theme';
+import { LogDetailPanelProps } from 'src/types';
 
-interface LogDetailPanelProps {
-  selectedLog: LogEntry;
-  mergedTheme: ThemeClasses;
-  setIsDetailPanelOpen: (isOpen: boolean) => void;
-}
-
-const LogDetailPanel = ({ selectedLog, mergedTheme, setIsDetailPanelOpen }: LogDetailPanelProps) => {
+const LogDetailPanel = ({ 
+  /**
+   * The log entry to display in the detail panel.
+   */
+  selectedLog,
+  
+  /**
+   * The theme to use for the detail panel.
+   */
+  mergedTheme, 
+  
+  /**
+   * The function to call when the detail panel is closed.
+   */
+  setIsDetailPanelOpen 
+}: LogDetailPanelProps) => {
   if (!selectedLog) return null;
   
   const timestamp = new Date(selectedLog.timestamp * 1000).toLocaleString();
@@ -127,5 +135,7 @@ const LogDetailPanel = ({ selectedLog, mergedTheme, setIsDetailPanelOpen }: LogD
     </motion.div>
   );
 };
+
+LogDetailPanel.displayName = 'LogDetailPanel';
 
 export default LogDetailPanel; 

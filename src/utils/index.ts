@@ -1,4 +1,4 @@
-import { LogEntry } from "./logs/types";
+import { LogEntry } from "../logs/types";
 
 /**
  * Format JSON for display

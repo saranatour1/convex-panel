@@ -1,94 +1,175 @@
 import * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
 import { PlayCircleIcon, PauseCircleIcon } from 'lucide-react';
-import { ThemeClasses } from '../types';
-import { LogType } from './types';
-import { ConvexPanelSettings } from '../settings/SettingsModal';
-import { getStorageItem } from '../data/utils/storage';
-
-// Default settings for fallback
-const defaultSettings = {
-  showRequestIdInput: true,
-  showLimitInput: true,
-  showSuccessCheckbox: true,
-};
-
-// Storage key for settings
-const SETTINGS_STORAGE_KEY = 'convex-panel:settings';
-
-interface LogsToolbarProps {
-  mergedTheme: ThemeClasses;
-  isPaused: boolean;
-  togglePause: () => void;
-  clearLogs: () => void;
-  refreshLogs: () => void;
-  isLoading: boolean;
-  filterText: string;
-  setFilterText: (text: string) => void;
-  requestIdFilter: string;
-  setRequestIdFilter: (id: string) => void;
-  limit: number;
-  setLimit: (limit: number) => void;
-  initialLimit: number;
-  showSuccess: boolean;
-  setShowSuccess: (show: boolean) => void;
-  isPermanentlyDisabled: boolean;
-  setIsPermanentlyDisabled: (disabled: boolean) => void;
-  setConsecutiveErrors: (count: number) => void;
-  fetchLogs: () => void;
-  logType: LogType;
-  setLogType: (type: LogType) => void;
-  settings?: ConvexPanelSettings;
-}
+import { LogType } from '../types';
+import { ConvexPanelSettings } from '../../settings/SettingsModal';
+import { getStorageItem } from '../../data/utils/storage';
+import { defaultSettings, STORAGE_KEYS } from '../../utils/constants';
+import { LogsToolbarProps } from '../../types';
 
 const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
+  /** 
+   * Theme customization object with merged default and custom styles.
+   * Controls visual appearance of logs toolbar components.
+   */
   mergedTheme,
+
+  /**
+   * Whether log streaming is currently paused.
+   * Controls if new logs are being fetched and displayed.
+   */
   isPaused,
+
+  /**
+   * Function to toggle the paused state.
+   * Allows starting/stopping log streaming.
+   */
   togglePause,
+
+  /**
+   * Function to clear all currently displayed logs.
+   * Removes logs from view but keeps streaming active.
+   */
   clearLogs,
+
+  /**
+   * Function to manually refresh and fetch latest logs.
+   * Forces an immediate log fetch regardless of streaming state.
+   */
   refreshLogs,
+
+  /**
+   * Whether logs are currently being fetched.
+   * Controls loading indicators in the UI.
+   */
   isLoading,
+
+  /**
+   * Text string to filter logs by content.
+   * Filters log messages containing this text.
+   */
   filterText,
+
+  /**
+   * Function to update the filter text.
+   * @param text New filter text to apply
+   */
   setFilterText,
+
+  /**
+   * Request ID to filter logs by.
+   * Shows only logs matching this request ID.
+   */
   requestIdFilter,
+
+  /**
+   * Function to update the request ID filter.
+   * @param id New request ID to filter by
+   */
   setRequestIdFilter,
+
+  /**
+   * Current limit on number of logs to fetch.
+   * Controls pagination size of log fetching.
+   */
   limit,
+
+  /**
+   * Function to update the fetch limit.
+   * @param limit New limit to apply
+   */
   setLimit,
+
+  /**
+   * Initial limit value when component loads.
+   * Starting pagination size for log fetching.
+   */
   initialLimit,
+
+  /**
+   * Whether to show successful log entries.
+   * Controls visibility of logs with success status.
+   */
   showSuccess,
+
+  /**
+   * Function to toggle showing successful logs.
+   * @param show Whether to show success logs
+   */
   setShowSuccess,
+
+  /**
+   * Whether logging is permanently disabled.
+   * Prevents any log fetching when true.
+   */
   isPermanentlyDisabled,
+
+  /**
+   * Function to update permanently disabled state.
+   * @param disabled Whether to disable logging
+   */
   setIsPermanentlyDisabled,
+
+  /**
+   * Function to update count of consecutive errors.
+   * @param errors Number of consecutive fetch errors
+   */
   setConsecutiveErrors,
+
+  /**
+   * Function to fetch a new batch of logs.
+   * Triggers manual log fetching.
+   */
   fetchLogs,
+
+  /**
+   * Current type of logs being displayed.
+   * Controls which log categories are shown.
+   */
   logType,
+
+  /**
+   * Function to update the log type filter.
+   * @param type New log type to filter by
+   */
   setLogType,
+
+  /**
+   * Settings passed as props to override localStorage settings.
+   * Controls visibility and behavior of toolbar components.
+   */
   settings: propSettings
 }, ref) => {
-  // State to store settings loaded from localStorage
-  const [localSettings, setLocalSettings] = useState<Partial<ConvexPanelSettings> | null>(null);
-  // Add state for log type dropdown
-  const [isLogTypeDropdownOpen, setIsLogTypeDropdownOpen] = useState(false);
   const logTypeDropdownRef = useRef<HTMLDivElement>(null);
+  const [localSettings, setLocalSettings] = useState<Partial<ConvexPanelSettings> | null>(null);
+  const [isLogTypeDropdownOpen, setIsLogTypeDropdownOpen] = useState(false);
   
-  // Load settings from localStorage on mount
+  /**
+   * Load settings from localStorage on mount
+   */
   useEffect(() => {
-    const savedSettings = getStorageItem<Partial<ConvexPanelSettings>>(SETTINGS_STORAGE_KEY, {});
+    const savedSettings = getStorageItem<Partial<ConvexPanelSettings>>(STORAGE_KEYS.SETTINGS, {});
     setLocalSettings(savedSettings);
   }, []);
   
-  // Update localSettings when propSettings changes
+  /**
+   * Update localSettings when propSettings changes
+   */
   useEffect(() => {
     if (propSettings) {
       setLocalSettings(propSettings);
     }
   }, [propSettings]);
   
-  // Use settings from props if provided, otherwise use settings from localStorage, with fallback to defaults
+  /**
+   * Use settings from props if provided, otherwise use settings from localStorage, with fallback to defaults
+   */
   const effectiveSettings = propSettings || localSettings || {};
   
-  // IMPORTANT: Don't use default values when reading from settings
-  // This ensures that if a setting is explicitly set to false, it will be respected
+  /**
+   * IMPORTANT: Don't use default values when reading from settings
+   * This ensures that if a setting is explicitly set to false, it will be respected
+   */
   const showRequestIdInput = effectiveSettings.showRequestIdInput !== undefined 
     ? effectiveSettings.showRequestIdInput 
     : defaultSettings.showRequestIdInput;
@@ -101,7 +182,9 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
     ? effectiveSettings.showSuccessCheckbox
     : defaultSettings.showSuccessCheckbox;
 
-  // Add effect to handle clicking outside the dropdown
+  /**
+   * Handle clicking outside the dropdown
+   */
   useEffect(() => {
     if (!isLogTypeDropdownOpen) return;
     

@@ -58,8 +58,9 @@ You can use the panel in two ways:
    And then using it in your component:
    ```tsx
    <ConvexPanel
-     accessToken="YOUR_ACCESS_TOKEN"
-     deployUrl={process.env.CONVEX_DEPLOYMENT}
+     accessToken="YOUR_ACCESS_TOKEN" // Required
+     deployKey={process.env.CONVEX_DEPLOYMENT} // Required
+     deployUrl={process.env.NEXT_PUBLIC_CONVEX_URL || REACT_APP_CONVEX_URL} // Optional
      convex={convex}
    />
    ```
@@ -96,6 +97,7 @@ The Convex Panel accepts the following props:
 |------|------|----------|-------------|
 | `accessToken` | string | Yes | Your Convex access token (from `convex config`) |
 | `deployKey` | string | Yes | Your Convex deployment URL (or use CONVEX_DEPLOYMENT env var) |
+| `deployUrl` | string | No | Alternative to deployKey - your Convex deployment URL |
 | `convex` | ConvexReactClient | Yes | Convex client instance |
 | `theme` | ThemeClasses | No | Custom theme options |
 | `initialLimit` | number | No | Initial log limit (default: 100) |

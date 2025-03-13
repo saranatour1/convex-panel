@@ -1,79 +1,179 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import debounce from 'debounce';
-import { ThemeClasses } from "./types";
+import { ContainerProps, ThemeClasses } from "./types";
 import { LogType, LogEntry } from './logs/types';
 import { cardVariants } from './theme';
 import { getLogId } from './utils';
-import LogsToolbar from './logs/LogsToolbar';
-import LogsTable from './logs/LogsTable';
 import DataTable from './data/DataTable';
-import { ConvexReactClient } from 'convex/react';
-import { ConvexClient } from 'convex/browser';
 import { SettingsButton, ConvexPanelSettings } from './settings';
 import { getStorageItem, setStorageItem } from './data/utils/storage';
 import { HealthContainer } from './health';
+import { defaultSettings, INTERVALS, STORAGE_KEYS, TabTypes } from './utils/constants';
+import { fetchLogsFromApi } from './utils/api';
+import { createFilterPredicate } from './utils/filters';
+import { TabButton } from './components/TabButton';
+import LogsContainer from './logs/LogsContainer';
 
-interface LogsContainerProps {
-  isOpen: boolean;
-  toggleOpen: () => void;
-  onToggle?: (isOpen: boolean) => void;
-  initialLimit?: number;
-  initialShowSuccess?: boolean;
-  initialLogType?: LogType;
-  onLogFetch?: (logs: LogEntry[]) => void;
-  onError?: (error: string) => void;
-  theme?: ThemeClasses;
-  maxStoredLogs?: number;
-  position: { x: number; y: number };
-  setPosition: (position: { x: number; y: number } | ((prev: { x: number; y: number }) => { x: number; y: number })) => void;
-  containerSize: { width: number; height: number };
-  setContainerSize: (size: { width: number; height: number }) => void;
-  dragControls: any;
-  convex: ConvexReactClient;
-  adminClient: ConvexClient | null;
-  initialActiveTab: 'logs' | 'data-tables' | 'health';
-  accessToken: string;
-  deployUrl?: string;
-}
-
-// Define settings storage key
-const SETTINGS_STORAGE_KEY = 'convex-panel:settings';
-const ACTIVE_TAB_STORAGE_KEY = 'convex-panel:activeTab';
-
-// Default settings
-const defaultSettings = {
-  showDebugFilters: false,
-  showStorageDebug: false,
-  logLevel: 'info' as const,
-  healthCheckInterval: 60, // seconds
-  showRequestIdInput: true,
-  showLimitInput: true,
-  showSuccessCheckbox: true,
-};
+const TABS = [
+  { id: 'logs' as const, label: 'Logs' },
+  { id: 'data-tables' as const, label: 'Data' },
+  { id: 'health' as const, label: 'Health' },
+] as const;
 
 const Container = ({
+  /** 
+   * Controls visibility of the main container.
+   * @required
+   */
   isOpen,
+
+  /** 
+   * Function to toggle the panel open/closed state.
+   * @required
+   */
   toggleOpen,
-  onToggle,
+
+  /** 
+   * Initial number of logs to fetch and display.
+   * Controls the initial page size when loading logs.
+   * @default 100
+   */
   initialLimit = 100,
+
+  /**
+   * Whether to show successful logs in the initial view.
+   * Can be toggled by the user in the UI.
+   * @default true
+   */
   initialShowSuccess = true,
+
+  /**
+   * Initial log type filter to apply when panel first loads.
+   * Options include: ALL, SUCCESS, FAILURE, DEBUG, LOGINFO, WARNING, ERROR, HTTP
+   * Controls which types of operations are displayed.
+   * Can be changed by the user via dropdown.
+   * @default LogType.ALL
+   */
   initialLogType = LogType.ALL,
+
+  /**
+   * Callback fired whenever new logs are fetched.
+   * Receives array of log entries as parameter.
+   * Useful for external monitoring or processing of logs.
+   * @param logs Array of LogEntry objects
+   */
   onLogFetch,
+
+  /**
+   * Error handling callback.
+   * Called when errors occur during log fetching or processing.
+   * Receives error message string as parameter.
+   * @param error Error message
+   */
   onError,
+
+  /**
+   * Theme customization object to override default styles.
+   * Supports customizing colors, spacing, and component styles.
+   * See ThemeClasses interface for available options.
+   * @default {}
+   */
   theme = {},
+
+  /**
+   * Maximum number of logs to keep in memory.
+   * Prevents memory issues from storing too many logs.
+   * Older logs are removed when limit is reached.
+   * @default 500
+   */
   maxStoredLogs = 500,
+
+  /**
+   * Current position of the panel.
+   * Coordinates object with x and y values.
+   * Used for draggable positioning.
+   * @required
+   */
   position,
+
+  /**
+   * Function to update panel position.
+   * Called during drag operations to update coordinates.
+   * @required
+   */
   setPosition,
+
+  /**
+   * Current size of the panel.
+   * Dimensions object with width and height values.
+   * Used for resizable container.
+   * @required
+   */
   containerSize,
+
+  /**
+   * Function to update panel size.
+   * Called during resize operations to update dimensions.
+   * @required
+   */
   setContainerSize,
+
+  /**
+   * Framer Motion drag controls.
+   * Used to enable draggable functionality.
+   * @required
+   */
   dragControls,
+
+  /**
+   * Convex React client instance.
+   * Required for making API calls to your Convex backend.
+   * Must be initialized and configured before passing.
+   * @required
+   */
   convex,
+
+  /**
+   * Enables admin-level operations in Convex.
+   * Should only be used in secure environments.
+   * @required
+   */
   adminClient,
+
+  /**
+   * Initial active tab to display.
+   * Controls which view is shown first.
+   * @required
+   */
   initialActiveTab,
+
+  /**
+   * Authentication token for accessing Convex API.
+   * Required for securing access to data.
+   * Should be kept private and not exposed to clients.
+   * @required
+   */
   accessToken,
+
+  /**
+   * Optional deploy URL for the Convex deployment.
+   * Used to configure the admin client connection.
+   * Default is the environment variable CONVEX_DEPLOYMENT.
+   * @optional
+   */
   deployUrl,
-}: LogsContainerProps) => {
+}: ContainerProps) => {
+  let baseUrl;
+
+  console.log("Access token", accessToken);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const lastFetchTime = useRef<number>(0);
+  const resizeStartPosition = useRef({ x: 0, y: 0 });
+  const pendingRequest = useRef<AbortController | null>(null);
+  const mergedTheme = useMemo(() => theme, [theme]);
+  const [logIds] = useState(() => new Set<string>());
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,54 +187,42 @@ const Container = ({
   const [isPermanentlyDisabled, setIsPermanentlyDisabled] = useState(false);
   const [retryAttempts, setRetryAttempts] = useState(0);
   const [isWatching, setIsWatching] = useState(false);
-  const MAX_RETRY_ATTEMPTS = 3;
-  const RETRY_DELAY = 2000;
-  const MAX_CONSECUTIVE_ERRORS = 5;
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
-  const [logIds] = useState(() => new Set<string>());
-  const pendingRequest = useRef<AbortController | null>(null);
   const [filterText, setFilterText] = useState('');
   const [debouncedFilterText, setDebouncedFilterText] = useState('');
   const [requestIdFilter, setRequestIdFilter] = useState('');
   const [isResizing, setIsResizing] = useState(false);
-  const resizeStartPosition = useRef({ x: 0, y: 0 });
   const resizeStartSize = useRef({ width: 0, height: 0 });
   const [cursor, setCursor] = useState<number | string>(0);
-  const lastFetchTime = useRef<number>(0);
-  const MIN_FETCH_INTERVAL = 1000;
   const [excludeViewerQueries, setExcludeViewerQueries] = useState(true);
-  const [convexUrl, setConvexUrl] = useState<string>(deployUrl || '');
-  const [activeTab, setActiveTab] = useState<'logs' | 'data-tables' | 'health'>(() => {
-    // Initialize from localStorage if available, otherwise use initialActiveTab
+  const [convexUrl, setConvexUrl] = useState<string>(process.env.NEXT_PUBLIC_CONVEX_URL! || deployUrl!);
+  
+  /**
+   * Retrieve active tab from localStorage or use initialActiveTab
+   */
+  const [activeTab, setActiveTab] = useState<TabTypes>(() => {
     if (typeof window !== 'undefined') {
-      return getStorageItem<'logs' | 'data-tables' | 'health'>(ACTIVE_TAB_STORAGE_KEY, initialActiveTab);
+      return getStorageItem<TabTypes>(STORAGE_KEYS.ACTIVE_TAB, initialActiveTab);
     }
     return initialActiveTab;
   });
+
+  /**
+   * Retrieve settings from localStorage or use defaultSettings
+   */
   const [settings, setSettings] = useState<ConvexPanelSettings>(() => {
-    
-    // Initialize from localStorage if available, otherwise use defaults
     if (typeof window !== 'undefined') {
-      return getStorageItem<ConvexPanelSettings>(SETTINGS_STORAGE_KEY, defaultSettings);
+      return getStorageItem<ConvexPanelSettings>(STORAGE_KEYS.SETTINGS, defaultSettings);
     }
     return defaultSettings;
   });
-  
-  let baseUrl;
-
-  // Merge theme with default theme
-  const mergedTheme = useMemo(() => theme, [theme]);
-
-  // Add a ref to the container element
-  const containerRef = useRef<HTMLDivElement>(null);
 
   /**
    * Get Convex URL from environment if not provided as prop
    */
   useEffect(() => {
     if (!convexUrl && typeof window !== 'undefined') {
-      const envUrl = (window as any).ENV?.NEXT_PUBLIC_CONVEX_URL || 
-                     process.env.NEXT_PUBLIC_CONVEX_URL;
+      const envUrl = (window as any).ENV?.NEXT_PUBLIC_CONVEX_URL || deployUrl;
       
       if (envUrl) {
         setConvexUrl(envUrl);
@@ -162,7 +250,7 @@ const Container = ({
     
     // Prevent frequent polling
     const now = Date.now();
-    if (now - lastFetchTime.current < MIN_FETCH_INTERVAL) {
+    if (now - lastFetchTime.current < INTERVALS.MIN_FETCH_INTERVAL) {
       return;
     }
     lastFetchTime.current = now;
@@ -183,53 +271,21 @@ const Container = ({
     }
     
     try {
-      // Create URL object based on convex url
-      const urlObj = new URL(convexUrl);
-      baseUrl = `${urlObj.protocol}//${urlObj.hostname}`;
-      
-      // Fetch logs from Convex API
-      const response = await fetch(`${baseUrl}/api/app_metrics/stream_function_logs?cursor=${cursor}`, {
-        headers: {
-          "authorization": `Convex ${accessToken}`
-        },
-        signal: pendingRequest.current.signal,
+      const response = await fetchLogsFromApi({
+        cursor,
+        convexUrl,
+        accessToken,
+        signal: pendingRequest.current.signal
       });
-      
-      if (!response.ok) {
-        if (response.status === 504 && retryAttempts < MAX_RETRY_ATTEMPTS) {
-          
-          // Increment retry attempts
-          setRetryAttempts(prev => prev + 1);
-          setError(`Request timed out. Retrying in ${RETRY_DELAY/1000} seconds... (Attempt ${retryAttempts + 1}/${MAX_RETRY_ATTEMPTS})`);
-          
-          // Schedule timeout for retry
-          setTimeout(() => {
-            if (isOpen && !isPaused) {
-              fetchLogs();
-            }
-          }, RETRY_DELAY);
-          return;
-        }
-        
-        throw new Error(`Failed to fetch logs: HTTP ${response.status}`);
-      }
       
       // Reset retry attempts on success
       setRetryAttempts(0);
-      
-      const data = await response.json();
-      
-      // Check if request was aborted after json parsing
-      if (pendingRequest.current?.signal.aborted) {
-        return;
-      }
-      
       setConsecutiveErrors(0);
       setShowRetryButton(false);
       
       // Update cursor for next poll if available and different from current
-      if (data.newCursor && data.newCursor !== cursor) {
-        setCursor(data.newCursor);
+      if (response.newCursor && response.newCursor !== cursor) {
+        setCursor(response.newCursor);
       }
       
       // Set watching state
@@ -238,57 +294,49 @@ const Container = ({
       // Update the message to indicate we're watching logs (not an error)
       // Only update the message if we don't have logs yet
       if (logs.length === 0) {
-        setError(`Watching logs for ${urlObj.hostname.split('.')[0]}...`);
+        setError(`Watching logs for ${response.hostname.split('.')[0]}...`);
       }
       
-      // Filter the logs
-      if (data.entries && data.entries.length > 0) {        
-        // Convert to our log format
-        const formattedLogs: LogEntry[] = data.entries.map((entry: any) => ({
-          timestamp: entry.timestamp || Date.now(),
-          topic: entry.topic || 'console',
-          function: {
-            type: entry.udfType,
-            path: entry.identifier,
-            cached: entry.cachedResult,
-            request_id: entry.requestId
-          },
-          log_level: entry.level || 'INFO',
-          message: entry.message || JSON.stringify(entry),
-          execution_time_ms: entry.executionTime ? entry.executionTime * 1000 : undefined,
-          status: entry.success !== null ? (entry.success ? 'success' : 'error') : undefined,
-          error_message: entry.error,
-          raw: entry
-        }));
-        
-        // Filter out duplicate logs
-        const newLogs = formattedLogs.filter((log: LogEntry) => {
-          const logId = getLogId(log);
-          if (logIds.has(logId)) return false;
-          logIds.add(logId);
-          return true;
+      // Filter out duplicate logs
+      const newLogs = response.logs.filter((log: LogEntry) => {
+        const logId = getLogId(log);
+        if (logIds.has(logId)) return false;
+        logIds.add(logId);
+        return true;
+      });
+      
+      // Add logs to the list
+      if (newLogs.length > 0) {
+        setLogs(prev => {
+          const combined = [...newLogs, ...prev];
+          const sorted = combined.sort((a, b) => b.timestamp - a.timestamp);
+          return sorted.slice(0, maxStoredLogs);
         });
         
-        // Add logs to the list
-        if (newLogs.length > 0) {
-          setLogs(prev => {
-            const combined = [...newLogs, ...prev];
-            const sorted = combined.sort((a, b) => b.timestamp - a.timestamp);
-            return sorted.slice(0, maxStoredLogs);
-          });
-          
-          if (onLogFetch) {
-            onLogFetch(newLogs);
-          }
-          
-          // Update the message to indicate we're watching logs (not an error)
-          setError(`Watching logs for ${urlObj.hostname.split('.')[0]}...`);
+        if (onLogFetch) {
+          onLogFetch(newLogs);
         }
+        
+        // Update the message to indicate we're watching logs (not an error)
+        setError(`Watching logs for ${response.hostname.split('.')[0]}...`);
       } else if (logs.length === 0) {
         // If no logs were returned and we don't have any logs yet, update the message
-        setError(`Watching logs for ${urlObj.hostname.split('.')[0]}...`);
+        setError(`Watching logs for ${response.hostname.split('.')[0]}...`);
       }
     } catch (err) {
+      // Handle timeout errors
+      if (err instanceof Error && err.message.includes('HTTP 504') && retryAttempts < INTERVALS.MAX_RETRY_ATTEMPTS) {
+        setRetryAttempts(prev => prev + 1);
+        setError(`Request timed out. Retrying in ${INTERVALS.RETRY_DELAY/1000} seconds... (Attempt ${retryAttempts + 1}/${INTERVALS.MAX_RETRY_ATTEMPTS})`);
+        
+        setTimeout(() => {
+          if (isOpen && !isPaused) {
+            fetchLogs();
+          }
+        }, INTERVALS.RETRY_DELAY);
+        return;
+      }
+      
       // Don't handle aborted requests as errors
       if (err instanceof Error && err.name === 'AbortError') {
         return;
@@ -301,7 +349,7 @@ const Container = ({
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
       setConsecutiveErrors(prev => prev + 1);
       
-      if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+      if (consecutiveErrors >= INTERVALS.MAX_CONSECUTIVE_ERRORS) {
         setIsPermanentlyDisabled(true);
         setError(`Too many consecutive errors (${consecutiveErrors}). Connection disabled.`);
       } else {
@@ -314,12 +362,31 @@ const Container = ({
       }
       setIsLoading(false);
     }
-  }, [isOpen, isPaused, cursor, logIds, maxStoredLogs, onLogFetch, retryAttempts, getLogId, MAX_RETRY_ATTEMPTS, excludeViewerQueries, convexUrl, accessToken, consecutiveErrors, MAX_CONSECUTIVE_ERRORS, onError, error, isWatching, logs.length]);
+  }, [
+    isOpen, 
+    isPaused, 
+    cursor, 
+    logIds, 
+    maxStoredLogs, 
+    onLogFetch, 
+    retryAttempts, 
+    getLogId, 
+    INTERVALS.MAX_RETRY_ATTEMPTS, 
+    convexUrl, 
+    accessToken, 
+    consecutiveErrors, 
+    INTERVALS.MAX_CONSECUTIVE_ERRORS, 
+    onError,
+    error, 
+    isWatching, 
+    logs.length
+  ]);
 
-  // Fetch logs when the container is initially opened or when convexUrl/accessToken changes
+  /**
+   * Fetch logs when the container is opened
+   */
   useEffect(() => {
     if (isOpen && !isPaused && convexUrl && accessToken) {
-      // Set initial message
       setError("Waiting for logs...");
       fetchLogs();
     }
@@ -377,27 +444,12 @@ const Container = ({
   }
 
   /**
-   * Start resize
-   */
-  const startResize = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    setIsResizing(true);
-    resizeStartPosition.current = { x: e.clientX, y: e.clientY };
-    resizeStartSize.current = { ...containerSize };
-    
-    // Add event listeners to document for move and up events
-    document.addEventListener('mousemove', handleResizeMove);
-    document.addEventListener('mouseup', handleResizeEnd);
-  }, [containerSize]);
-
-  /**
    * Handle resize move with boundary constraints
    */
   const handleResizeMove = useCallback((e: MouseEvent) => {
     if (!isResizing) return;
     
+    // Calculate delta
     const deltaX = e.clientX - resizeStartPosition.current.x;
     const deltaY = e.clientY - resizeStartPosition.current.y;
     
@@ -431,7 +483,8 @@ const Container = ({
   }, [handleResizeMove]);
   
   /**
-   * Constrain container position to stay within viewport
+   * Utility function to constrain container position within viewport bounds
+   * Ensures at least 40px of the container is always visible
    */
   const constrainPosition = useCallback((pos: { x: number; y: number }) => {
     const windowWidth = window.innerWidth;
@@ -439,19 +492,21 @@ const Container = ({
     const containerWidth = containerSize.width;
     const containerHeight = containerSize.height;
     
-    // Ensure at least 40px of the container is always visible
     return {
       x: Math.min(Math.max(pos.x, -containerWidth + 40), windowWidth - 40),
       y: Math.min(Math.max(pos.y, -containerHeight + 40), windowHeight - 40)
     };
   }, [containerSize.width, containerSize.height]);
 
-  // Add window resize handler to keep container in bounds when window is resized
+  /**
+   * Handle window resize events to keep container within bounds
+   * Adjusts both position and size when window dimensions change
+   */
   useEffect(() => {
     const handleWindowResize = () => {
       setPosition(prev => constrainPosition(prev));
       
-      // Also constrain container size if window gets smaller
+      // Constrain container size if window gets smaller
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
       
@@ -468,7 +523,9 @@ const Container = ({
     return () => window.removeEventListener('resize', handleWindowResize);
   }, [containerSize, position, constrainPosition]);
 
-  // Remove the old event listeners setup since we're now adding/removing them in startResize and handleResizeEnd
+  /**
+   * Remove event listeners on unmount
+   */
   useEffect(() => {
     return () => {
       document.removeEventListener('mousemove', handleResizeMove);
@@ -483,7 +540,7 @@ const Container = ({
   const renderErrorWithRetry = () => {
     return (
       <div className="flex flex-col items-center justify-center h-full p-4">
-        <div className="convex-panel-error mb-4">{error}</div>
+        <div className="convex-panel-error">{error}</div>
         <div className="flex gap-2">
           <button
             onClick={() => {
@@ -502,14 +559,55 @@ const Container = ({
     );
   };
 
-  // Add auto-refresh functionality
+  /**
+   * Auto-refresh logs when watching
+   */
   useEffect(() => {
     let refreshInterval: NodeJS.Timeout | null = null;
     
     if (isOpen && !isPaused && isWatching && !isPermanentlyDisabled) {
       // Refresh logs every 2 seconds when watching
-      refreshInterval = setInterval(() => {
-        fetchLogs();
+      refreshInterval = setInterval(async () => {
+        if (!convexUrl || !accessToken) return;
+        
+        try {
+          const response = await fetchLogsFromApi({
+            cursor,
+            convexUrl,
+            accessToken,
+            signal: pendingRequest.current?.signal
+          });
+
+          if (response.logs.length > 0) {
+            // Get just the latest log
+            const latestLog = response.logs[0];
+            const logId = getLogId(latestLog);
+
+            // Only add if not duplicate
+            if (!logIds.has(logId)) {
+              logIds.add(logId);
+              setLogs(prev => {
+                const newLogs = [latestLog, ...prev];
+                return newLogs.slice(0, maxStoredLogs);
+              });
+
+              if (onLogFetch) {
+                onLogFetch([latestLog]);
+              }
+            }
+          }
+
+          // Update cursor for next poll
+          if (response.newCursor && response.newCursor !== cursor) {
+            setCursor(response.newCursor);
+          }
+
+        } catch (err) {
+          // Error handling remains same as fetchLogs
+          if (onError && err instanceof Error) {
+            onError(err.message);
+          }
+        }
       }, 2000);
     }
     
@@ -518,82 +616,45 @@ const Container = ({
         clearInterval(refreshInterval);
       }
     };
-  }, [isOpen, isPaused, isWatching, isPermanentlyDisabled, fetchLogs]);
+  }, [
+    isOpen, 
+    isPaused, 
+    isWatching, 
+    isPermanentlyDisabled, 
+    convexUrl, 
+    accessToken, 
+    cursor, 
+    getLogId, 
+    logIds, 
+    maxStoredLogs, 
+    onLogFetch, 
+    onError
+  ]);
 
   /**
-   * Optimized filtering logic
+   * Optimized filtering logic using memoized filter predicates
    */
   const filteredLogs = useMemo(() => {
-    // Apply all filters: search text, request ID, log type, and success status
-    return logs.filter(log => {
-      // Filter by log type
-      if (logType !== LogType.ALL) {
-        // Handle specific log types
-        switch (logType) {
-          case LogType.HTTP:
-            // Filter HTTP actions
-            if (log.function?.type !== 'HttpAction') return false;
-            break;
-          case LogType.SUCCESS:
-            // Filter successful logs
-            if (log.status !== 'success') return false;
-            break;
-          case LogType.FAILURE:
-            // Filter failed logs
-            if (log.status !== 'error') return false;
-            break;
-          case LogType.DEBUG:
-          case LogType.LOGINFO:
-          case LogType.WARNING:
-          case LogType.ERROR:
-            // Filter by log level or topic
-            const logLevelLower = log.log_level?.toLowerCase() || '';
-            const topicLower = log.topic?.toLowerCase() || '';
-            const filterValue = logType.toLowerCase();
-            
-            // Check if either log level or topic matches the filter
-            if (logLevelLower !== filterValue && topicLower !== filterValue) {
-              return false;
-            }
-            break;
-          default:
-            // For other types (Query, Mutation, Action), check function type
-            if (log.function?.type !== logType) return false;
-            break;
-        }
-      }
-      
-      // Filter by request ID if specified
-      if (requestIdFilter && log.function?.request_id !== requestIdFilter) return false;
-      
-      // Filter by success status if showSuccess is false
-      if (!showSuccess && log.status === 'success') return false;
-      
-      // Filter by search text
-      if (debouncedFilterText) {
-        const searchText = debouncedFilterText.toLowerCase();
-        const searchableText = [
-          log.function?.path,
-          log.message,
-          log.function?.request_id,
-          log.error_message
-        ].filter(Boolean).join(' ').toLowerCase();
-        
-        return searchableText.includes(searchText);
-      }
-      
-      return true;
-    });
-  }, [logs, logType, requestIdFilter, debouncedFilterText, showSuccess]);
+    const filterPredicate = createFilterPredicate(
+      logType,
+      requestIdFilter,
+      showSuccess,
+      debouncedFilterText
+    );
+    
+    return logs.filter(filterPredicate);
+  }, [logs, logType, requestIdFilter, showSuccess, debouncedFilterText]);
 
-  // Handle settings changes
+  /**
+   * Handle settings changes
+   */
   const handleSettingsChange = useCallback((newSettings: ConvexPanelSettings) => {
     // Update settings state
     setSettings(newSettings);
     
     // Save settings to localStorage
     if (typeof window !== 'undefined') {
-      setStorageItem(SETTINGS_STORAGE_KEY, newSettings);
+      setStorageItem(STORAGE_KEYS.SETTINGS, newSettings);
     }
     
     // Force re-render of the current tab content
@@ -603,15 +664,20 @@ const Container = ({
     // before setting back to the original tab
     requestAnimationFrame(() => {
       setActiveTab('logs');
-      setStorageItem(ACTIVE_TAB_STORAGE_KEY, 'logs');
+      setStorageItem(STORAGE_KEYS.ACTIVE_TAB, 'logs');
       
       // Use another requestAnimationFrame to switch back to the original tab
       requestAnimationFrame(() => {
         setActiveTab(currentTab);
-        setStorageItem(ACTIVE_TAB_STORAGE_KEY, currentTab);
+        setStorageItem(STORAGE_KEYS.ACTIVE_TAB, currentTab);
       });
     });
   }, [activeTab]);
+
+  const handleTabChange = useCallback((tab: TabTypes) => {
+    setActiveTab(tab);
+    setStorageItem(STORAGE_KEYS.ACTIVE_TAB, tab);
+  }, []);
 
   return (
     <motion.div
@@ -726,77 +792,18 @@ const Container = ({
           data-orientation="horizontal" 
           style={{ outline: 'none' }}
         >
-          <button 
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'logs'}
-            aria-controls="tab-content-logs"
-            data-state={activeTab === 'logs' ? 'active' : 'inactive'}
-            id="tab-trigger-logs"
-            className="convex-panel-tab-button"
-            tabIndex={activeTab === 'logs' ? 0 : -1}
-            data-orientation="horizontal"
-            onClick={() => {
-              setActiveTab('logs');
-              setStorageItem(ACTIVE_TAB_STORAGE_KEY, 'logs');
-            }}
-          >
-              <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="convex-panel-tab-icon"><path d="M3.89949 5.50002C3.89949 5.27911 3.7204 5.10003 3.49949 5.10003C3.27857 5.10003 3.09949 5.27911 3.09949 5.50002L3.09949 12.5343L1.78233 11.2172C1.62612 11.061 1.37285 11.061 1.21664 11.2172C1.06043 11.3734 1.06043 11.6267 1.21664 11.7829L3.21664 13.7829C3.29166 13.8579 3.3934 13.9 3.49949 13.9C3.60557 13.9 3.70732 13.8579 3.78233 13.7829L5.78233 11.7829C5.93854 11.6267 5.93854 11.3734 5.78233 11.2172C5.62612 11.061 5.37285 11.061 5.21664 11.2172L3.89949 12.5343L3.89949 5.50002ZM8.49998 13C8.22383 13 7.99998 12.7762 7.99998 12.5C7.99998 12.2239 8.22383 12 8.49998 12H14.5C14.7761 12 15 12.2239 15 12.5C15 12.7762 14.7761 13 14.5 13H8.49998ZM8.49998 10C8.22383 10 7.99998 9.77617 7.99998 9.50002C7.99998 9.22388 8.22383 9.00002 8.49998 9.00002H14.5C14.7761 9.00002 15 9.22388 15 9.50002C15 9.77617 14.7761 10 14.5 10H8.49998C8.22383 10 7.99998 9.77617 7.99998 9.50002ZM7.99998 6.50002C7.99998 6.77617 8.22383 7.00002 8.49998 7.00002H14.5C14.7761 7.00002 15 6.77617 15 6.50002C15 6.22388 14.7761 6.00002 14.5 6.00002H8.49998C8.22383 6.00002 7.99998 6.22388 7.99998 6.50002Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
-            <span>
-              <span className="convex-panel-tab-text">Logs</span>
-            </span>
-          </button>
-
-          <button
-            disabled={false}
-            type="button"
-            role="tab" 
-            aria-selected={activeTab === 'data-tables'}
-            aria-controls="tab-content-data-tables"
-            data-state={activeTab === 'data-tables' ? 'active' : 'inactive'}
-            id="tab-trigger-data-tables"
-            className="convex-panel-tab-button"
-            tabIndex={activeTab === 'data-tables' ? 0 : -1}
-            data-orientation="horizontal"
-            onClick={() => {
-              setActiveTab('data-tables');
-              setStorageItem(ACTIVE_TAB_STORAGE_KEY, 'data-tables');
-            }}
-          >
-            <div className="flex items-center gap-1">
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="convex-panel-tab-data-icon"><path d="M8 2H12.5C12.7761 2 13 2.22386 13 2.5V5H8V2ZM7 5V2H2.5C2.22386 2 2 2.22386 2 2.5V5H7ZM2 6V9H7V6H2ZM8 6H13V9H8V6ZM8 10H13V12.5C13 12.7761 12.7761 13 12.5 13H8V10ZM2 12.5V10H7V13H2.5C2.22386 13 2 12.7761 2 12.5ZM1 2.5C1 1.67157 1.67157 1 2.5 1H12.5C13.3284 1 14 1.67157 14 2.5V12.5C14 13.3284 13.3284 14 12.5 14H2.5C1.67157 14 1 13.3284 1 12.5V2.5Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
-            <span>
-              <span className="convex-panel-tab-text">Data</span>
-            </span>
-            </div>
-          </button>
-
-          <button
-            disabled={false}
-            type="button"
-            role="tab" 
-            aria-selected={activeTab === 'health'}
-            aria-controls="tab-content-health"
-            data-state={activeTab === 'health' ? 'active' : 'inactive'}
-            id="tab-trigger-health"
-            className="convex-panel-tab-button"
-            tabIndex={activeTab === 'health' ? 0 : -1}
-            data-orientation="horizontal"
-            onClick={() => {
-              setActiveTab('health');
-              setStorageItem(ACTIVE_TAB_STORAGE_KEY, 'health');
-            }}
-          >
-            <div className="flex items-center gap-1">
-            <svg className="convex-panel-tab-health-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M9.002 2.5a.75.75 0 01.691.464l6.302 15.305 2.56-6.301a.75.75 0 01.695-.468h4a.75.75 0 010 1.5h-3.495l-3.06 7.532a.75.75 0 01-1.389.004L8.997 5.21l-3.054 7.329A.75.75 0 015.25 13H.75a.75.75 0 010-1.5h4l3.558-8.538a.75.75 0 01.694-.462z"></path></svg>
-            <span>
-              <span className="convex-panel-tab-text">Health</span>
-            </span>
-            </div>
-          </button>
+          {TABS.map(({ id, label }) => (
+            <TabButton
+              key={id}
+              tabId={id}
+              label={label}
+              activeTab={activeTab}
+              onClick={handleTabChange}
+            />
+          ))}
         </div>
         
-        {/* Settings button on the far right */}
+        {/* Settings button */}
         <div className="convex-panel-settings-container">
           <SettingsButton 
             onSettingsChange={handleSettingsChange}
@@ -806,44 +813,37 @@ const Container = ({
       </div>
       
       {activeTab === 'logs' && (
-        <>
-          <LogsToolbar
-            mergedTheme={mergedTheme}
-            isPaused={isPaused}
-            togglePause={togglePause}
-            clearLogs={clearLogs}
-            refreshLogs={refreshLogs}
-            isLoading={isLoading}
-            filterText={filterText}
-            setFilterText={setFilterText}
-            requestIdFilter={requestIdFilter}
-            setRequestIdFilter={setRequestIdFilter}
-            limit={limit}
-            setLimit={setLimit}
-            initialLimit={initialLimit}
-            showSuccess={showSuccess}
-            setShowSuccess={setShowSuccess}
-            isPermanentlyDisabled={isPermanentlyDisabled}
-            setIsPermanentlyDisabled={setIsPermanentlyDisabled}
-            setConsecutiveErrors={setConsecutiveErrors}
-            fetchLogs={fetchLogs}
-            logType={logType}
-            setLogType={setLogType}
-          />
-          
-          <LogsTable
-            mergedTheme={mergedTheme}
-            filteredLogs={filteredLogs}
-            containerSize={containerSize}
-            isDetailPanelOpen={isDetailPanelOpen}
-            selectedLog={selectedLog}
-            setIsDetailPanelOpen={setIsDetailPanelOpen}
-            handleLogSelect={handleLogSelect}
-            error={error}
-            renderErrorWithRetry={renderErrorWithRetry}
-            isPaused={isPaused}
-          />
-        </>
+        <LogsContainer
+          mergedTheme={mergedTheme}
+          isPaused={isPaused}
+          togglePause={togglePause}
+          clearLogs={clearLogs}
+          refreshLogs={refreshLogs}
+          isLoading={isLoading}
+          filterText={filterText}
+          setFilterText={setFilterText}
+          requestIdFilter={requestIdFilter}
+          setRequestIdFilter={setRequestIdFilter}
+          limit={limit}
+          setLimit={setLimit}
+          initialLimit={initialLimit}
+          showSuccess={showSuccess}
+          setShowSuccess={setShowSuccess}
+          isPermanentlyDisabled={isPermanentlyDisabled}
+          setIsPermanentlyDisabled={setIsPermanentlyDisabled}
+          setConsecutiveErrors={setConsecutiveErrors}
+          fetchLogs={fetchLogs}
+          logType={logType}
+          setLogType={setLogType}
+          filteredLogs={filteredLogs}
+          containerSize={containerSize}
+          isDetailPanelOpen={isDetailPanelOpen}
+          selectedLog={selectedLog}
+          setIsDetailPanelOpen={setIsDetailPanelOpen}
+          handleLogSelect={handleLogSelect}
+          error={error as Error | null}
+          renderErrorWithRetry={renderErrorWithRetry}
+        />
       )}
 
       {activeTab === 'data-tables' && (
@@ -869,5 +869,7 @@ const Container = ({
     </motion.div>
   );
 };
+
+Container.displayName = 'Container';
 
 export default Container; 
