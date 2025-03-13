@@ -41,7 +41,7 @@ const ConvexPanel = ({
   maxStoredLogs = 500,
   convex,
   deployKey,
-  cloudUrl,
+  accessToken,
 }: ButtonProps) => {
   const mergedTheme = useMemo(() => ({ ...defaultTheme, ...theme }), [theme]);
   const [isMounted, setIsMounted] = useState(false);
@@ -49,7 +49,7 @@ const ConvexPanel = ({
   const [logoError, setLogoError] = useState(false);
 
   // Only create adminClient if we have a URL and deployKey
-  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || cloudUrl;
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
   const adminClient = convexUrl && deployKey ? new ConvexClient(convexUrl) : null;
   
   // Only set admin auth if we have an adminClient and deployKey
@@ -167,6 +167,7 @@ const ConvexPanel = ({
             dragControls={dragControls}
             adminClient={adminClient}
             initialActiveTab={initialTab}
+            accessToken={accessToken}
           />
         )}
       </AnimatePresence>

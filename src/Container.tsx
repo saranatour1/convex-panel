@@ -33,6 +33,8 @@ interface LogsContainerProps {
   convex: ConvexReactClient;
   adminClient: ConvexClient | null;
   initialActiveTab: 'logs' | 'data-tables' | 'health';
+  accessToken: string;
+  deployUrl?: string;
 }
 
 // Define settings storage key
@@ -69,6 +71,8 @@ const Container = ({
   convex,
   adminClient,
   initialActiveTab,
+  accessToken,
+  deployUrl,
 }: LogsContainerProps) => {
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -99,8 +103,7 @@ const Container = ({
   const lastFetchTime = useRef<number>(0);
   const MIN_FETCH_INTERVAL = 1000;
   const [excludeViewerQueries, setExcludeViewerQueries] = useState(true);
-  const [convexUrl, setConvexUrl] = useState<string>('');
-  const [accessToken, setAccessToken] = useState<string>('');
+  const [convexUrl, setConvexUrl] = useState<string>(deployUrl || '');
   const [activeTab, setActiveTab] = useState<'logs' | 'data-tables' | 'health'>(() => {
     // Initialize from localStorage if available, otherwise use initialActiveTab
     if (typeof window !== 'undefined') {
@@ -126,34 +129,18 @@ const Container = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   /**
-   * Get Convex credentials from environment
+   * Get Convex URL from environment if not provided as prop
    */
   useEffect(() => {
-    const getConvexCredentials = async () => {
-      try {
-        if (typeof window !== 'undefined') {
-          const envUrl = (window as any).ENV?.NEXT_PUBLIC_CONVEX_URL || 
-                         process.env.NEXT_PUBLIC_CONVEX_URL;
-          
-          if (envUrl) {
-            setConvexUrl(envUrl);
-          }
-        }
-        
-        const response = await fetch('/api/convex-token');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.accessToken) {
-            setAccessToken(data.accessToken);
-          }
-        }
-      } catch (error) {
-        console.error('Error getting Convex credentials:', error);
+    if (!convexUrl && typeof window !== 'undefined') {
+      const envUrl = (window as any).ENV?.NEXT_PUBLIC_CONVEX_URL || 
+                     process.env.NEXT_PUBLIC_CONVEX_URL;
+      
+      if (envUrl) {
+        setConvexUrl(envUrl);
       }
-    };
-    
-    getConvexCredentials();
-  }, []);
+    }
+  }, [convexUrl]);
 
   /**
    * Debounce filter text changes
@@ -651,7 +638,7 @@ const Container = ({
         x: position.x,
         y: position.y,
         width: containerSize.width,
-        height: containerSize.height
+        // height: containerSize.height
       }}
     >
       <div className="convex-panel-header-container">

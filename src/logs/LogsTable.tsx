@@ -102,9 +102,9 @@ const LogsTable = ({
           <div className="convex-panel-logs-list-container">
             <List
               height={containerSize.height - (
-                shouldShowStatusMessage ? 190 : 
-                shouldHideStatusWhenWatching ? 160 : 
-                150
+                shouldShowStatusMessage ? 40 : 
+                shouldHideStatusWhenWatching ? 30 : 
+                20
               )}
               itemCount={filteredLogs.length}
               itemSize={isDetailPanelOpen ? 35 : 35}

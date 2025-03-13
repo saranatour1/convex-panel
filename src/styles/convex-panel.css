@@ -41,8 +41,8 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - var(--header-height, 64px) - 3rem);
-    max-height: 40rem;
+    height: 640px;
+    max-height: 640px;
     padding: 0.5rem;
     position: relative;
     margin-right: 1rem;
@@ -714,7 +714,7 @@
   @media (max-width: 768px) {
     .convex-panel-card {
       width: calc(100vw - 2rem) !important;
-      height: calc(100vh - 6rem) !important;
+      height: 640px;
     }
   }
 
@@ -1637,7 +1637,7 @@
 
   .convex-panel-logs-list {
     background-color: #121212;
-    height: 330px !important;
+    height: 467px !important;
   }
 
   /* Logs container layout */
@@ -1944,7 +1944,7 @@
   /*DataTable layout styles */
   .convex-panel-data-layout {
     display: flex;
-    height: 100%;
+    overflow: auto;
   }
 
   .convex-panel-data-content {
