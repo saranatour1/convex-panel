@@ -305,6 +305,18 @@ const Container = ({
       
       // Add logs to the list
       if (newLogs.length > 0) {
+        // Log all incoming logs to find the specific log ID
+        console.log('Incoming logs:', newLogs);
+        
+        // Specifically look for log ID #18b50257e6d44185
+        const targetLog = newLogs.find(log => 
+          log.function?.request_id && log.function.request_id.includes('18b50257e6d44185')
+        );
+        
+        if (targetLog) {
+          console.log('Found target log with ID #18b50257e6d44185:', targetLog);
+        }
+        
         setLogs(prev => {
           const combined = [...newLogs, ...prev];
           const sorted = combined.sort((a, b) => b.timestamp - a.timestamp);

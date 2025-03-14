@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from 'react';
+import { memo, useRef, useState, useEffect } from 'react';
 import { InfoIcon } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { LogRowProps } from '../../types';
@@ -31,6 +31,14 @@ const LogRow = memo(({
   const iconRef = useRef<HTMLDivElement>(null);
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
   const [showTooltip, setShowTooltip] = useState(false);
+  
+  // Log the request ID to find the specific log we're looking for
+  useEffect(() => {
+    const requestId = log.function?.request_id || '';
+    if (requestId.includes('18b50257e6d44185')) {
+      console.log('Found target log:', log);
+    }
+  }, [log]);
   
   /**
    * Function to position the tooltip.
@@ -125,6 +133,12 @@ const LogRow = memo(({
   // Format cached indicator
   const cachedIndicator = log.function?.cached ? '(cached)' : '';
   
+  // Determine if this is an error log
+  const isError = log.status === 'error';
+  
+  // Create a class for the row background based on status
+  const rowBackgroundClass = isError ? 'convex-panel-error-background' : '';
+  
   // Simplified format when detail panel is open
   if (isDetailPanelOpen) {
     // For simplified view, combine type and details for better context
@@ -135,7 +149,7 @@ const LogRow = memo(({
     return (
       <div 
         style={style} 
-        className={`convex-panel-log-row-simplified ${mergedTheme.tableRow}`}
+        className={`convex-panel-log-row-simplified ${mergedTheme.tableRow} ${rowBackgroundClass}`}
         onClick={() => handleLogSelect(log)}
       >
         <div className="convex-panel-log-row-content">
@@ -170,7 +184,7 @@ const LogRow = memo(({
   return (
     <div 
       style={style} 
-      className={`convex-panel-log-row ${mergedTheme.tableRow}`}
+      className={`convex-panel-log-row ${mergedTheme.tableRow} ${rowBackgroundClass}`}
       onClick={() => handleLogSelect(log)}
     >
       <div className="convex-panel-log-row-full-content">
@@ -178,6 +192,7 @@ const LogRow = memo(({
         <div className="convex-panel-log-request-id">{requestId.substring(0, 8)}</div>
         <div className={`convex-panel-log-status ${statusColor}`}>
           {log.status === 'success' && <span className="convex-panel-success-text">success</span>}
+          {log.status === 'error' && <span className="convex-panel-error-text">error</span>}
           {!log.status && cachedIndicator && <span className="convex-panel-cached-text">{cachedIndicator}</span>}
         </div>
         <div className="convex-panel-log-execution-time">{executionTime}</div>

@@ -1049,15 +1049,18 @@
     background-color: #1e1e1e !important;
   }
 
+  /* Error background for log rows */
+  .convex-panel-error-background {
+    background-color: rgba(220, 38, 38, 0.15) !important;
+  }
+
+  .convex-panel-error-background:hover {
+    background-color: rgba(220, 38, 38, 0.25) !important;
+  }
+
   .convex-panel-log-row-content {
     display: flex !important;
     align-items: center !important;
-  }
-
-  .convex-panel-log-row-full-content {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
   }
 
   .convex-panel-log-timestamp {
