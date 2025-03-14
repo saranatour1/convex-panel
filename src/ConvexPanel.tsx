@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, ErrorInfo } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, useDragControls } from 'framer-motion';
 import { motion } from 'framer-motion';
@@ -12,6 +12,7 @@ import cssText from './styles/convex-panel.css';
 import { STORAGE_KEYS, TabTypes } from './utils/constants';
 import { getStorageItem } from './utils/storage';
 import { ConvexLogo } from './components/icons';
+import ErrorBoundary from './ErrorBoundary';
 
 /**
  * Injects the CSS styles into the document head
@@ -211,31 +212,35 @@ const ConvexPanel = ({
     return null;
   }
 
+  // Even if there's an error with the Container component,
+  // we should still render the button
   return (
     <div className="convex-panel-container">
       <AnimatePresence>
         {isOpen && (
-          <Container
-            convex={convex as ConvexReactClient}
-            isOpen={isOpen}
-            toggleOpen={toggleOpen}
-            initialLimit={initialLimit}
-            initialShowSuccess={initialShowSuccess}
-            initialLogType={initialLogType}
-            onLogFetch={onLogFetch}
-            onError={onError}
-            theme={mergedTheme}
-            maxStoredLogs={maxStoredLogs}
-            position={position}
-            setPosition={setPosition}
-            containerSize={containerSize}
-            setContainerSize={setContainerSize}
-            dragControls={dragControls}
-            adminClient={adminClient}
-            initialActiveTab={initialTab}
-            accessToken={accessToken}
-            deployUrl={deployUrl}
-          />
+          <ErrorBoundary>
+            <Container
+              convex={convex as ConvexReactClient}
+              isOpen={isOpen}
+              toggleOpen={toggleOpen}
+              initialLimit={initialLimit}
+              initialShowSuccess={initialShowSuccess}
+              initialLogType={initialLogType}
+              onLogFetch={onLogFetch}
+              onError={onError}
+              theme={mergedTheme}
+              maxStoredLogs={maxStoredLogs}
+              position={position}
+              setPosition={setPosition}
+              containerSize={containerSize}
+              setContainerSize={setContainerSize}
+              dragControls={dragControls}
+              adminClient={adminClient}
+              initialActiveTab={initialTab}
+              accessToken={accessToken}
+              deployUrl={deployUrl}
+            />
+          </ErrorBoundary>
         )}
       </AnimatePresence>
       
