@@ -95,7 +95,19 @@ const LogsTable = ({
    * Whether log streaming is currently paused.
    * Controls if new logs are being fetched and displayed.
    */
-  isPaused
+  isPaused,
+
+  /**
+   * Function called when mouse enters a log row
+   * @param logId ID of the log being hovered
+   * @param event Mouse event
+   */
+  onLogRowMouseEnter,
+  
+  /**
+   * Function called when mouse leaves a log row
+   */
+  onLogRowMouseLeave
 }: LogsTableProps) => {
   /**
    * Whether the user is waiting for logs to appear.
@@ -116,13 +128,17 @@ const LogsTable = ({
     error.includes("Watching logs");
 
   const getListHeight = () => {
-    if (showStatusMessage) return containerSize.height - 40;
-    if (showLiveIndicator) return containerSize.height - 30;
-    return containerSize.height - 20;
+    // Calculate the height of the table header and any status messages
+    const headerHeight = 40; // Height of the table header
+    const statusMessageHeight = showStatusMessage ? 40 : 0;
+    const liveIndicatorHeight = showLiveIndicator ? 30 : 0;
+    
+    // Subtract these heights from the container height
+    return containerSize.height - headerHeight - statusMessageHeight - liveIndicatorHeight;
   };
 
   return (
-    <div className={`convex-panel-logs-container ${isPaused ? 'convex-panel-logs-paused' : ''}`}>
+    <div className={`convex-panel-logs-container`} style={{ height: containerSize.height }}>
       <div className={`convex-panel-logs-main ${isDetailPanelOpen ? 'convex-panel-logs-with-detail' : 'convex-panel-logs-full'}`}>
         {showLiveIndicator && <LiveIndicator />}
         {shouldShowError && renderErrorWithRetry()}
@@ -141,12 +157,14 @@ const LogsTable = ({
               height={getListHeight()}
               itemCount={filteredLogs.length}
               itemSize={35}
-              width={isDetailPanelOpen ? containerSize.width / 2 - 10 : containerSize.width}
+              width={isDetailPanelOpen ? (containerSize.width / 2) - 10 : containerSize.width - 10}
               itemData={{ 
                 logs: filteredLogs, 
                 isDetailPanelOpen,
                 mergedTheme,
-                handleLogSelect
+                handleLogSelect,
+                onLogRowMouseEnter,
+                onLogRowMouseLeave
               }}
               className="convex-panel-logs-list"
             >

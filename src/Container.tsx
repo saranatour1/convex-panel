@@ -241,6 +241,47 @@ const Container = ({
     return () => handler.clear();
   }, [filterText]);
 
+  // Add a ref to track if user has manually scrolled
+  const userHasScrolled = useRef(false);
+  
+  // Function to handle scroll events on the logs list
+  const handleLogScroll = useCallback((event: Event) => {
+    const target = event.target as HTMLElement;
+    
+    // If user has scrolled down at all
+    if (target.scrollTop > 0) {
+      userHasScrolled.current = true;
+      
+      // Auto-pause logs when scrolled down
+      if (!isPaused) {
+        setIsPaused(true);
+      }
+    } else {
+      // If scrolled back to top
+      userHasScrolled.current = false;
+      
+      // Auto-resume logs when scrolled to top
+      if (isPaused) {
+        setIsPaused(false);
+      }
+    }
+  }, [isPaused, setIsPaused]);
+  
+  // Add scroll event listener to the logs list
+  useEffect(() => {
+    const logsListContainer = document.querySelector('.convex-panel-logs-list');
+    
+    if (logsListContainer) {
+      logsListContainer.addEventListener('scroll', handleLogScroll);
+    }
+    
+    return () => {
+      if (logsListContainer) {
+        logsListContainer.removeEventListener('scroll', handleLogScroll);
+      }
+    };
+  }, [handleLogScroll]);
+  
   /**
    * Fetch logs
    */
@@ -253,6 +294,9 @@ const Container = ({
     if (timeSinceLastFetch < INTERVALS.MIN_FETCH_INTERVAL) {
       return;
     }
+    
+    // Update last fetch time
+    lastFetchTime.current = now;
     
     // Only cancel previous request if it's still pending
     if (pendingRequest.current?.signal.aborted === false) {
@@ -305,23 +349,25 @@ const Container = ({
       
       // Add logs to the list
       if (newLogs.length > 0) {
-        // Log all incoming logs to find the specific log ID
-        console.log('Incoming logs:', newLogs);
-        
-        // Specifically look for log ID #18b50257e6d44185
-        const targetLog = newLogs.find(log => 
-          log.function?.request_id && log.function.request_id.includes('18b50257e6d44185')
-        );
-        
-        if (targetLog) {
-          console.log('Found target log with ID #18b50257e6d44185:', targetLog);
-        }
-        
         setLogs(prev => {
+          // Sort logs by timestamp in descending order (newest first)
+          // This ensures consistent chronological ordering regardless of when logs are received
           const combined = [...newLogs, ...prev];
           const sorted = combined.sort((a, b) => b.timestamp - a.timestamp);
+          
+          // Limit the number of logs to prevent memory issues
           return sorted.slice(0, maxStoredLogs);
         });
+        
+        // If we're at the top (not scrolled), scroll to top to show new logs
+        if (!userHasScrolled.current) {
+          const logsListContainer = document.querySelector('.convex-panel-logs-list');
+          if (logsListContainer) {
+            requestAnimationFrame(() => {
+              logsListContainer.scrollTop = 0;
+            });
+          }
+        }
         
         if (onLogFetch) {
           onLogFetch(newLogs);
@@ -389,7 +435,8 @@ const Container = ({
     onError,
     error, 
     isWatching, 
-    logs.length
+    logs.length,
+    userHasScrolled
   ]);
 
   /**
@@ -422,6 +469,23 @@ const Container = ({
   }, [isOpen, isPaused, isWatching, isPermanentlyDisabled, fetchLogs]);
 
   /**
+   * Set up polling interval for fetching logs
+   */
+  useEffect(() => {
+    if (!isOpen || isPaused || isPermanentlyDisabled) return;
+    
+    // Set up polling interval
+    const intervalId = setInterval(() => {
+      fetchLogs();
+    }, INTERVALS.POLLING_INTERVAL);
+    
+    // Clean up interval on unmount
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [isOpen, isPaused, isPermanentlyDisabled, fetchLogs, INTERVALS.POLLING_INTERVAL]);
+
+  /**
    * Refresh logs when the container is opened
    */
   const refreshLogs = useCallback(() => {
@@ -441,7 +505,8 @@ const Container = ({
    * Toggle the pause state of the logs
    */
   const togglePause = useCallback(() => {
-    setIsPaused(!isPaused);
+    const newPausedState = !isPaused;
+    setIsPaused(newPausedState);
   }, [isPaused]);
 
   /**

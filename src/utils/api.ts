@@ -72,7 +72,13 @@ export async function fetchLogsFromApi({
     log_level: entry.level || 'INFO',
     message: entry.message || JSON.stringify(entry),
     execution_time_ms: entry.executionTime ? entry.executionTime * 1000 : undefined,
-    status: entry.success !== null ? (entry.success ? 'success' : 'error') : undefined,
+    status: entry.success === null 
+      ? undefined 
+      : (typeof entry.success === 'object' && entry.success !== null)
+        ? 'success'  // If success is an object (like {status: "200"}), it's a success
+        : entry.success === true
+          ? 'success'
+          : 'error',
     error_message: entry.error,
     raw: entry
   })) || [];

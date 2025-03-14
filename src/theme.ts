@@ -45,6 +45,14 @@ export const buttonVariants = {
 };
 
 export const detailPanelVariants = {
-  hidden: { opacity: 0, x: 20, width: 0 },
-  visible: { opacity: 1, x: 0, width: '50%', transition: { duration: 0.3, ease: 'easeOut' } }
+  hidden: { opacity: 0, x: 50, width: 0 },
+  visible: { 
+    opacity: 1, 
+    x: 0, 
+    width: '50%', 
+    transition: { 
+      duration: 0.3, 
+      ease: 'easeOut' 
+    } 
+  }
 };

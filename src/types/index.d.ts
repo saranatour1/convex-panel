@@ -132,6 +132,8 @@ export interface LogsContainerProps {
   handleLogSelect: (log: LogEntry) => void;
   error: Error | null;
   renderErrorWithRetry: () => React.ReactNode;
+  onLogRowMouseEnter?: (logId: string, event: React.MouseEvent) => void;
+  onLogRowMouseLeave?: () => void;
 }
 
 // LogsToolbar props
@@ -172,18 +174,15 @@ export interface LogsTableProps {
   error: string | null;
   renderErrorWithRetry: () => React.ReactNode;
   isPaused: boolean;
+  onLogRowMouseEnter?: (logId: string, event: React.MouseEvent) => void;
+  onLogRowMouseLeave?: () => void;
 }
 
 // LogRow props
 export interface LogRowProps {
   index: number;
   style: React.CSSProperties;
-  data: {
-    logs: LogEntry[];
-    isDetailPanelOpen: boolean;
-    mergedTheme: ThemeClasses;
-    handleLogSelect: (log: LogEntry) => void;
-  };
+  data: LogRowItemData;
 }
 
 // LogDetailPanel props
@@ -500,3 +499,13 @@ export interface SchedulerStatusProps {
 // Types
 export type TimeSeriesData = [TimeStamp, number | null][];
 export type APIResponse = [string, TimeSeriesData][];
+
+// Update the LogRow itemData interface
+export interface LogRowItemData {
+  logs: LogEntry[];
+  isDetailPanelOpen: boolean;
+  mergedTheme: ThemeClasses;
+  handleLogSelect: (log: LogEntry) => void;
+  onLogRowMouseEnter?: (logId: string, event: React.MouseEvent) => void;
+  onLogRowMouseLeave?: () => void;
+}

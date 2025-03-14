@@ -1058,9 +1058,17 @@
     background-color: rgba(220, 38, 38, 0.25) !important;
   }
 
+  .convex-panel-log-row-full-content {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+
   .convex-panel-log-row-content {
     display: flex !important;
     align-items: center !important;
+    width: 100% !important;
   }
 
   .convex-panel-log-timestamp {
@@ -1083,6 +1091,8 @@
   .convex-panel-log-status {
     font-size: 0.75rem !important;
     width: 4rem !important;
+    text-align: center !important;
+    flex-shrink: 0 !important;
   }
 
   .convex-panel-success-text {
@@ -1131,6 +1141,13 @@
     color: white !important;
     flex: 1 !important;
     font-family: monospace !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .convex-panel-log-details-truncated {
+    max-width: 150px !important;
+    white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
@@ -1636,11 +1653,11 @@
   .convex-panel-logs-list-container {
     flex: 1;
     overflow: hidden;
+    height: 100%;
   }
 
   .convex-panel-logs-list {
     background-color: #121212;
-    height: 467px !important;
   }
 
   /* Logs container layout */
@@ -1649,27 +1666,29 @@
     display: flex;
     flex-direction: row; /* Ensure horizontal layout */
     overflow: hidden;
-    width: 100%; /* Ensure full width */
     position: relative; /* Establish positioning context */
+    height: 100%; /* Ensure full height */
+    width: 100%; /* Ensure full width */
   }
 
   .convex-panel-logs-paused {
-    opacity: 0.5;
+    /* Remove opacity effect */
   }
 
   .convex-panel-logs-main {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    flex-shrink: 0; /* Prevent shrinking */
+    height: 100%; /* Ensure full height */
   }
 
   .convex-panel-logs-with-detail {
-    width: 50%;
+    width: 50%; /* Set width to 50% when detail panel is open */
+    flex-shrink: 0; /* Prevent shrinking */
   }
 
   .convex-panel-logs-full {
-    width: 100%;
+    width: 100%; /* Set width to 100% when detail panel is closed */
   }
 
   .convex-panel-live-indicator {
@@ -1690,11 +1709,13 @@
 
   /* Detail Panel Styles */
   .convex-panel-detail-panel {
-    width: 50%;
     overflow-y: auto;
     background-color: #121212;
     flex-shrink: 0; /* Prevent shrinking */
     border-left: 1px solid #333; /* Add a separator */
+    width: 50%; /* Set width to 50% of the container */
+    height: 100%; /* Set height to 100% */
+    position: relative; /* Ensure proper positioning */
   }
 
   .convex-panel-detail-header {
@@ -2234,5 +2255,22 @@
 
   .convex-panel-column-header:hover {
     background-color: #333 !important;
+  }
+
+  .convex-panel-log-details-text {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+  }
+
+  /* Add a new style for the paused live button */
+  .convex-panel-live-button-paused {
+    background-color: #953f3f !important; /* Red background for paused state */
+    border: 1px solid rgba(149, 63, 63, 0.25) !important;
+  }
+
+  .convex-panel-live-button-paused:hover {
+    background-color: rgba(149, 63, 63, 0.6) !important;
   }
 }

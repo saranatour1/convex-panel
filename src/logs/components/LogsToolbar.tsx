@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import { PlayCircleIcon, PauseCircleIcon } from 'lucide-react';
 import { LogType } from '../../utils/constants';
 import { ConvexPanelSettings } from '../../settings/SettingsModal';
-import { getStorageItem } from '../../utils/storage';
+import { getStorageItem, setStorageItem } from '../../utils/storage';
 import { defaultSettings, STORAGE_KEYS } from '../../utils/constants';
 import { LogsToolbarProps } from '../../types';
 import { ChevronDownIcon, RefreshIcon } from 'src/components/icons';
@@ -201,12 +201,54 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
     };
   }, [isLogTypeDropdownOpen]);
 
+  /**
+   * Handle Go Live button click
+   * Toggles pause state and scrolls to top when resuming
+   */
+  const handleGoLive = () => {
+    // If we're currently paused and about to go live
+    if (isPaused) {
+      // First toggle the pause state
+      togglePause();
+      
+      // Then scroll logs to the top
+      // Use requestAnimationFrame to ensure the DOM has updated
+      requestAnimationFrame(() => {
+        const logsListContainer = document.querySelector('.convex-panel-logs-list');
+        if (logsListContainer) {
+          logsListContainer.scrollTop = 0;
+        }
+      });
+    } else {
+      // Just toggle the pause state if we're not paused
+      togglePause();
+    }
+  };
+
+  /**
+   * Handle log type change
+   * Updates the log type and saves it to localStorage
+   */
+  const handleLogTypeChange = (type: LogType) => {
+    setLogType(type);
+    setStorageItem(STORAGE_KEYS.LOG_TYPE_FILTER, type);
+    setIsLogTypeDropdownOpen(false);
+  };
+
+  // Load saved log type from localStorage on mount
+  useEffect(() => {
+    const savedLogType = getStorageItem<LogType>(STORAGE_KEYS.LOG_TYPE_FILTER, LogType.ALL);
+    if (savedLogType && savedLogType !== logType) {
+      setLogType(savedLogType);
+    }
+  }, [setLogType, logType]);
+
   return (
     <div ref={ref} className={`convex-panel-toolbar ${mergedTheme.toolbar}`}>
       <div className="convex-panel-toolbar-button-container">
         <button 
           className={`convex-panel-live-button ${mergedTheme.input}`}
-          onClick={togglePause}
+          onClick={handleGoLive}
         >
           {isPaused ? <PlayCircleIcon className="convex-panel-button-icon" /> : <PauseCircleIcon className="convex-panel-button-icon" />}
           {isPaused ? 'Go Live' : 'Pause'}
@@ -325,8 +367,7 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    setLogType(type);
-                    setIsLogTypeDropdownOpen(false);
+                    handleLogTypeChange(type);
                   }}
                   onMouseDown={(e) => e.stopPropagation()}
                 >

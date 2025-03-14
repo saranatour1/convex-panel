@@ -176,6 +176,18 @@ export const LogsContainer = ({
    * Displays error message and retry button.
    */
   renderErrorWithRetry,
+
+  /**
+   * Function called when mouse enters a log row
+   * @param logId ID of the log being hovered
+   * @param event Mouse event
+   */
+  onLogRowMouseEnter,
+  
+  /**
+   * Function called when mouse leaves a log row
+   */
+  onLogRowMouseLeave,
 }: LogsContainerProps) => {
   return (
     <>
@@ -214,6 +226,8 @@ export const LogsContainer = ({
         error={error ? error.message : null}
         renderErrorWithRetry={renderErrorWithRetry}
         isPaused={isPaused}
+        onLogRowMouseEnter={onLogRowMouseEnter}
+        onLogRowMouseLeave={onLogRowMouseLeave}
       />
     </>
   );

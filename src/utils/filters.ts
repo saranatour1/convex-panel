@@ -11,17 +11,35 @@ const createLogTypeFilter = (logType: LogType) => (log: LogEntry): boolean => {
     case LogType.SUCCESS:
       return log.status === 'success';
     case LogType.FAILURE:
-      return log.status === 'error';
+      // Check for explicit failure status
+      if (log.status === 'error' || log.status === 'failure') return true;
+      
+      // Check for error message
+      if (log.error_message) return true;
+      
+      // Check for error in raw data
+      if (log.raw) {
+        return !!log.raw.error || 
+               log.raw.failure === true || 
+               log.raw.success === false;
+      }
+      
+      return false;
     case LogType.DEBUG:
+      return log.log_level?.toLowerCase() === 'debug';
     case LogType.LOGINFO:
+      return log.log_level?.toLowerCase() === 'loginfo' || log.log_level?.toLowerCase() === 'info';
     case LogType.WARNING:
+      return log.log_level?.toLowerCase() === 'warn' || log.log_level?.toLowerCase() === 'warning';
     case LogType.ERROR:
-      const logLevelLower = log.log_level?.toLowerCase() || '';
-      const topicLower = log.topic?.toLowerCase() || '';
-      const filterValue = logType.toLowerCase();
-      return logLevelLower === filterValue || topicLower === filterValue;
+      return log.log_level?.toLowerCase() === 'error';
     default:
-      return log.function?.type === logType;
+      // For any other type, check both function type and log_level
+      const logTypeStr = String(logType).toLowerCase();
+      const typeMatch = log.function?.type ? log.function.type.toLowerCase() === logTypeStr : false;
+      const logLevelMatch = log.log_level ? log.log_level.toLowerCase() === logTypeStr : false;
+      const topicMatch = log.topic ? log.topic.toLowerCase() === logTypeStr : false;
+      return typeMatch || logLevelMatch || topicMatch;
   }
 };
 

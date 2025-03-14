@@ -14,21 +14,48 @@ export const STORAGE_KEYS: Record<string, string> = {
   ACTIVE_TABLE: `${STORAGE_PREFIX}:active-table`,
   TABLE_FILTERS: `${STORAGE_PREFIX}:table-filters`,
   SIDEBAR_COLLAPSED: `${STORAGE_PREFIX}:sidebar-collapsed`,
+  LOG_TYPE_FILTER: `${STORAGE_PREFIX}:log-type-filter`,
 }
 
-// Interval constants
+/**
+ * Interval constants for polling and retries
+ */
 export const INTERVALS = {
-  MINUTE: 60,
-  HOUR: 3600,
-  DAY: 86400,
-  WEEK: 604800,
-  MONTH: 2592000,
-  YEAR: 31536000,
+  /**
+   * Polling interval for fetching logs in milliseconds
+   * Controls how frequently logs are fetched when streaming
+   * @default 1000
+   */
+  POLLING_INTERVAL: 1000,
+
+  /**
+   * Minimum interval between fetch requests in milliseconds
+   * Prevents too frequent API calls
+   * @default 500
+   */
   MIN_FETCH_INTERVAL: 1000,
-  MAX_RETRY_ATTEMPTS: 3,
+
+  /**
+   * Delay before retrying after a timeout in milliseconds
+   * Controls backoff period after failed requests
+   * @default 2000
+   */
   RETRY_DELAY: 2000,
-  MAX_CONSECUTIVE_ERRORS: 5,
-}
+
+  /**
+   * Maximum number of retry attempts for timeouts
+   * Prevents infinite retry loops
+   * @default 3
+   */
+  MAX_RETRY_ATTEMPTS: 3,
+
+  /**
+   * Maximum number of consecutive errors before disabling
+   * Prevents continuous failed requests
+   * @default 5
+   */
+  MAX_CONSECUTIVE_ERRORS: 5
+};
 
 // Tab types
 export type TabTypes = 'logs' | 'data-tables' | 'health';

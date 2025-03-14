@@ -35,7 +35,7 @@ const LogDetailPanel = ({
       initial="hidden"
       animate="visible"
       exit="hidden"
-      layout
+      style={{ width: '50%', height: '100%' }}
     >
       <div className="convex-panel-detail-header">
         <h3 className="convex-panel-detail-title">LOG DETAILS</h3>
