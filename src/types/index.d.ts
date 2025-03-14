@@ -55,6 +55,9 @@ export interface ThemeClasses {
   warningText?: string;
 }
 
+// Button position type
+export type ButtonPosition = 'bottom-left' | 'bottom-center' | 'bottom-right' | 'right-center' | 'top-right';
+
 /**
  * ConvexPanel component props
  */
@@ -72,6 +75,12 @@ export type ButtonProps = {
   deployKey?: string;
   accessToken: string;
   deployUrl?: string;
+  /**
+   * Position of the ConvexPanel button.
+   * Controls where the button appears on the screen.
+   * @default 'bottom-right'
+   */
+  buttonPosition?: ButtonPosition;
 }
 
 /**

@@ -122,6 +122,13 @@ const ConvexPanel = ({
    * @optional
    */
   deployUrl,
+
+  /**
+   * Position of the ConvexPanel button.
+   * Controls where the button appears on the screen.
+   * @default 'bottom-right'
+   */
+  buttonPosition = 'bottom-right',
 }: ButtonProps) => {
   const dragControls = useDragControls();
   const mergedTheme = useMemo(() => ({ ...defaultTheme, ...theme }), [theme]);
@@ -207,6 +214,56 @@ const ConvexPanel = ({
     }
   };
 
+  // Get button position styles based on buttonPosition prop
+  const getButtonPositionStyles = () => {
+    const baseStyles = {
+      position: 'fixed',
+      margin: '20px',
+      zIndex: 9999,
+    } as const;
+
+    switch (buttonPosition) {
+      case 'bottom-left':
+        return {
+          ...baseStyles,
+          bottom: 0,
+          left: 0,
+        };
+      case 'bottom-center':
+        return {
+          ...baseStyles,
+          bottom: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+        };
+      case 'bottom-right':
+        return {
+          ...baseStyles,
+          bottom: 0,
+          right: 0,
+        };
+      case 'right-center':
+        return {
+          ...baseStyles,
+          top: '50%',
+          right: 0,
+          transform: 'translateY(-50%)',
+        };
+      case 'top-right':
+        return {
+          ...baseStyles,
+          top: 0,
+          right: 0,
+        };
+      default:
+        return {
+          ...baseStyles,
+          bottom: 0,
+          right: 0,
+        };
+    }
+  };
+
   // Don't render anything on the server
   if (!isMounted) {
     return null;
@@ -284,6 +341,7 @@ const ConvexPanel = ({
         whileTap="tap"
         animate={isOpen ? { rotate: 180 } : { rotate: 0 }}
         transition={{ duration: 0.3 }}
+        style={getButtonPositionStyles()}
       >
         <ConvexLogo />
       </motion.button>
