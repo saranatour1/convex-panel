@@ -212,13 +212,44 @@ const ConvexPanel = ({
     return null;
   }
 
-  // Even if there's an error with the Container component,
-  // we should still render the button
+  // Render the button and container separately
+  // The button should always be visible, even if there's an error with the Container
   return (
     <div className="convex-panel-container">
       <AnimatePresence>
         {isOpen && (
-          <ErrorBoundary>
+          <ErrorBoundary fallback={
+            <div className="convex-panel-error-container" style={{
+              position: 'fixed',
+              top: position.y,
+              left: position.x,
+              width: containerSize.width,
+              height: 'auto',
+              backgroundColor: '#1e1e1e',
+              color: '#ff5555',
+              padding: '20px',
+              borderRadius: '8px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+              zIndex: 9999,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h3 style={{ margin: 0 }}>Convex Panel Error</h3>
+                <button 
+                  onClick={toggleOpen}
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: '#fff', 
+                    fontSize: '18px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+              <p>An error occurred while loading the Convex Panel. Please check the console for more details.</p>
+            </div>
+          }>
             <Container
               convex={convex as ConvexReactClient}
               isOpen={isOpen}
