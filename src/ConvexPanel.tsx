@@ -8,6 +8,7 @@ import { defaultTheme, buttonVariants } from './theme';
 import Container from './Container';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexClient } from 'convex/browser';
+// @ts-ignore
 import cssText from './styles/convex-panel.css';
 import { STORAGE_KEYS, TabTypes } from './utils/constants';
 import { getStorageItem } from './utils/storage';
