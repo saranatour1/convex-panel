@@ -30,12 +30,14 @@ const LogDetailPanel = ({
   
   return (
     <motion.div 
-      className={`convex-panel-detail-panel ${mergedTheme.container}`}
-      variants={detailPanelVariants}
-      initial="hidden"
-      animate="visible"
-      exit="hidden"
-      style={{ width: '50%', height: '100%' }}
+      {...{
+        className: `convex-panel-detail-panel ${mergedTheme.container}`,
+        variants: detailPanelVariants,
+        initial: "hidden",
+        animate: "visible",
+        exit: "hidden",
+        style: { width: '50%', height: '100%' }
+      } as any}
     >
       <div className="convex-panel-detail-header">
         <h3 className="convex-panel-detail-title">LOG DETAILS</h3>
