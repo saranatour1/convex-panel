@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, HTMLMotionProps, PanInfo } from 'framer-motion';
 import debounce from 'debounce';
 import { ContainerProps, LogEntry } from "./types";
 import { LogType } from './utils/constants';
@@ -930,31 +930,32 @@ const Container = ({
 
   return (
     <motion.div
-      ref={containerRef}
-      className="convex-panel-card"
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      drag
-      dragControls={dragControls}
-      dragMomentum={false}
-      dragElastic={0}
-      onDragEnd={(_, info) => {
-        setPosition((prev: { x: number; y: number }) => {
-          const newPos = {
-            x: prev.x + info.offset.x,
-            y: prev.y + info.offset.y
-          };
-          return constrainPosition(newPos);
-        });
-      }}
-      style={{
-        x: position.x,
-        y: position.y,
-        width: containerSize.width,
-        // height: containerSize.height
-      }}
+      {...{
+        ref: containerRef,
+        className: "convex-panel-card",
+        variants: cardVariants,
+        initial: "hidden",
+        animate: "visible",
+        exit: "exit",
+        drag: true,
+        dragControls,
+        dragMomentum: false,
+        dragElastic: 0,
+        onDragEnd: (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+          setPosition((prev: { x: number; y: number }) => {
+            const newPos = {
+              x: prev.x + info.offset.x,
+              y: prev.y + info.offset.y
+            };
+            return constrainPosition(newPos);
+          });
+        },
+        style: {
+          x: position.x,
+          y: position.y,
+          width: containerSize.width,
+        }
+      } as any}
     >
       <div className="convex-panel-header-container">
         <div 
