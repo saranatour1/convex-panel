@@ -343,15 +343,17 @@ const ConvexPanel = ({
       </AnimatePresence>
       
       <motion.button
-        className="convex-panel-button"
-        onClick={toggleOpen}
-        variants={buttonVariants}
-        initial="rest"
-        whileHover="hover"
-        whileTap="tap"
-        animate={isOpen ? { rotate: 180 } : { rotate: 0 }}
-        transition={{ duration: 0.3 }}
-        style={getButtonPositionStyles()}
+        {...{
+          className: "convex-panel-button",
+          onClick: toggleOpen,
+          variants: buttonVariants,
+          initial: "rest",
+          whileHover: "hover",
+          whileTap: "tap",
+          animate: isOpen ? { rotate: 180 } : { rotate: 0 },
+          transition: { duration: 0.3 },
+          style: getButtonPositionStyles()
+        } as any}
       >
         <ConvexLogo />
       </motion.button>
