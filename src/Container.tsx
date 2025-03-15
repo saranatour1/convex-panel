@@ -164,8 +164,18 @@ const Container = ({
    * @optional
    */
   deployUrl,
+
+  /**
+   * Whether to use mock data instead of real API data.
+   * Useful for development, testing, and demos.
+   * When true, the component will use mock data instead of making API calls.
+   * @default false
+   */
+  useMockData = false,
 }: ContainerProps) => {
   let baseUrl;
+
+  console.log('useMockData', useMockData);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFetchTime = useRef<number>(0);
@@ -286,7 +296,27 @@ const Container = ({
    * Fetch logs
    */
   const fetchLogs = useCallback(async () => {
-    if (!isOpen || isPaused || !convexUrl || !accessToken) return;
+    // Don't fetch if the panel is closed or paused
+    if (!isOpen || isPaused) {
+      return;
+    }
+    
+    console.log("useMockData", useMockData);
+    
+    // For mock data, clear any error message immediately
+    if (useMockData) {
+      setError(null);
+      setShowRetryButton(false);
+    }
+    
+    // For real data, we need convexUrl and accessToken
+    // For mock data, we can proceed without them
+    if (!useMockData && (!convexUrl || !accessToken)) {
+      console.log("Missing convexUrl or accessToken, skipping fetch");
+      return;
+    }
+    
+    console.log("Fetching logs with useMockData:", useMockData, "cursor:", cursor);
     
     // Prevent frequent polling with a more strict check
     const now = Date.now();
@@ -298,26 +328,37 @@ const Container = ({
     // Update last fetch time
     lastFetchTime.current = now;
     
-    // Only cancel previous request if it's still pending
-    if (pendingRequest.current?.signal.aborted === false) {
+    // Only cancel previous request if it's still pending and we're not using mock data
+    // Mock data doesn't need AbortController since it's not making real network requests
+    if (!useMockData && pendingRequest.current?.signal.aborted === false) {
       pendingRequest.current.abort();
     }
     
-    pendingRequest.current = new AbortController();
+    // Only create a new AbortController if we're not using mock data
+    if (!useMockData) {
+      pendingRequest.current = new AbortController();
+    }
     
     setIsLoading(true);
     
     // Only show "Waiting for logs" if we're not already watching
-    if (!isWatching || !error || error.includes('Failed to fetch logs') || error.includes('Request timed out')) {
+    if (!isWatching || !error || (typeof error === 'string' && (error.includes('Failed to fetch logs') || error.includes('Request timed out')))) {
       setError("Waiting for logs...");
     }
     
     try {
       const response = await fetchLogsFromApi({
         cursor,
-        convexUrl,
-        accessToken,
-        signal: pendingRequest.current.signal
+        convexUrl: useMockData ? 'mock-deployment.convex.cloud' : convexUrl,
+        accessToken: useMockData ? 'mock-token' : accessToken,
+        signal: useMockData ? undefined : pendingRequest.current?.signal,
+        useMockData
+      });
+      
+      console.log("Received logs response:", {
+        logCount: response.logs.length,
+        newCursor: response.newCursor,
+        hostname: response.hostname
       });
       
       // Reset retry attempts on success
@@ -327,6 +368,7 @@ const Container = ({
       
       // Update cursor for next poll if available and different from current
       if (response.newCursor && response.newCursor !== cursor) {
+        console.log("Updating cursor from", cursor, "to", response.newCursor);
         setCursor(response.newCursor);
       }
       
@@ -334,18 +376,28 @@ const Container = ({
       setIsWatching(true);
       
       // Update the message to indicate we're watching logs (not an error)
-      // Only update the message if we don't have logs yet
+      // Only update the message if we don't have logs yet and we're not using mock data
       if (logs.length === 0) {
-        setError(`Watching logs for ${response.hostname.split('.')[0]}...`);
+        if (useMockData) {
+          // For mock data, don't show any error message
+          setError(null);
+        } else {
+          setError(`Watching logs for ${response.hostname.split('.')[0]}...`);
+        }
       }
       
       // Filter out duplicate logs
       const newLogs = response.logs.filter((log: LogEntry) => {
         const logId = getLogId(log);
-        if (logIds.has(logId)) return false;
+        if (logIds.has(logId)) {
+          console.log("Duplicate log detected:", logId);
+          return false;
+        }
         logIds.add(logId);
         return true;
       });
+      
+      console.log("After filtering duplicates, new logs count:", newLogs.length);
       
       // Add logs to the list
       if (newLogs.length > 0) {
@@ -374,12 +426,31 @@ const Container = ({
         }
         
         // Update the message to indicate we're watching logs (not an error)
-        setError(`Watching logs for ${response.hostname.split('.')[0]}...`);
+        if (!useMockData) {
+          setError(`Watching logs for ${response.hostname.split('.')[0]}...`);
+        } else {
+          // For mock data, don't show any error message
+          setError(null);
+        }
       } else if (logs.length === 0) {
         // If no logs were returned and we don't have any logs yet, update the message
-        setError(`Watching logs for ${response.hostname.split('.')[0]}...`);
+        if (!useMockData) {
+          setError(`Watching logs for ${response.hostname.split('.')[0]}...`);
+        } else {
+          // For mock data, don't show any error message
+          setError(null);
+        }
       }
     } catch (err) {
+      console.error("Error fetching logs:", err);
+      
+      // Skip API-specific error handling when using mock data
+      if (useMockData) {
+        console.log("Error occurred with mock data, ignoring API-specific error handling");
+        setIsLoading(false);
+        return;
+      }
+      
       // Handle timeout errors
       if (err instanceof Error && err.message.includes('HTTP 504') && retryAttempts < INTERVALS.MAX_RETRY_ATTEMPTS) {
         setRetryAttempts(prev => prev + 1);
@@ -436,7 +507,8 @@ const Container = ({
     error, 
     isWatching, 
     logs.length,
-    userHasScrolled
+    userHasScrolled,
+    useMockData
   ]);
 
   /**
@@ -446,7 +518,13 @@ const Container = ({
     let timeoutId: NodeJS.Timeout | null = null;
     
     const scheduleNextFetch = () => {
-      if (isOpen && !isPaused && isWatching && !isPermanentlyDisabled) {
+      // For mock data, we only need to check if the panel is open and not paused
+      // For real data, we also need to check if we're watching and not permanently disabled
+      const shouldSchedule = useMockData 
+        ? isOpen && !isPaused 
+        : isOpen && !isPaused && isWatching && !isPermanentlyDisabled;
+      
+      if (shouldSchedule) {
         timeoutId = setTimeout(() => {
           fetchLogs().finally(() => {
             // Schedule next fetch only after current one completes
@@ -457,7 +535,13 @@ const Container = ({
     };
     
     // Initial fetch when watching starts
-    if (isOpen && !isPaused && isWatching && !isPermanentlyDisabled) {
+    // For mock data, we start fetching as soon as the panel is open
+    // For real data, we wait until we're watching
+    const shouldStartFetching = useMockData 
+      ? isOpen && !isPaused 
+      : isOpen && !isPaused && isWatching && !isPermanentlyDisabled;
+    
+    if (shouldStartFetching) {
       scheduleNextFetch();
     }
     
@@ -466,12 +550,16 @@ const Container = ({
         clearTimeout(timeoutId);
       }
     };
-  }, [isOpen, isPaused, isWatching, isPermanentlyDisabled, fetchLogs]);
+  }, [isOpen, isPaused, isWatching, isPermanentlyDisabled, fetchLogs, useMockData]);
 
   /**
    * Set up polling interval for fetching logs
    */
   useEffect(() => {
+    // Skip this effect entirely when using mock data
+    // The auto-refresh effect above will handle mock data
+    if (useMockData) return;
+    
     if (!isOpen || isPaused || isPermanentlyDisabled) return;
     
     // Set up polling interval
@@ -483,23 +571,33 @@ const Container = ({
     return () => {
       clearInterval(intervalId);
     };
-  }, [isOpen, isPaused, isPermanentlyDisabled, fetchLogs, INTERVALS.POLLING_INTERVAL]);
+  }, [isOpen, isPaused, isPermanentlyDisabled, fetchLogs, INTERVALS.POLLING_INTERVAL, useMockData]);
 
   /**
    * Refresh logs when the container is opened
    */
   const refreshLogs = useCallback(() => {
-    if (!isPaused && !isPermanentlyDisabled) {
+    // For mock data, we only need to check if the panel is not paused
+    // For real data, we also need to check if it's not permanently disabled
+    const shouldRefresh = useMockData 
+      ? !isPaused 
+      : !isPaused && !isPermanentlyDisabled;
+    
+    if (shouldRefresh) {
       fetchLogs();
     }
-  }, [fetchLogs, isPaused, isPermanentlyDisabled, isOpen]);
+  }, [fetchLogs, isPaused, isPermanentlyDisabled, useMockData]);
 
   // call refreshLogs when the container is opened
   useEffect(() => {
     if (isOpen) {
-      refreshLogs();
+      // For mock data, we always want to refresh logs when the container is opened
+      // For real data, we only refresh if we have the necessary API credentials
+      if (useMockData || (convexUrl && accessToken)) {
+        refreshLogs();
+      }
     }
-  }, [isOpen, refreshLogs]);
+  }, [isOpen, refreshLogs, convexUrl, accessToken, useMockData]);
 
   /**
    * Toggle the pause state of the logs
@@ -627,27 +725,55 @@ const Container = ({
    * Render the retry button
    * Will be shown if there is an error and the connection is not permanently disabled
    */
-  const renderErrorWithRetry = () => {
+  const renderErrorWithRetry = useCallback(() => {
+    if (!error) return null;
+    
+    // Don't show any error message or retry button for mock data
+    if (useMockData) {
+      return null;
+    }
+    
+    const handleRetry = () => {
+      // Only reset API-specific states when not using mock data
+      if (!useMockData) {
+        setIsPermanentlyDisabled(false);
+        setConsecutiveErrors(0);
+      }
+      refreshLogs();
+    };
+    
     return (
-      <div className="flex flex-col items-center justify-center h-full p-4">
-        <div className="convex-panel-error">{error}</div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => {
-              setError(null);
-              setShowRetryButton(false);
-              setIsPermanentlyDisabled(false);
-              setConsecutiveErrors(0);
-              fetchLogs();
-            }}
-            className="convex-panel-button-sm"
-          >
+      <div className="convex-panel-error">
+        <div className="convex-panel-error-message">{error}</div>
+        {showRetryButton && (
+          <button className="convex-panel-retry-button" onClick={handleRetry}>
             Retry
           </button>
-        </div>
+        )}
       </div>
     );
-  };
+  }, [error, refreshLogs, showRetryButton, useMockData]);
+
+  // Render a message when the panel is permanently disabled
+  const renderPermanentlyDisabled = useCallback(() => {
+    return (
+      <div className="convex-panel-error">
+        <div className="convex-panel-error-message">
+          Connection to Convex has been permanently disabled due to too many errors.
+        </div>
+        <button 
+          className="convex-panel-retry-button" 
+          onClick={() => {
+            setIsPermanentlyDisabled(false);
+            setConsecutiveErrors(0);
+            refreshLogs();
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }, [refreshLogs]);
 
   /**
    * Optimized filtering logic using memoized filter predicates
@@ -709,6 +835,94 @@ const Container = ({
       }
     };
   }, []);
+
+  const renderContent = () => {
+    // If the panel is closed, don't render anything
+    if (!isOpen) {
+      return null;
+    }
+
+    // This function only handles the logs tab content
+    // If we're using mock data for logs, show the logs list
+    if (useMockData) {
+      return (
+        <LogsContainer
+          mergedTheme={mergedTheme}
+          isPaused={isPaused}
+          togglePause={togglePause}
+          clearLogs={clearLogs}
+          refreshLogs={refreshLogs}
+          isLoading={isLoading}
+          filterText={filterText}
+          setFilterText={setFilterText}
+          requestIdFilter={requestIdFilter}
+          setRequestIdFilter={setRequestIdFilter}
+          limit={limit}
+          setLimit={setLimit}
+          initialLimit={initialLimit}
+          showSuccess={showSuccess}
+          setShowSuccess={setShowSuccess}
+          isPermanentlyDisabled={isPermanentlyDisabled}
+          setIsPermanentlyDisabled={setIsPermanentlyDisabled}
+          setConsecutiveErrors={setConsecutiveErrors}
+          fetchLogs={fetchLogs}
+          logType={logType}
+          setLogType={setLogType}
+          filteredLogs={filteredLogs}
+          containerSize={containerSize}
+          isDetailPanelOpen={isDetailPanelOpen}
+          selectedLog={selectedLog}
+          setIsDetailPanelOpen={setIsDetailPanelOpen}
+          handleLogSelect={handleLogSelect}
+          error={error as Error | null}
+          renderErrorWithRetry={renderErrorWithRetry}
+        />
+      );
+    }
+
+    // For real data, handle various states
+    if (isPermanentlyDisabled) {
+      return renderPermanentlyDisabled();
+    }
+
+    if (error && showRetryButton) {
+      return renderErrorWithRetry();
+    }
+
+    return (
+      <LogsContainer
+        mergedTheme={mergedTheme}
+        isPaused={isPaused}
+        togglePause={togglePause}
+        clearLogs={clearLogs}
+        refreshLogs={refreshLogs}
+        isLoading={isLoading}
+        filterText={filterText}
+        setFilterText={setFilterText}
+        requestIdFilter={requestIdFilter}
+        setRequestIdFilter={setRequestIdFilter}
+        limit={limit}
+        setLimit={setLimit}
+        initialLimit={initialLimit}
+        showSuccess={showSuccess}
+        setShowSuccess={setShowSuccess}
+        isPermanentlyDisabled={isPermanentlyDisabled}
+        setIsPermanentlyDisabled={setIsPermanentlyDisabled}
+        setConsecutiveErrors={setConsecutiveErrors}
+        fetchLogs={fetchLogs}
+        logType={logType}
+        setLogType={setLogType}
+        filteredLogs={filteredLogs}
+        containerSize={containerSize}
+        isDetailPanelOpen={isDetailPanelOpen}
+        selectedLog={selectedLog}
+        setIsDetailPanelOpen={setIsDetailPanelOpen}
+        handleLogSelect={handleLogSelect}
+        error={error as Error | null}
+        renderErrorWithRetry={renderErrorWithRetry}
+      />
+    );
+  };
 
   return (
     <motion.div
@@ -829,43 +1043,11 @@ const Container = ({
         </div>
       </div>
       
-      {activeTab === 'logs' && (
-        <LogsContainer
-          mergedTheme={mergedTheme}
-          isPaused={isPaused}
-          togglePause={togglePause}
-          clearLogs={clearLogs}
-          refreshLogs={refreshLogs}
-          isLoading={isLoading}
-          filterText={filterText}
-          setFilterText={setFilterText}
-          requestIdFilter={requestIdFilter}
-          setRequestIdFilter={setRequestIdFilter}
-          limit={limit}
-          setLimit={setLimit}
-          initialLimit={initialLimit}
-          showSuccess={showSuccess}
-          setShowSuccess={setShowSuccess}
-          isPermanentlyDisabled={isPermanentlyDisabled}
-          setIsPermanentlyDisabled={setIsPermanentlyDisabled}
-          setConsecutiveErrors={setConsecutiveErrors}
-          fetchLogs={fetchLogs}
-          logType={logType}
-          setLogType={setLogType}
-          filteredLogs={filteredLogs}
-          containerSize={containerSize}
-          isDetailPanelOpen={isDetailPanelOpen}
-          selectedLog={selectedLog}
-          setIsDetailPanelOpen={setIsDetailPanelOpen}
-          handleLogSelect={handleLogSelect}
-          error={error as Error | null}
-          renderErrorWithRetry={renderErrorWithRetry}
-        />
-      )}
+      {activeTab === 'logs' && renderContent()}
 
       {activeTab === 'data-tables' && (
         <DataTable
-          key={`data-table-${JSON.stringify(settings)}`}
+          key={`data-table-${JSON.stringify(settings)}-${useMockData}`}
           convexUrl={convexUrl}
           accessToken={accessToken}
           onError={onError}
@@ -874,6 +1056,7 @@ const Container = ({
           convex={convex}
           adminClient={adminClient}
           settings={settings}
+          useMockData={useMockData}
         />
       )}
       
@@ -881,6 +1064,7 @@ const Container = ({
         <HealthContainer 
           deploymentUrl={convexUrl}
           authToken={accessToken}
+          useMockData={useMockData}
         />
       )}
     </motion.div>

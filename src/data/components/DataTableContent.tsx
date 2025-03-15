@@ -111,6 +111,23 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
    */
   tableName
 }) => {
+  console.log('DataTableContent rendering with:', {
+    documentsLength: documents.length,
+    columnHeadersLength: columnHeaders.length,
+    isLoading,
+    hasMore,
+    isLoadingMore,
+    tableName
+  });
+  
+  if (documents.length > 0) {
+    console.log('First document:', documents[0]);
+  }
+  
+  if (columnHeaders.length > 0) {
+    console.log('Column headers:', columnHeaders);
+  }
+
   const tableRef = useRef<HTMLTableElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 

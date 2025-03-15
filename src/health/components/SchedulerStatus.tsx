@@ -42,6 +42,23 @@ const SchedulerStatus: React.FC<SchedulerStatusProps> = ({ status, message }) =>
     }
   };
 
+  /**
+   * Get the icon for the status
+   * @returns The icon for the status
+   */
+  const getStatusIcon = () => {
+    switch (status) {
+      case 'on_time':
+        return '✓';
+      case 'delayed':
+        return '⚠';
+      case 'error':
+        return '✗';
+      default:
+        return '?';
+    }
+  };
+
   return (
     <div className="scheduler-status" style={{ padding: '20px' }}>
       <h3 className="convex-panel-health-header convex-panel-table-header-theme">Scheduler Status</h3>
@@ -53,18 +70,39 @@ const SchedulerStatus: React.FC<SchedulerStatusProps> = ({ status, message }) =>
         minHeight: '150px',
         backgroundColor: 'rgba(0,0,0,0.2)',
         borderRadius: '8px',
-        padding: '20px'
+        padding: '20px',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+        transition: 'all 0.3s ease'
       }}>
         <div style={{
-          fontSize: '40px',
-          fontWeight: 'bold',
-          color: getStatusColor(),
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: '10px'
         }}>
-          {getStatusTitle()}
+          <span style={{
+            fontSize: '32px',
+            marginRight: '10px',
+            color: getStatusColor()
+          }}>
+            {getStatusIcon()}
+          </span>
+          <div style={{
+            fontSize: '40px',
+            fontWeight: 'bold',
+            color: getStatusColor(),
+          }}>
+            {getStatusTitle()}
+          </div>
         </div>
         <div style={{
           color: '#cccccc',
-          textAlign: 'center'
+          textAlign: 'center',
+          fontSize: '16px',
+          maxWidth: '400px',
+          padding: '10px',
+          backgroundColor: 'rgba(0,0,0,0.1)',
+          borderRadius: '4px',
+          marginTop: '10px'
         }}>
           {message}
         </div>

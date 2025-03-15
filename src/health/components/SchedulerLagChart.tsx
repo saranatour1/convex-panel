@@ -12,6 +12,7 @@ import {
 import SchedulerStatus from './SchedulerStatus';
 import { SchedulerLagChartProps } from 'src/types';
 import { ROUTES } from 'src/utils/constants';
+import { fetchSchedulerLag } from '../../utils/api';
 
 const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
   /**
@@ -41,9 +42,16 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
    * Determines whether the chart should be displayed or not.
    * @required
    */
-  showChart
+  showChart,
+
+  /**
+   * Whether to use mock data instead of real API data.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData = false
 }) => {
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<Array<{time: string, lag: number}>>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<'on_time' | 'delayed' | 'error'>('on_time');
@@ -60,74 +68,107 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
         setLoading(true);
       }
       
-      // Create time window for the API call (1 hour)
-      const endTime = Math.floor(Date.now() / 1000);
-      const startTime = endTime - 3600; // 1 hour ago
-      
-      const queryParams = new URLSearchParams({
-        window: JSON.stringify({
-          start: {
-            secs_since_epoch: startTime,
-            nanos_since_epoch: 384000062
-          },
-          end: {
-            secs_since_epoch: endTime,
-            nanos_since_epoch: 384000062
-          },
-          num_buckets: 60
-        })
-      });
-      
-      const response = await fetch(
-        `${deploymentUrl}${ROUTES.SCHEDULER_LAG}?${queryParams}`,
-        {
-          headers: {
-            'Authorization': `Convex ${authToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      
-      if (!response.ok) {
-        // If response is 404, we'll try again later but not show the error
-        if (response.status === 404) {
-          setLoading(true);
-          return; // Exit without updating state further
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      console.log('Fetching scheduler lag data with useMockData:', useMockData);
+      const data = await fetchSchedulerLag(deploymentUrl, authToken, useMockData);
+      console.log('Raw scheduler lag data:', data);
       
       // We got a successful response
       setReceivedSuccessResponse(true);
       
-      const data = await response.json();
-      
       // Process the data for Recharts format
-      const formattedData = data.map((item: any) => {
-        const timestamp = item[0].secs_since_epoch * 1000;
-        const timeLabel = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const lagValue = item[1] || 0;
-        
-        return {
-          time: timeLabel,
-          lag: lagValue,
-        };
-      });
+      let formattedData: Array<{time: string, lag: number}> = [];
       
-      // Determine status based on lag values
-      const lagValues = formattedData.map((item: any) => item.lag);
-      const maxLag = Math.max(...lagValues);
-      if (maxLag > 5) {
+      try {
+        // Handle different data formats for mock vs real data
+        if (useMockData && data && data.data && Array.isArray(data.data[0]) && Array.isArray(data.data[0][1])) {
+          console.log('Processing mock data format:', data.data[0][1]);
+          // Process mock data format
+          formattedData = data.data[0][1].map((item: any) => {
+            try {
+              const timestamp = item[0]?.secs_since_epoch ? item[0].secs_since_epoch * 1000 : Date.now();
+              const timeLabel = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              const lagValue = typeof item[1] === 'number' ? item[1] : 0;
+              
+              return {
+                time: timeLabel,
+                lag: lagValue,
+              };
+            } catch (itemErr) {
+              console.warn('Error processing mock data item:', itemErr);
+              // Return a fallback item if there's an error
+              return {
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                lag: 0
+              };
+            }
+          });
+          
+          // Set status and message from the mock response
+          setStatus(data.status || 'on_time');
+          setMessage(data.message || 'Scheduler is running on time.');
+          console.log('Mock data status:', data.status, 'message:', data.message);
+        } else {
+          // Process real API data format
+          // For real data, we need to handle the format returned by the actual API
+          if (Array.isArray(data)) {
+            console.log('Processing real API data format:', data);
+            formattedData = data.map((item: any) => {
+              try {
+                const timestamp = item[0]?.secs_since_epoch ? item[0].secs_since_epoch * 1000 : Date.now();
+                const timeLabel = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const lagValue = typeof item[1] === 'number' ? item[1] : 0;
+                
+                return {
+                  time: timeLabel,
+                  lag: lagValue,
+                };
+              } catch (itemErr) {
+                console.warn('Error processing real data item:', itemErr);
+                // Return a fallback item if there's an error
+                return {
+                  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  lag: 0
+                };
+              }
+            });
+            
+            // Determine status based on lag values for real data
+            const lagValues = formattedData.map((item) => item.lag);
+            const maxLag = Math.max(...lagValues);
+            if (maxLag > 2) {
+              setStatus('delayed');
+              setMessage('Scheduled functions are experiencing some delays.');
+            } else {
+              setStatus('on_time');
+              setMessage('Scheduler is running on time.');
+            }
+          } else {
+            console.warn('Unexpected data format from scheduler lag API:', data);
+            // Generate some fallback data to avoid empty chart
+            const now = Date.now();
+            formattedData = Array.from({ length: 10 }, (_, i) => {
+              const time = new Date(now - i * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              return { time, lag: 0 };
+            }).reverse();
+            
+            setStatus('on_time');
+            setMessage('No scheduler lag data available.');
+          }
+        }
+      } catch (formatErr) {
+        console.error('Error formatting scheduler lag data:', formatErr);
+        // Generate some fallback data to avoid empty chart
+        const now = Date.now();
+        formattedData = Array.from({ length: 10 }, (_, i) => {
+          const time = new Date(now - i * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          return { time, lag: 0 };
+        }).reverse();
+        
         setStatus('error');
-        setMessage('Scheduled functions are severely delayed.');
-      } else if (maxLag > 1) {
-        setStatus('delayed');
-        setMessage('Scheduled functions are running with slight delays.');
-      } else {
-        setStatus('on_time');
-        setMessage('Scheduled functions are running on time.');
+        setMessage('Error processing scheduler data.');
       }
       
+      console.log('Final formatted chart data:', formattedData);
       setChartData(formattedData);
       setLoading(false);
       setError(null);
@@ -142,7 +183,7 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
         setLoading(false);
       }
     }
-  }, [deploymentUrl, authToken, receivedSuccessResponse]);
+  }, [deploymentUrl, authToken, receivedSuccessResponse, useMockData]);
 
   /**
    * Fetch data and set up interval for refreshing data
@@ -194,6 +235,9 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
                     position: 'insideLeft', 
                     style: { fill: '#cccccc' } 
                   }}
+                  domain={[0, 'dataMax + 1']}
+                  allowDataOverflow={false}
+                  tickCount={10}
                 />
                 <Tooltip 
                   contentStyle={{ 
@@ -202,6 +246,7 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
                     color: '#cccccc' 
                   }}
                   labelStyle={{ color: '#cccccc' }}
+                  formatter={(value: any) => [`${value.toFixed(2)} minutes`, 'Lag Time']}
                 />
                 <Legend 
                   wrapperStyle={{ color: '#cccccc' }}
@@ -212,8 +257,10 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
                   name="Lag Time (minutes)"
                   stroke="#FFC107"
                   strokeWidth={2}
-                  dot={{ r: 3 }}
-                  activeDot={{ r: 6 }}
+                  dot={{ r: 3, fill: '#FFC107' }}
+                  activeDot={{ r: 6, fill: '#FFA000' }}
+                  isAnimationActive={true}
+                  animationDuration={1000}
                 />
               </LineChart>
             </ResponsiveContainer>

@@ -33,7 +33,14 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
    * Controls how frequently the chart updates with new data.
    * @default 60000 (1 minute)
    */
-  refreshInterval = 60000
+  refreshInterval = 60000,
+
+  /**
+   * Whether to use mock data instead of real API data.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData = false
 }) => {
   const [data, setData] = useState<CacheHitData[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +121,10 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
    */
   const fetchData = async () => {
     try {
-      const response = await fetchCacheHitRate(deploymentUrl, authToken) as APIResponse;
+      console.log('Fetching cache hit rate data with useMockData:', useMockData);
+      const response = await fetchCacheHitRate(deploymentUrl, authToken, useMockData) as APIResponse;
+      
+      console.log('Cache hit rate API response:', response);
       
       // First, collect all timestamps and create data points
       const timestamps = new Set<number>();
@@ -171,6 +181,8 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
         });
       });
 
+      console.log('Transformed data for chart:', transformedData);
+      
       setData(transformedData);
       
       // Ensure all function names have visibility set to true
@@ -198,7 +210,7 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
     fetchData();
     const interval = setInterval(fetchData, refreshInterval);
     return () => clearInterval(interval);
-  }, [deploymentUrl, authToken, refreshInterval]);
+  }, [deploymentUrl, authToken, refreshInterval, useMockData]);
 
   /**
    * Handle legend item clicks

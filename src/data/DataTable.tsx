@@ -72,8 +72,17 @@ const DataTable: React.FC<DataTableProps> = ({
    * @optional
    */
   adminClient,
-  settings: externalSettings
+  settings: externalSettings,
+  
+  /**
+   * Whether to use mock data instead of real API data.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData = false,
 }) => {
+  console.log('DataTable component rendered with useMockData:', useMockData);
+  
   const [searchText, setSearchText] = React.useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
 
@@ -114,7 +123,8 @@ const DataTable: React.FC<DataTableProps> = ({
     accessToken,
     baseUrl,
     adminClient,
-    onError
+    onError,
+    useMockData
   });
 
   /**
@@ -158,6 +168,14 @@ const DataTable: React.FC<DataTableProps> = ({
       fetchTableData(selectedTable, null);
     }
   }, [filters, setTableFilters, fetchTableData, selectedTable]);
+
+  // Add a debug effect to log when documents change
+  useEffect(() => {
+    console.log(`DataTable: documents updated, count: ${documents.length}`);
+    if (documents.length > 0) {
+      console.log('First document sample:', documents[0]);
+    }
+  }, [documents]);
 
   /**
    * Create a wrapper function for patchDocumentFields to match the expected interface

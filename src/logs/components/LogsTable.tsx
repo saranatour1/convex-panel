@@ -112,8 +112,8 @@ const LogsTable = ({
   /**
    * Whether the user is waiting for logs to appear.
    */
-  const isWaitingForLogs = error?.includes("Waiting for logs");
-  const isWatchingLogs = error?.includes("Watching for logs");
+  const isWaitingForLogs = error ? typeof error === 'string' && error.includes("Waiting for logs") : false;
+  const isWatchingLogs = error ? typeof error === 'string' && error.includes("Watching for logs") : false;
   const hasStatusMessage = error && (isWaitingForLogs || isWatchingLogs);
   const shouldShowError = error && !hasStatusMessage;
   
@@ -125,6 +125,7 @@ const LogsTable = ({
   
   const showLiveIndicator = hasStatusMessage && 
     filteredLogs.length > 0 && 
+    typeof error === 'string' && 
     error.includes("Watching logs");
 
   const getListHeight = () => {

@@ -11,6 +11,7 @@ import {
 import { saveActiveTable, getTableFilters } from '../utils/storage';
 import { fetchTablesFromApi } from '../utils/api';
 import { patchDocumentFields } from '../utils/functions';
+import { mockFetchTablesFromApi } from '../utils/mockData';
 
 export const useTableData = ({
   /**
@@ -50,7 +51,16 @@ export const useTableData = ({
    * @param error Error message
    */
   onError,
+
+  /**
+   * Whether to use mock data instead of real API data.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData = false,
 }: UseTableDataProps): UseTableDataReturn => {
+  console.log('useTableData hook initialized with useMockData:', useMockData);
+  
   // Use a ref to track if filters have been loaded from storage
   const filtersLoadedRef = useRef<Record<string, boolean>>({});
   // Add a ref to track the previous table
@@ -99,12 +109,20 @@ export const useTableData = ({
     setIsLoading(true);
     setError(null);
     
+    console.log('fetchTables called, useMockData:', useMockData);
+    
     try {
-      const { tables: tableData, selectedTable: newSelectedTable } = await fetchTablesFromApi({
-        convexUrl,
-        accessToken,
-        adminClient
-      });
+      // Use mock data if useMockData is true
+      const { tables: tableData, selectedTable: newSelectedTable } = useMockData
+        ? await mockFetchTablesFromApi()
+        : await fetchTablesFromApi({
+            convexUrl,
+            accessToken,
+            adminClient
+          });
+      
+      console.log('Fetched tables:', Object.keys(tableData), 'Selected table:', newSelectedTable);
+      console.log('Table data structure:', tableData);
       
       setTables(tableData);
       setSelectedTable(newSelectedTable);
@@ -118,13 +136,18 @@ export const useTableData = ({
     } finally {
       setIsLoading(false);
     }
-  }, [convexUrl, accessToken, onError, adminClient, setSelectedTable]);
+  }, [convexUrl, accessToken, onError, adminClient, setSelectedTable, useMockData]);
 
   /**
    * Fetch table data
    */
   const fetchTableData = useCallback(async (tableName: string, cursor: string | null = null) => {
-    if (!tableName || !adminClient) return;
+    if (!tableName) return;
+    
+    // For real data, we need adminClient
+    if (!useMockData && !adminClient) return;
+    
+    console.log(`fetchTableData called for table: ${tableName}, cursor: ${cursor}, useMockData: ${useMockData}`);
     
     // Check if this is a duplicate request
     const lastFetch = lastFetchRef.current;
@@ -140,6 +163,7 @@ export const useTableData = ({
       cursor === lastFetch.cursor &&
       filtersJson === lastFiltersJson
     ) {
+      console.log('Skipping duplicate request');
       return;
     }
     
@@ -160,6 +184,33 @@ export const useTableData = ({
     setError(null);
     
     try {
+      // If using mock data, generate mock documents
+      if (useMockData) {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Generate mock documents based on the table schema
+        const mockDocuments = generateMockDocuments(tableName, cursor === null ? 25 : 10);
+        
+        console.log(`Generated ${mockDocuments.length} mock documents for table ${tableName}:`, mockDocuments);
+        
+        if (cursor === null) {
+          setDocuments(mockDocuments);
+        } else {
+          setDocuments(prev => [...prev, ...mockDocuments]);
+        }
+        
+        // Set a fake cursor for pagination
+        setContinueCursor(cursor === null ? 'mock-cursor-1' : 'mock-cursor-2');
+        
+        // Simulate having more data for the first page, then no more
+        setHasMore(cursor === null);
+        
+        setDocumentCount(prev => cursor === null ? mockDocuments.length : prev + mockDocuments.length);
+        return;
+      }
+      
+      // Real data fetching logic
       const page: PaginationOptions = {
         cursor,
         numItems: 25,
@@ -223,7 +274,188 @@ export const useTableData = ({
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [adminClient]);
+  }, [adminClient, useMockData, onError]);
+
+  /**
+   * Generate mock documents for a table
+   */
+  const generateMockDocuments = useCallback((tableName: string, count: number) => {
+    console.log('generateMockDocuments called for table:', tableName, 'with count:', count);
+    console.log('Available tables:', Object.keys(tables));
+    
+    // If the table doesn't exist in our tables object, create a fallback table definition
+    if (!tables[tableName]) {
+      console.warn(`Table ${tableName} not found in tables. Using fallback definition.`);
+      
+      // Create a basic fallback table definition with _id and _creationTime
+      const fallbackTable = {
+        type: 'object',
+        fields: [
+          {
+            fieldName: '_id',
+            optional: false,
+            shape: { type: 'string' }
+          },
+          {
+            fieldName: '_creationTime',
+            optional: false,
+            shape: { type: 'number' }
+          },
+          {
+            fieldName: 'name',
+            optional: false,
+            shape: { type: 'string' }
+          },
+          {
+            fieldName: 'description',
+            optional: false,
+            shape: { type: 'string' }
+          }
+        ]
+      };
+      
+      // Generate basic documents with the fallback definition
+      const mockDocs: TableDocument[] = [];
+      
+      for (let i = 0; i < count; i++) {
+        mockDocs.push({
+          _id: `fallback-${tableName}-${i}-${Math.random().toString(36).substring(2, 8)}`,
+          _creationTime: Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000),
+          name: `Fallback ${tableName} ${i}`,
+          description: `This is a fallback document for table ${tableName}`
+        });
+      }
+      
+      return mockDocs;
+    }
+    
+    const mockDocs: TableDocument[] = [];
+    const fields = tables[tableName].fields;
+    
+    console.log(`Generating ${count} documents for table ${tableName} with ${fields.length} fields`);
+    
+    // Generate realistic IDs like "sx7e0w23m8fx13nk7nzwvtze7x7c2cg3"
+    const generateRealisticId = () => {
+      return Array.from({ length: 32 }, () => {
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        return chars.charAt(Math.floor(Math.random() * chars.length));
+      }).join('');
+    };
+    
+    // Generate realistic timestamps like 1741912427727.3538
+    const generateRealisticTimestamp = () => {
+      const now = Date.now();
+      const randomOffset = Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000); // Random time in the last 30 days
+      return (now - randomOffset) + Math.random();
+    };
+    
+    for (let i = 0; i < count; i++) {
+      const doc: TableDocument = {
+        _id: generateRealisticId(),
+        _creationTime: generateRealisticTimestamp(),
+      };
+      
+      // Generate values for each field based on its type and name
+      fields.forEach(field => {
+        if (field.fieldName === '_id' || field.fieldName === '_creationTime') return;
+        
+        const fieldType = field.shape.type;
+        const fieldName = field.fieldName;
+        
+        // Skip generating values for fields that are typically undefined
+        if (['binaryIndex', 'emailAddresses', 'nextDeltaToken', 'orgId', 'threads'].includes(fieldName)) {
+          doc[fieldName] = undefined;
+          return;
+        }
+        
+        try {
+          switch (fieldType) {
+            case 'string':
+              // Generate more realistic values based on field name
+              if (fieldName === 'emailAddress') {
+                const domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'example.com'];
+                const domain = domains[Math.floor(Math.random() * domains.length)];
+                const username = `user${Math.floor(Math.random() * 1000)}`;
+                doc[fieldName] = `${username}@${domain}`;
+              } else if (fieldName === 'name') {
+                const firstNames = ['Alex', 'Jamie', 'Taylor', 'Jordan', 'Casey', 'Morgan', 'Riley', 'Quinn'];
+                const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Wilson'];
+                const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+                const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+                doc[fieldName] = `${firstName} ${lastName}`;
+              } else if (fieldName === 'provider') {
+                const providers = ['google', 'github', 'facebook', 'twitter', 'apple'];
+                doc[fieldName] = providers[Math.floor(Math.random() * providers.length)];
+              } else if (fieldName === 'id') {
+                const ids = ['google', 'github', 'facebook', 'twitter', 'apple'];
+                doc[fieldName] = ids[Math.floor(Math.random() * ids.length)];
+              } else if (fieldName === 'token' || fieldName === 'refreshToken') {
+                // Generate a long random string for tokens
+                doc[fieldName] = Array.from({ length: 100 }, () => {
+                  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+                  return chars.charAt(Math.floor(Math.random() * chars.length));
+                }).join('');
+              } else if (fieldName === 'scope') {
+                doc[fieldName] = 'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
+              } else if (fieldName === 'userId') {
+                doc[fieldName] = generateRealisticId();
+              } else if (fieldName === 'title') {
+                const titles = ['My First Post', 'Hello World', 'Introduction', 'Welcome', 'Getting Started', 'Tutorial', 'Guide'];
+                doc[fieldName] = titles[Math.floor(Math.random() * titles.length)];
+              } else if (fieldName === 'content') {
+                doc[fieldName] = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+              } else {
+                doc[fieldName] = `Mock ${fieldName} ${i}`;
+              }
+              break;
+            case 'number':
+              if (fieldName === 'expiresAt') {
+                // Generate a future timestamp
+                doc[fieldName] = Date.now() + Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000);
+              } else {
+                doc[fieldName] = Math.floor(Math.random() * 1000);
+              }
+              break;
+            case 'boolean':
+              doc[fieldName] = Math.random() > 0.5;
+              break;
+            case 'null':
+              doc[fieldName] = null;
+              break;
+            case 'Id':
+              doc[fieldName] = generateRealisticId();
+              break;
+            case 'Array':
+              if (field.shape.shape?.type === 'string') {
+                const arrayLength = Math.floor(Math.random() * 5);
+                doc[fieldName] = Array.from({ length: arrayLength }, (_, j) => `Item ${j}`);
+              } else {
+                doc[fieldName] = [];
+              }
+              break;
+            case 'object':
+              doc[fieldName] = { key: `value-${i}` };
+              break;
+            default:
+              if (field.optional) {
+                // Skip optional fields sometimes
+                if (Math.random() > 0.7) break;
+              }
+              doc[fieldName] = `Mock ${fieldType} value`;
+          }
+        } catch (error) {
+          console.error(`Error generating value for field ${fieldName} of type ${fieldType}:`, error);
+          // Provide a fallback value
+          doc[fieldName] = `Fallback value for ${fieldName}`;
+        }
+      });
+      
+      mockDocs.push(doc);
+    }
+    
+    console.log(`Generated ${mockDocs.length} documents for table ${tableName}`);
+    return mockDocs;
+  }, [tables]);
 
   /**
    * Update filtersRef when filters change
@@ -273,14 +505,21 @@ export const useTableData = ({
    */
   useEffect(() => {
     if (selectedTable) {
-      // Use a shorter timeout for better responsiveness
-      const timeoutId = setTimeout(() => {
-        fetchTableData(selectedTable, null);
-      }, 50); // Reduce timeout for better responsiveness
+      console.log(`Selected table changed to ${selectedTable}, fetching data...`);
       
-      return () => clearTimeout(timeoutId);
+      // For mock data, fetch immediately
+      if (useMockData) {
+        fetchTableData(selectedTable, null);
+      } else {
+        // For real data, use a short timeout for better responsiveness
+        const timeoutId = setTimeout(() => {
+          fetchTableData(selectedTable, null);
+        }, 50);
+        
+        return () => clearTimeout(timeoutId);
+      }
     }
-  }, [selectedTable, fetchTableData]);
+  }, [selectedTable, fetchTableData, useMockData]);
 
   /**
    * Add a dedicated effect to handle filter changes and fetch data
@@ -305,8 +544,27 @@ export const useTableData = ({
    * Patch fields
    */
   const patchFields = useCallback(async (table: string, ids: string[], fields: Record<string, any>) => {
+    // If using mock data, simulate a successful patch
+    if (useMockData) {
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Update the documents in state
+      setDocuments(prevDocs => {
+        return prevDocs.map(doc => {
+          if (ids.includes(doc._id)) {
+            return { ...doc, ...fields };
+          }
+          return doc;
+        });
+      });
+      
+      return { success: true };
+    }
+    
+    // Otherwise use the real function
     return patchDocumentFields(table, ids, fields, adminClient);
-  }, [adminClient]);
+  }, [adminClient, useMockData]);
 
   /**
    * Observer target

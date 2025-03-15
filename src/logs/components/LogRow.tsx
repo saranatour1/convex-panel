@@ -127,29 +127,17 @@ const LogRow = memo(({
   let logType = '';
   let logDetails = '';
   
-  if (log.function?.type === 'HttpAction') {
-    // Format HTTP actions
-    const identifier = log.function.path || '';
-    logType = identifier.startsWith('GET') ? 'GET' : 
-              identifier.startsWith('POST') ? 'POST' : 
-              identifier.startsWith('PUT') ? 'PUT' : 
-              identifier.startsWith('DELETE') ? 'DELETE' : 'H';
+  if (log.function?.type) {
+    // Use the type directly from the log data (Q, M, A, H)
+    logType = log.function.type;
     
-    // Extract path from identifier
-    const path = identifier.split(' ')[1] || identifier;
-    logDetails = path;
-  } else if (log.function?.type === 'Query') {
-    // Format queries
-    logType = 'Q';
-    logDetails = log.function.path || '';
-  } else if (log.function?.type === 'Mutation') {
-    // Format mutations
-    logType = 'M';
-    logDetails = log.function.path || '';
-  } else if (log.function?.type === 'Action') {
-    // Format actions
-    logType = 'A';
-    logDetails = log.function.path || '';
+    // For details, check if we have a raw.details field first (for mock data)
+    if (log.raw?.details) {
+      logDetails = log.raw.details;
+    } else {
+      // Otherwise just use the function path without appending the type
+      logDetails = log.function.path || '';
+    }
   } else {
     // Other log types
     logType = log.topic || '';

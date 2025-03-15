@@ -33,7 +33,14 @@ const FailureRateChart: React.FC<FailureRateChartProps> = ({
    * Controls how frequently the chart updates with new data.
    * @default 60000 (1 minute)
    */
-  refreshInterval = 60000
+  refreshInterval = 60000,
+
+  /**
+   * Whether to use mock data instead of real API data.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData = false
 }) => {
   const [data, setData] = useState<FailureData[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -103,7 +110,8 @@ const FailureRateChart: React.FC<FailureRateChartProps> = ({
 
   const fetchData = async () => {
     try {
-      const response = await fetchFailureRate(deploymentUrl, authToken) as APIResponse;
+      console.log('Fetching failure rate data with useMockData:', useMockData);
+      const response = await fetchFailureRate(deploymentUrl, authToken, useMockData) as APIResponse;
       
       // First, collect all timestamps and create data points
       const timestamps = new Set<number>();
@@ -184,7 +192,7 @@ const FailureRateChart: React.FC<FailureRateChartProps> = ({
     fetchData();
     const interval = setInterval(fetchData, refreshInterval);
     return () => clearInterval(interval);
-  }, [deploymentUrl, authToken, refreshInterval]);
+  }, [deploymentUrl, authToken, refreshInterval, useMockData]);
 
   // Handle legend item clicks
   const handleLegendClick = (name: string) => {

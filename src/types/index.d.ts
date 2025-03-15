@@ -75,12 +75,8 @@ export type ButtonProps = {
   deployKey?: string;
   accessToken: string;
   deployUrl?: string;
-  /**
-   * Position of the ConvexPanel button.
-   * Controls where the button appears on the screen.
-   * @default 'bottom-right'
-   */
   buttonPosition?: ButtonPosition;
+  useMockData?: boolean;
 }
 
 /**
@@ -108,6 +104,7 @@ export interface ContainerProps {
   initialActiveTab: TabTypes;
   accessToken: string;
   deployUrl?: string;
+  useMockData?: boolean;
 }
 
 // LogsContainer props
@@ -213,6 +210,7 @@ export interface DataTableProps {
   convex: ConvexReactClient;
   adminClient: ConvexClient | null;
   settings?: ConvexPanelSettings;
+  useMockData?: boolean;
 }
 
 // Table Field Props
@@ -395,6 +393,7 @@ export interface UseTableDataProps {
   baseUrl: string;
   adminClient: ConvexClient | null;
   onError?: (error: string) => void;
+  useMockData?: boolean;
 }
 
 // Use Table Data Return
@@ -454,9 +453,34 @@ export interface FetchTablesResponse {
  */
 // Health Container Props
 export interface HealthContainerProps {
+  /**
+   * URL of the deployment.
+   * Used to configure the connection to the deployment.
+   * @required
+   */
   deploymentUrl: string;
+  
+  /**
+   * Authentication token for accessing the deployment.
+   * Required for securing access to the deployment.
+   * Should be kept private and not exposed to clients.
+   * @required
+   */
   authToken: string;
-  convexVersion?: string; // Optional prop for version
+  
+  /**
+   * Version of the Convex package.
+   * Used to determine if an update is available.
+   * @default "1.18.0"
+   */
+  convexVersion?: string;
+  
+  /**
+   * Whether to use mock data instead of real API calls.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData?: boolean;
 }
 
 // Cache Hit Data
@@ -467,9 +491,34 @@ export interface CacheHitData {
 
 // Cache Hit Rate Chart Props
 export interface CacheHitRateChartProps {
+  /**
+   * URL of the deployment to fetch cache hit rate data from.
+   * Required for making API calls to the backend.
+   * @required
+   */
   deploymentUrl: string;
+  
+  /**
+   * Authentication token for accessing the API.
+   * Required for securing access to data.
+   * Should be kept private and not exposed to clients.
+   * @required
+   */
   authToken: string;
+  
+  /**
+   * Interval in milliseconds to refresh the cache hit rate data.
+   * Controls how frequently the chart updates with new data.
+   * @default 60000 (1 minute)
+   */
   refreshInterval?: number;
+  
+  /**
+   * Whether to use mock data instead of real API calls.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData?: boolean;
 }
 
 // Timestamp
@@ -486,17 +535,73 @@ export interface FailureData {
 
 // Failure Rate Chart Props
 interface FailureRateChartProps {
+  /**
+   * URL of the deployment to fetch failure rate data from.
+   * Required for making API calls to the backend.
+   * @required
+   */
   deploymentUrl: string;
+  
+  /**
+   * Authentication token for accessing the API.
+   * Required for securing access to data.
+   * Should be kept private and not exposed to clients.
+   * @required
+   */
   authToken: string;
+  
+  /**
+   * Interval in milliseconds to refresh the failure rate data.
+   * Controls how frequently the chart updates with new data.
+   * @default 60000 (1 minute)
+   */
   refreshInterval?: number;
+  
+  /**
+   * Whether to use mock data instead of real API calls.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData?: boolean;
 }
 
 // Scheduler Lag Chart Props
 export interface SchedulerLagChartProps {
+  /**
+   * URL of the deployment to fetch scheduler lag data from.
+   * Required for making API calls to the backend.
+   * @required
+   */
   deploymentUrl: string;
+  
+  /**
+   * Authentication token for accessing the API.
+   * Required for securing access to data.
+   * Should be kept private and not exposed to clients.
+   * @required
+   */
   authToken: string;
+  
+  /**
+   * Interval in milliseconds to refresh the scheduler lag data.
+   * Controls how frequently the chart updates with new data.
+   * @default 60000 (1 minute)
+   */
   refreshInterval?: number;
+  
+  /**
+   * Boolean flag to control the visibility of the chart.
+   * Determines whether the chart should be displayed or not.
+   * @required
+   */
   showChart: boolean;
+  
+  /**
+   * Whether to use mock data instead of real API calls.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData?: boolean;
 }
 
 // Scheduler Status Props

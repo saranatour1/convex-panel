@@ -129,6 +129,14 @@ const ConvexPanel = ({
    * @default 'bottom-right'
    */
   buttonPosition = 'bottom-right',
+
+  /**
+   * Whether to use mock data instead of real API data.
+   * Useful for development, testing, and demos.
+   * When true, the component will use mock data instead of making API calls.
+   * @default false
+   */
+  useMockData = false,
 }: ButtonProps) => {
   const dragControls = useDragControls();
   const mergedTheme = useMemo(() => ({ ...defaultTheme, ...theme }), [theme]);
@@ -272,7 +280,7 @@ const ConvexPanel = ({
   // Render the button and container separately
   // The button should always be visible, even if there's an error with the Container
   return (
-    <div className="convex-panel-container">
+    <div className="convex-panel-container" style={{ zIndex: 99999 }}>
       <AnimatePresence>
         {isOpen && (
           <ErrorBoundary fallback={
@@ -327,6 +335,7 @@ const ConvexPanel = ({
               initialActiveTab={initialTab}
               accessToken={accessToken}
               deployUrl={deployUrl}
+              useMockData={useMockData}
             />
           </ErrorBoundary>
         )}

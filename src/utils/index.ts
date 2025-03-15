@@ -19,6 +19,12 @@ export const formatJson = (obj: any) => {
  * @returns A unique ID for the log entry
  */
 export const getLogId = (log: LogEntry) => {
+  // For mock data, use a more unique identifier
+  if (log.raw && log.raw.mockData) {
+    return `mock-${log.timestamp}-${log.raw.mockId || Math.random().toString(36).substring(2, 10)}`;
+  }
+  
+  // For real logs, use the existing logic
   return `${log.timestamp}-${log.function?.request_id || ''}-${log.message || ''}`;
 };
 

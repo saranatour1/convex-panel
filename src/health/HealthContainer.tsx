@@ -27,7 +27,14 @@ const HealthContainer: React.FC<HealthContainerProps> = ({
    * Used to determine if an update is available.
    * @default "1.18.0"
    */
-  convexVersion = "1.18.0"
+  convexVersion = "1.18.0",
+
+  /**
+   * Whether to use mock data instead of real API data.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData = false
 }) => {
   const [showDetailedSchedulerView, setShowDetailedSchedulerView] = useState(false);
   const [currentVersion, setCurrentVersion] = useState<string>(`v${convexVersion.replace(/^\^v?/, '')}`);
@@ -76,6 +83,13 @@ const HealthContainer: React.FC<HealthContainerProps> = ({
    * Updates the latest version and checks if an update is available.
    */
   const fetchLatestVersion = async () => {
+    // Skip version check if using mock data
+    if (useMockData) {
+      setLatestVersion("v1.20.0");
+      setIsUpdateAvailable(true);
+      return;
+    }
+
     setIsCheckingVersion(true);
     try {
       // Query npm registry for latest convex package version
@@ -133,11 +147,13 @@ const HealthContainer: React.FC<HealthContainerProps> = ({
           deploymentUrl={deploymentUrl}
           authToken={authToken}
           refreshInterval={60000}
+          useMockData={useMockData}
         />
         <FailureRateChart 
           deploymentUrl={deploymentUrl}
           authToken={authToken}
           refreshInterval={60000}
+          useMockData={useMockData}
         />
       </div>
       
@@ -154,6 +170,7 @@ const HealthContainer: React.FC<HealthContainerProps> = ({
             authToken={authToken}
             refreshInterval={60000}
             showChart={showDetailedSchedulerView}
+            useMockData={useMockData}
           />
           <div style={{
             position: 'absolute',

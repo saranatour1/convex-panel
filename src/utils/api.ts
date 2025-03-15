@@ -2,6 +2,7 @@ import { ROUTES } from 'src/utils/constants';
 import { LogEntry, TableDefinition } from '../types';
 import { getActiveTable } from './storage';
 import { FetchLogsOptions, FetchLogsResponse, FetchTablesOptions, FetchTablesResponse } from '../types';
+import { mockFetchLogsFromApi, mockFetchTablesFromApi, mockFetchCacheHitRate, mockFetchFailureRate, mockFetchSchedulerLag } from './mockData';
 
 /**
  * Fetch logs from the Convex API
@@ -39,8 +40,20 @@ export async function fetchLogsFromApi({
    * Pass signal from AbortController to enable cancellation.
    * @optional
    */
-  signal
-}: FetchLogsOptions): Promise<FetchLogsResponse> {
+  signal,
+
+  /**
+   * Whether to use mock data instead of making API calls.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData = false
+}: FetchLogsOptions & { useMockData?: boolean }): Promise<FetchLogsResponse> {
+  // Use mock data if useMockData is true
+  if (useMockData) {
+    return mockFetchLogsFromApi(cursor);
+  }
+
   // Create URL object based on convex url
   const urlObj = new URL(convexUrl);
   const baseUrl = `${urlObj.protocol}//${urlObj.hostname}`;
@@ -115,8 +128,20 @@ export async function fetchTablesFromApi({
    * Must be initialized and configured before passing.
    * @optional
    */
-  adminClient
-}: FetchTablesOptions): Promise<FetchTablesResponse> {
+  adminClient,
+
+  /**
+   * Whether to use mock data instead of making API calls.
+   * Useful for development, testing, and demos.
+   * @default false
+   */
+  useMockData = false
+}: FetchTablesOptions & { useMockData?: boolean }): Promise<FetchTablesResponse> {
+  // Use mock data if useMockData is true
+  if (useMockData) {
+    return mockFetchTablesFromApi();
+  }
+
   if (!convexUrl || !accessToken) {
     throw new Error('Missing URL or access token');
   }
@@ -178,9 +203,19 @@ export async function fetchTablesFromApi({
  * Fetch the cache hit rate from the Convex API
  * @param deploymentUrl - The URL of the Convex deployment
  * @param authToken - The authentication token for the Convex deployment
+ * @param useMockData - Whether to use mock data instead of making API calls
  * @returns The cache hit rate
  */
-export const fetchCacheHitRate = async (deploymentUrl: string, authToken: string) => {
+export const fetchCacheHitRate = async (
+  deploymentUrl: string, 
+  authToken: string, 
+  useMockData = false
+) => {
+  // Use mock data if useMockData is true
+  if (useMockData) {
+    return mockFetchCacheHitRate();
+  }
+
   // Calculate timestamps for the last hour
   const now = Math.floor(Date.now() / 1000); // Current time in seconds
   const oneHourAgo = now - 3600; // One hour ago
@@ -235,9 +270,19 @@ export const fetchCacheHitRate = async (deploymentUrl: string, authToken: string
  * Fetch the failure rate from the Convex API
  * @param deploymentUrl - The URL of the Convex deployment
  * @param authToken - The authentication token for the Convex deployment
+ * @param useMockData - Whether to use mock data instead of making API calls
  * @returns The failure rate
  */
-export const fetchFailureRate = async (deploymentUrl: string, authToken: string) => {
+export const fetchFailureRate = async (
+  deploymentUrl: string, 
+  authToken: string, 
+  useMockData = false
+) => {
+  // Use mock data if useMockData is true
+  if (useMockData) {
+    return mockFetchFailureRate();
+  }
+
   // Calculate timestamps for the last hour
   const now = Math.floor(Date.now() / 1000); // Current time in seconds
   const oneHourAgo = now - 3600; // One hour ago
@@ -292,12 +337,19 @@ export const fetchFailureRate = async (deploymentUrl: string, authToken: string)
  * Fetch the scheduler lag from the Convex API
  * @param deploymentUrl - The URL of the Convex deployment
  * @param authToken - The authentication token for the Convex deployment
+ * @param useMockData - Whether to use mock data instead of making API calls
  * @returns The scheduler lag
  */
 export async function fetchSchedulerLag(
   deploymentUrl: string,
-  authToken: string
+  authToken: string,
+  useMockData = false
 ): Promise<any> {
+  // Use mock data if useMockData is true
+  if (useMockData) {
+    return mockFetchSchedulerLag();
+  }
+
   // Create a window object (start: 1 hour ago, end: now)
   const end = new Date();
   const start = new Date(end.getTime() - 60 * 60 * 1000); // 1 hour before
