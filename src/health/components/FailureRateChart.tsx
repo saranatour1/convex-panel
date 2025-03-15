@@ -50,7 +50,9 @@ const FailureRateChart: React.FC<FailureRateChartProps> = ({
   const [displayMode, setDisplayMode] = useState<'all' | 'individual'>('all');
   const [chartFunctionNames, setChartFunctionNames] = useState<string[]>([]);
 
-  // Initialize visible lines when function names change
+  /**
+   * Initialize visible lines when function names change
+   */
   useEffect(() => {
     if (functionNames.length > 0) {
       const initialVisibility = functionNames.reduce((acc, name) => ({
@@ -61,7 +63,9 @@ const FailureRateChart: React.FC<FailureRateChartProps> = ({
     }
   }, [functionNames]);
 
-  // Verify all function names have a visibility state
+  /**
+   * Verify all function names have a visibility state
+   */
   useEffect(() => {
     if (chartFunctionNames.length > 0) {
       setVisibleLines(prev => {
@@ -80,7 +84,9 @@ const FailureRateChart: React.FC<FailureRateChartProps> = ({
     }
   }, [chartFunctionNames]);
 
-  // Update chart function names whenever data changes
+  /**
+   * Update chart function names whenever data changes
+   */
   useEffect(() => {
     if (data.length > 0) {
       const names = Array.from(
@@ -100,7 +106,9 @@ const FailureRateChart: React.FC<FailureRateChartProps> = ({
     }
   }, [data]);
 
-  // Generate color map from function names
+  /**
+   * Generate color map from function names
+   */
   const colorMap = useMemo<Record<string, string>>(() => {
     return chartFunctionNames.reduce<Record<string, string>>((acc, name) => ({
       ...acc,
@@ -108,9 +116,11 @@ const FailureRateChart: React.FC<FailureRateChartProps> = ({
     }), {});
   }, [chartFunctionNames]);
 
+  /**
+   * Fetch data from the API
+   */
   const fetchData = async () => {
     try {
-      console.log('Fetching failure rate data with useMockData:', useMockData);
       const response = await fetchFailureRate(deploymentUrl, authToken, useMockData) as APIResponse;
       
       // First, collect all timestamps and create data points
@@ -188,13 +198,18 @@ const FailureRateChart: React.FC<FailureRateChartProps> = ({
     }
   };
 
+  /**
+   * Fetch data and set up interval for refreshing data
+   */
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, refreshInterval);
     return () => clearInterval(interval);
   }, [deploymentUrl, authToken, refreshInterval, useMockData]);
 
-  // Handle legend item clicks
+  /**
+   * Handle legend item clicks
+   */
   const handleLegendClick = (name: string) => {
     if (!name) return;
 

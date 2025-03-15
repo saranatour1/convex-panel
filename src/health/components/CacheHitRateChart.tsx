@@ -121,10 +121,7 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
    */
   const fetchData = async () => {
     try {
-      console.log('Fetching cache hit rate data with useMockData:', useMockData);
       const response = await fetchCacheHitRate(deploymentUrl, authToken, useMockData) as APIResponse;
-      
-      console.log('Cache hit rate API response:', response);
       
       // First, collect all timestamps and create data points
       const timestamps = new Set<number>();
@@ -180,8 +177,6 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
           }
         });
       });
-
-      console.log('Transformed data for chart:', transformedData);
       
       setData(transformedData);
       

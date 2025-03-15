@@ -2290,4 +2290,34 @@
   .convex-panel-live-button-paused:hover {
     background-color: rgba(149, 63, 63, 0.6) !important;
   }
+
+  /* Update checker styles */
+  .convex-panel-update-container {
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+  }
+  
+  .convex-panel-update-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: var(--convex-panel-primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .convex-panel-update-button:hover {
+    background-color: var(--convex-panel-primary-hover-color);
+  }
+  
+  .convex-panel-update-button svg {
+    width: 14px;
+    height: 14px;
+  }
 }

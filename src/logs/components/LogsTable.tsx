@@ -141,9 +141,6 @@ const LogsTable = ({
   return (
     <div className={`convex-panel-logs-container`} style={{ height: containerSize.height }}>
       <div className={`convex-panel-logs-main ${isDetailPanelOpen ? 'convex-panel-logs-with-detail' : 'convex-panel-logs-full'}`}>
-        {showLiveIndicator && <LiveIndicator />}
-        {shouldShowError && renderErrorWithRetry()}
-        
         <TableHeader isDetailPanelOpen={isDetailPanelOpen} mergedTheme={mergedTheme} />
         
         {filteredLogs.length === 0 && hasStatusMessage && (

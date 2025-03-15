@@ -68,9 +68,7 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
         setLoading(true);
       }
       
-      console.log('Fetching scheduler lag data with useMockData:', useMockData);
       const data = await fetchSchedulerLag(deploymentUrl, authToken, useMockData);
-      console.log('Raw scheduler lag data:', data);
       
       // We got a successful response
       setReceivedSuccessResponse(true);
@@ -81,7 +79,6 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
       try {
         // Handle different data formats for mock vs real data
         if (useMockData && data && data.data && Array.isArray(data.data[0]) && Array.isArray(data.data[0][1])) {
-          console.log('Processing mock data format:', data.data[0][1]);
           // Process mock data format
           formattedData = data.data[0][1].map((item: any) => {
             try {
@@ -106,12 +103,10 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
           // Set status and message from the mock response
           setStatus(data.status || 'on_time');
           setMessage(data.message || 'Scheduler is running on time.');
-          console.log('Mock data status:', data.status, 'message:', data.message);
         } else {
           // Process real API data format
           // For real data, we need to handle the format returned by the actual API
           if (Array.isArray(data)) {
-            console.log('Processing real API data format:', data);
             formattedData = data.map((item: any) => {
               try {
                 const timestamp = item[0]?.secs_since_epoch ? item[0].secs_since_epoch * 1000 : Date.now();
@@ -168,7 +163,6 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
         setMessage('Error processing scheduler data.');
       }
       
-      console.log('Final formatted chart data:', formattedData);
       setChartData(formattedData);
       setLoading(false);
       setError(null);

@@ -59,8 +59,6 @@ export const useTableData = ({
    */
   useMockData = false,
 }: UseTableDataProps): UseTableDataReturn => {
-  console.log('useTableData hook initialized with useMockData:', useMockData);
-  
   // Use a ref to track if filters have been loaded from storage
   const filtersLoadedRef = useRef<Record<string, boolean>>({});
   // Add a ref to track the previous table
@@ -108,9 +106,7 @@ export const useTableData = ({
   const fetchTables = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
-    console.log('fetchTables called, useMockData:', useMockData);
-    
+        
     try {
       // Use mock data if useMockData is true
       const { tables: tableData, selectedTable: newSelectedTable } = useMockData
@@ -120,9 +116,6 @@ export const useTableData = ({
             accessToken,
             adminClient
           });
-      
-      console.log('Fetched tables:', Object.keys(tableData), 'Selected table:', newSelectedTable);
-      console.log('Table data structure:', tableData);
       
       setTables(tableData);
       setSelectedTable(newSelectedTable);
@@ -146,9 +139,7 @@ export const useTableData = ({
     
     // For real data, we need adminClient
     if (!useMockData && !adminClient) return;
-    
-    console.log(`fetchTableData called for table: ${tableName}, cursor: ${cursor}, useMockData: ${useMockData}`);
-    
+        
     // Check if this is a duplicate request
     const lastFetch = lastFetchRef.current;
     const currentFilters = filtersRef.current;
@@ -163,7 +154,6 @@ export const useTableData = ({
       cursor === lastFetch.cursor &&
       filtersJson === lastFiltersJson
     ) {
-      console.log('Skipping duplicate request');
       return;
     }
     
@@ -191,9 +181,7 @@ export const useTableData = ({
         
         // Generate mock documents based on the table schema
         const mockDocuments = generateMockDocuments(tableName, cursor === null ? 25 : 10);
-        
-        console.log(`Generated ${mockDocuments.length} mock documents for table ${tableName}:`, mockDocuments);
-        
+                
         if (cursor === null) {
           setDocuments(mockDocuments);
         } else {
@@ -280,9 +268,6 @@ export const useTableData = ({
    * Generate mock documents for a table
    */
   const generateMockDocuments = useCallback((tableName: string, count: number) => {
-    console.log('generateMockDocuments called for table:', tableName, 'with count:', count);
-    console.log('Available tables:', Object.keys(tables));
-    
     // If the table doesn't exist in our tables object, create a fallback table definition
     if (!tables[tableName]) {
       console.warn(`Table ${tableName} not found in tables. Using fallback definition.`);
@@ -319,9 +304,9 @@ export const useTableData = ({
       
       for (let i = 0; i < count; i++) {
         mockDocs.push({
-          _id: `fallback-${tableName}-${i}-${Math.random().toString(36).substring(2, 8)}`,
+          _id: `${Math.random().toString(36).substring(2, 8)}`,
           _creationTime: Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000),
-          name: `Fallback ${tableName} ${i}`,
+          name: `${tableName} ${i}`,
           description: `This is a fallback document for table ${tableName}`
         });
       }
@@ -331,9 +316,7 @@ export const useTableData = ({
     
     const mockDocs: TableDocument[] = [];
     const fields = tables[tableName].fields;
-    
-    console.log(`Generating ${count} documents for table ${tableName} with ${fields.length} fields`);
-    
+        
     // Generate realistic IDs like "sx7e0w23m8fx13nk7nzwvtze7x7c2cg3"
     const generateRealisticId = () => {
       return Array.from({ length: 32 }, () => {
@@ -363,7 +346,7 @@ export const useTableData = ({
         const fieldName = field.fieldName;
         
         // Skip generating values for fields that are typically undefined
-        if (['binaryIndex', 'emailAddresses', 'nextDeltaToken', 'orgId', 'threads'].includes(fieldName)) {
+        if (['binaryIndex', 'emailAddresses', 'nextDeltaToken'].includes(fieldName)) {
           doc[fieldName] = undefined;
           return;
         }
@@ -453,7 +436,6 @@ export const useTableData = ({
       mockDocs.push(doc);
     }
     
-    console.log(`Generated ${mockDocs.length} documents for table ${tableName}`);
     return mockDocs;
   }, [tables]);
 
@@ -504,9 +486,7 @@ export const useTableData = ({
    * Fetch data when selected table or filters change
    */
   useEffect(() => {
-    if (selectedTable) {
-      console.log(`Selected table changed to ${selectedTable}, fetching data...`);
-      
+    if (selectedTable) {      
       // For mock data, fetch immediately
       if (useMockData) {
         fetchTableData(selectedTable, null);

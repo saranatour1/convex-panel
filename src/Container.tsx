@@ -9,12 +9,12 @@ import DataTable from './data/DataTable';
 import { SettingsButton, ConvexPanelSettings } from './settings';
 import { getStorageItem, setStorageItem } from './utils/storage';
 import { HealthContainer } from './health';
-import { defaultSettings, INTERVALS, STORAGE_KEYS, TabTypes } from './utils/constants';
+import { defaultSettings, INTERVALS, STORAGE_KEYS, ROUTES, TabTypes } from './utils/constants';
 import { fetchLogsFromApi } from './utils/api';
 import { createFilterPredicate } from './utils/filters';
 import { TabButton } from './components/TabButton';
 import LogsContainer from './logs/LogsContainer';
-import { ConvexFavicon } from './components/icons';
+import { ConvexFavicon, RefreshIcon } from './components/icons';
 
 const TABS = [
   { id: 'logs' as const, label: 'Logs' },
@@ -171,11 +171,9 @@ const Container = ({
    * When true, the component will use mock data instead of making API calls.
    * @default false
    */
-  useMockData = false,
+  useMockData = false
 }: ContainerProps) => {
   let baseUrl;
-
-  console.log('useMockData', useMockData);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFetchTime = useRef<number>(0);
@@ -300,24 +298,20 @@ const Container = ({
     if (!isOpen || isPaused) {
       return;
     }
-    
-    console.log("useMockData", useMockData);
-    
+        
     // For mock data, clear any error message immediately
     if (useMockData) {
       setError(null);
       setShowRetryButton(false);
     }
     
-    // For real data, we need convexUrl and accessToken
-    // For mock data, we can proceed without them
+    // For real data, we use convexUrl and accessToken
+    // For mock data, we can skip
     if (!useMockData && (!convexUrl || !accessToken)) {
       console.log("Missing convexUrl or accessToken, skipping fetch");
       return;
     }
-    
-    console.log("Fetching logs with useMockData:", useMockData, "cursor:", cursor);
-    
+        
     // Prevent frequent polling with a more strict check
     const now = Date.now();
     const timeSinceLastFetch = now - lastFetchTime.current;
@@ -355,12 +349,6 @@ const Container = ({
         useMockData
       });
       
-      console.log("Received logs response:", {
-        logCount: response.logs.length,
-        newCursor: response.newCursor,
-        hostname: response.hostname
-      });
-      
       // Reset retry attempts on success
       setRetryAttempts(0);
       setConsecutiveErrors(0);
@@ -368,7 +356,6 @@ const Container = ({
       
       // Update cursor for next poll if available and different from current
       if (response.newCursor && response.newCursor !== cursor) {
-        console.log("Updating cursor from", cursor, "to", response.newCursor);
         setCursor(response.newCursor);
       }
       
@@ -390,15 +377,12 @@ const Container = ({
       const newLogs = response.logs.filter((log: LogEntry) => {
         const logId = getLogId(log);
         if (logIds.has(logId)) {
-          console.log("Duplicate log detected:", logId);
           return false;
         }
         logIds.add(logId);
         return true;
       });
-      
-      console.log("After filtering duplicates, new logs count:", newLogs.length);
-      
+            
       // Add logs to the list
       if (newLogs.length > 0) {
         setLogs(prev => {
@@ -446,7 +430,6 @@ const Container = ({
       
       // Skip API-specific error handling when using mock data
       if (useMockData) {
-        console.log("Error occurred with mock data, ignoring API-specific error handling");
         setIsLoading(false);
         return;
       }
@@ -836,6 +819,27 @@ const Container = ({
     };
   }, []);
 
+  /**
+   * Compare version strings (e.g., "0.1.33" vs "0.1.34")
+   */
+  const compareVersions = useCallback((current: string, latest: string): boolean => {
+    const currentParts = current.replace(/^v/, '').split('.').map(Number);
+    const latestParts = latest.replace(/^v/, '').split('.').map(Number);
+    
+    for (let i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
+      const currentPart = currentParts[i] || 0;
+      const latestPart = latestParts[i] || 0;
+      
+      if (latestPart > currentPart) {
+        return true; // Update available
+      } else if (latestPart < currentPart) {
+        return false; // Current is newer
+      }
+    }
+    
+    return false; // Versions are equal
+  }, []);
+
   const renderContent = () => {
     // If the panel is closed, don't render anything
     if (!isOpen) {
@@ -997,7 +1001,7 @@ const Container = ({
             </div>
             <div className="convex-panel-url-container">
               <a 
-                href={convexUrl ? `https://${convexUrl.replace('https://', '')}` : "https://dashboard.convex.dev"} 
+                href={useMockData ? "https://convex.dev" : (convexUrl ? `https://${convexUrl.replace('https://', '')}` : "https://dashboard.convex.dev")}
                 target="_blank" 
                 rel="noreferrer"
                 className="convex-panel-url-link"

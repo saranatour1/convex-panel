@@ -38,15 +38,7 @@ const LogRow = memo(({
   const iconRef = useRef<HTMLDivElement>(null);
   const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
   const [showTooltip, setShowTooltip] = useState(false);
-  
-  // Log the request ID to find the specific log we're looking for
-  useEffect(() => {
-    const requestId = log.function?.request_id || '';
-    if (requestId.includes('18b50257e6d44185')) {
-      console.log('Found target log:', log);
-    }
-  }, [log]);
-  
+
   /**
    * Function to position the tooltip.
    * This is used for logs that have additional information to display.

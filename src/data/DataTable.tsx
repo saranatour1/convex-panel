@@ -81,7 +81,6 @@ const DataTable: React.FC<DataTableProps> = ({
    */
   useMockData = false,
 }) => {
-  console.log('DataTable component rendered with useMockData:', useMockData);
   
   const [searchText, setSearchText] = React.useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
@@ -168,14 +167,6 @@ const DataTable: React.FC<DataTableProps> = ({
       fetchTableData(selectedTable, null);
     }
   }, [filters, setTableFilters, fetchTableData, selectedTable]);
-
-  // Add a debug effect to log when documents change
-  useEffect(() => {
-    console.log(`DataTable: documents updated, count: ${documents.length}`);
-    if (documents.length > 0) {
-      console.log('First document sample:', documents[0]);
-    }
-  }, [documents]);
 
   /**
    * Create a wrapper function for patchDocumentFields to match the expected interface

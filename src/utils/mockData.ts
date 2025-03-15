@@ -1,11 +1,15 @@
 import { LogEntry, FetchLogsResponse, FetchTablesResponse, TableDefinition } from '../types';
 import { LogType } from './constants';
 
-// Store a mock log database to simulate persistence between calls
+/**
+ * Store a mock log database to simulate persistence between calls
+ */
 let mockLogDatabase: LogEntry[] = [];
 let lastMockLogId = 0;
 
-// Initialize the mock log database with some initial data
+/**
+ * Initialize the mock log database with some initial data
+ */
 const initializeMockLogDatabase = () => {
   if (mockLogDatabase.length === 0) {
     // Generate 100 initial logs with timestamps spread over the last hour
@@ -20,14 +24,18 @@ const initializeMockLogDatabase = () => {
   }
 };
 
-// Generate a random timestamp within the last hour
+/**
+ * Generate a random timestamp within the last hour
+ */
 const getRandomTimestamp = () => {
-  const now = Math.floor(Date.now() / 1000); // Convert to seconds for consistency with Convex API
-  const oneHourAgo = now - 3600; // One hour ago in seconds
+  const now = Math.floor(Date.now() / 1000);
+  const oneHourAgo = now - 3600;
   return Math.floor(Math.random() * (now - oneHourAgo)) + oneHourAgo;
 };
 
-// Generate a random log entry
+/**
+ * Generate a random log entry
+ */
 const generateMockLog = (index: number): LogEntry => {
   const isSuccess = Math.random() > 0.2;
   const timestamp = getRandomTimestamp();
@@ -39,6 +47,7 @@ const generateMockLog = (index: number): LogEntry => {
     { type: 'action', display: 'A' },
     { type: 'httpAction', display: 'H' }
   ];
+
   const functionTypeIndex = Math.floor(Math.random() * functionTypeOptions.length);
   const functionTypeObj = functionTypeOptions[functionTypeIndex];
   const functionType = functionTypeObj.type;
@@ -57,6 +66,7 @@ const generateMockLog = (index: number): LogEntry => {
     'web'
   ];
   
+  // Function definitions
   const functionNames: Record<string, string[]> = {
     'query': ['get', 'list', 'search', 'find', 'count', 'viewer', 'getProfile', 'getLogs'],
     'mutation': ['create', 'update', 'delete', 'add', 'remove', 'toggle', 'createLog'],
@@ -101,30 +111,30 @@ const generateMockLog = (index: number): LogEntry => {
     ? successMessages[Math.floor(Math.random() * successMessages.length)]
     : errorMessages[Math.floor(Math.random() * errorMessages.length)];
   
-  // Generate a realistic request ID
+  // Generate request ID
   const requestId = Math.random().toString(16).substring(2, 18).padEnd(16, '0');
   
-  // Generate log levels with appropriate distribution
   const logLevels = isSuccess 
-    ? ['INFO', 'DEBUG', 'INFO', 'INFO'] // More INFO for success
-    : ['ERROR', 'WARN', 'ERROR', 'FATAL']; // More ERROR for failures
+    ? ['INFO', 'DEBUG', 'INFO', 'INFO']
+    : ['ERROR', 'WARN', 'ERROR', 'FAILURE'];
   
+  // Generate log level
   const logLevel = logLevels[Math.floor(Math.random() * logLevels.length)];
   
-  // Generate a unique mockId for this log
+  // Generate mockId
   const mockId = `mock-${index}-${Math.random().toString(36).substring(2, 8)}`;
   
   return {
     timestamp,
     topic: 'console',
     function: {
-      type: functionTypeObj.display, // Use the display value (Q, M, A, H)
+      type: functionTypeObj.display,
       path: functionPath,
       cached: Math.random() > 0.7,
       request_id: requestId
     },
     log_level: logLevel,
-    message: message, // Use the original message
+    message: message,
     execution_time_ms: Math.floor(Math.random() * 500),
     status: isSuccess ? 'success' : 'error',
     error_message: isSuccess ? undefined : `Error: ${message}`,
@@ -135,20 +145,22 @@ const generateMockLog = (index: number): LogEntry => {
       level: logLevel,
       message,
       success: isSuccess,
-      udfType: functionType, // Store the original function type
+      udfType: functionType,
       identifier: functionPath,
       requestId,
       cachedResult: Math.random() > 0.7,
       executionTime: Math.floor(Math.random() * 500) / 1000,
-      details: functionDetails // Add the details for expanded view
+      details: functionDetails
     }
   };
 };
 
-// Add a new log to the mock database
+/**
+ * Add a new log to the mock database
+ */
 const addNewMockLog = () => {
   const newLog = generateMockLog(lastMockLogId++);
-  // Add to the beginning (newest first)
+  // newest fisrt
   mockLogDatabase.unshift(newLog);
   
   // Keep database size reasonable
@@ -159,16 +171,18 @@ const addNewMockLog = () => {
   return newLog;
 };
 
-// Mock implementation of fetchLogsFromApi
+/**
+ * Mock implementation of fetchLogsFromApi
+ */
 export const mockFetchLogsFromApi = async (cursor: number | string = 0): Promise<FetchLogsResponse> => {
   // Initialize the mock database if it's empty
   initializeMockLogDatabase();
   
-  // Simulate network delay (shorter for better responsiveness)
+  // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 200));
   
-  // Always add new logs each time to ensure there's something to show
-  const numNewLogs = Math.floor(Math.random() * 3) + 3; // Add 3-5 logs each time
+  // Always add new logs each time
+  const numNewLogs = Math.floor(Math.random() * 3) + 3;
   const newLogs = [];
   for (let i = 0; i < numNewLogs; i++) {
     newLogs.push(addNewMockLog());
@@ -181,8 +195,7 @@ export const mockFetchLogsFromApi = async (cursor: number | string = 0): Promise
   // Handle different cursor formats
   if (cursor === 0 || cursor === 'now' || typeof cursor === 'string' && (cursor.includes('now') || cursor === '')) {
     // Return the most recent logs for initial load
-    logs = mockLogDatabase.slice(0, 15); // Return more logs initially
-    console.log(`Initial load with cursor ${cursor}, returning ${logs.length} logs`);
+    logs = mockLogDatabase.slice(0, 15);
   } else {
     try {
       // Find logs newer than the cursor timestamp
@@ -191,24 +204,20 @@ export const mockFetchLogsFromApi = async (cursor: number | string = 0): Promise
       if (isNaN(cursorTimestamp)) {
         // If cursor is not a valid number, return recent logs
         logs = mockLogDatabase.slice(0, 10);
-        console.log(`Invalid cursor ${cursor}, returning ${logs.length} recent logs`);
       } else {
         // Get logs newer than cursor
         logs = mockLogDatabase.filter(log => log.timestamp > cursorTimestamp);
-        console.log(`Filtering logs newer than cursor ${cursorTimestamp}, found ${logs.length} logs`);
         
         // If no logs found after cursor, return the most recent ones anyway
         if (logs.length === 0) {
           logs = mockLogDatabase.slice(0, 10);
-          console.log(`No logs after cursor ${cursorTimestamp}, returning ${logs.length} recent logs instead`);
         }
         
-        // Limit to 10 logs per request to simulate pagination
+        // Limit of 10 logs per request
         logs = logs.slice(0, 10);
       }
     } catch (e) {
       // If there's any issue with cursor parsing, return recent logs
-      console.log(`Error with cursor ${cursor}, returning recent logs`, e);
       logs = mockLogDatabase.slice(0, 10);
     }
   }
@@ -216,9 +225,7 @@ export const mockFetchLogsFromApi = async (cursor: number | string = 0): Promise
   // Ensure we always have a valid cursor for next fetch
   // Use the newest log's timestamp as the new cursor
   const newCursor = logs.length > 0 ? logs[0].timestamp : Math.floor(Date.now() / 1000);
-  
-  console.log(`Mock logs: Returning ${logs.length} logs, newCursor: ${newCursor}`);
-  
+
   return {
     logs,
     newCursor,
@@ -226,7 +233,9 @@ export const mockFetchLogsFromApi = async (cursor: number | string = 0): Promise
   };
 };
 
-// Mock table definition
+/**
+ * Mock table definition
+ */
 const mockTables: TableDefinition = {
   'users': {
     type: 'object',
@@ -248,11 +257,6 @@ const mockTables: TableDefinition = {
       },
       {
         fieldName: 'emailAddress',
-        optional: false,
-        shape: { type: 'string' }
-      },
-      {
-        fieldName: 'userId',
         optional: false,
         shape: { type: 'string' }
       },
@@ -281,24 +285,6 @@ const mockTables: TableDefinition = {
         optional: false,
         shape: { type: 'number' }
       },
-      {
-        fieldName: 'binaryIndex',
-        optional: true,
-        shape: { type: 'string' }
-      },
-      {
-        fieldName: 'emailAddresses',
-        optional: true,
-        shape: { 
-          type: 'Array',
-          shape: { type: 'string' }
-        }
-      },
-      {
-        fieldName: 'nextDeltaToken',
-        optional: true,
-        shape: { type: 'string' }
-      }
     ]
   },
   'posts': {
@@ -394,10 +380,10 @@ const mockTables: TableDefinition = {
   }
 };
 
-// Mock implementation of fetchTablesFromApi
+/**
+ * Mock implementation of fetchTablesFromApi
+ */
 export const mockFetchTablesFromApi = async (): Promise<FetchTablesResponse> => {
-  console.log('mockFetchTablesFromApi called');
-  
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 500));
   
@@ -414,8 +400,6 @@ export const mockFetchTablesFromApi = async (): Promise<FetchTablesResponse> => 
       shape: { type: Math.random() > 0.5 ? 'string' : 'number' }
     });
   }
-  
-  console.log('mockFetchTablesFromApi returning tables:', Object.keys(mockTables));
   
   return {
     tables: mockTables,
@@ -652,13 +636,6 @@ export const mockFetchSchedulerLag = async () => {
   const message = status === 'on_time' 
     ? 'Scheduler is running on time' 
     : `Scheduler is experiencing delays (max lag: ${maxLag.toFixed(1)} minutes)`;
-  
-  console.log('Generated mock scheduler lag data:', {
-    status,
-    message,
-    dataPoints: values.length,
-    maxLag
-  });
   
   return {
     status,
