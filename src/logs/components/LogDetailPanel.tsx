@@ -2,8 +2,8 @@ import { motion } from 'framer-motion';
 import { CopyIcon } from 'lucide-react';
 import { formatJson } from '../../utils';
 import { detailPanelVariants } from '../../theme';
-import { LogDetailPanelProps } from 'src/types';
-import { XIcon } from 'src/components/icons';
+import { LogDetailPanelProps } from '../../types';
+import { XIcon } from '../../components/icons';
 
 const LogDetailPanel = ({ 
   /**

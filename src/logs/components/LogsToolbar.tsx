@@ -6,7 +6,7 @@ import { ConvexPanelSettings } from '../../settings/SettingsModal';
 import { getStorageItem, setStorageItem } from '../../utils/storage';
 import { defaultSettings, STORAGE_KEYS } from '../../utils/constants';
 import { LogsToolbarProps } from '../../types';
-import { ChevronDownIcon, RefreshIcon } from 'src/components/icons';
+import { ChevronDownIcon, RefreshIcon } from '../../components/icons';
 
 const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
   /** 

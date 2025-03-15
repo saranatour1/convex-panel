@@ -10,8 +10,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import SchedulerStatus from './SchedulerStatus';
-import { SchedulerLagChartProps } from 'src/types';
-import { ROUTES } from 'src/utils/constants';
+import { SchedulerLagChartProps } from '../../types';
 import { fetchSchedulerLag } from '../../utils/api';
 
 const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { DataTableSidebarProps } from '../../types';
-import { STORAGE_KEYS } from 'src/utils/constants';
-import { PanelCollapseIcon, PanelExpandIcon } from 'src/components/icons';
+import { STORAGE_KEYS } from '../../utils/constants';
+import { PanelCollapseIcon, PanelExpandIcon } from '../../components/icons';
 
 const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
   /**

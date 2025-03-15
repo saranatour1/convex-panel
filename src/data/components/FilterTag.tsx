@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, memo } from 'react';
 import { FilterClause } from '../../types';
-import { RedXIcon } from 'src/components/icons';
+import { RedXIcon } from '../../components/icons';
 
 const FilterTag = memo(({ 
   /**

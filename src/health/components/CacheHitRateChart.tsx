@@ -9,8 +9,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { fetchCacheHitRate } from '../../utils/api';
-import { CacheHitRateChartProps, CacheHitData, APIResponse } from 'src/types';
-import { generateColor, formatFunctionName, getNextMinute } from 'src/utils';
+import { CacheHitRateChartProps, CacheHitData, APIResponse } from '../../types';
+import { generateColor, formatFunctionName, getNextMinute } from '../../utils';
 
 const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
   /**

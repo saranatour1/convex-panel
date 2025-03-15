@@ -1,4 +1,4 @@
-import { ROUTES } from 'src/utils/constants';
+import { ROUTES } from '../utils/constants';
 import { LogEntry, TableDefinition } from '../types';
 import { getActiveTable } from './storage';
 import { FetchLogsOptions, FetchLogsResponse, FetchTablesOptions, FetchTablesResponse } from '../types';

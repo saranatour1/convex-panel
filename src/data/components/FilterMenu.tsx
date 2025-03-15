@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { FilterMenuProps, FilterClause } from '../../types';
-import { operatorOptions, typeOptions } from 'src/utils/constants';
-import { ChevronDownIcon } from 'src/components/icons';
+import { operatorOptions, typeOptions } from '../../utils/constants';
+import { ChevronDownIcon } from '../../components/icons';
 
 /**
  * Get portal container.

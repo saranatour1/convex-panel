@@ -1,7 +1,7 @@
 import React, { useCallback, memo } from 'react';
 import { ActiveFiltersProps } from '../../types';
 import FilterTag from './FilterTag';
-import { TrashIcon } from 'src/components/icons';
+import { TrashIcon } from '../../components/icons';
 
 const ActiveFilters: React.FC<ActiveFiltersProps> = memo(({ 
   /**

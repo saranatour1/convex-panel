@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getStorageItem, setStorageItem } from '../utils/storage';
-import { XIcon } from 'src/components/icons';
+import { XIcon } from '../components/icons';
 
 // Define storage keys for settings
 const SETTINGS_STORAGE_KEY = 'convex-panel:settings';

@@ -13,8 +13,8 @@ import {
 import { getStorageItem } from '../utils/storage';
 import { ConvexPanelSettings } from '../settings';
 import '../styles/DataTable.css';
-import { defaultSettings } from 'src/utils/constants';
-import { STORAGE_KEYS } from 'src/utils/constants';
+import { defaultSettings } from '../utils/constants';
+import { STORAGE_KEYS } from '../utils/constants';
 import { FilterMenuState } from '../types';
 
 const DataTable: React.FC<DataTableProps> = ({

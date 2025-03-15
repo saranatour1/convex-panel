@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import FailureRateChart from './components/FailureRateChart';
 import CacheHitRateChart from './components/CacheHitRateChart';
 import SchedulerLagChart from './components/SchedulerLagChart';
-import { HealthContainerProps } from 'src/types';
-import { ROUTES } from 'src/utils/constants';
-import { ChartIcon, RevertIcon } from 'src/components/icons';
+import { HealthContainerProps } from '../types';
+import { ROUTES } from '../utils/constants';
+import { ChartIcon, RevertIcon } from '../components/icons';
 
 const HealthContainer: React.FC<HealthContainerProps> = ({
   /**

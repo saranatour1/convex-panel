@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { DataTableContentProps, FilterClause } from '../../types';
 import FilterMenu from './FilterMenu';
-import { FilterIcon } from 'src/components/icons';
+import { FilterIcon } from '../../components/icons';
 
 const DataTableContent: React.FC<DataTableContentProps> = ({
   /**
