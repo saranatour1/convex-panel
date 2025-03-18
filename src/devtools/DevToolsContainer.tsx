@@ -8,7 +8,7 @@ import { ChevronDownIcon } from '../components/icons';
 import { CONSOLE_FILTER_TYPES } from '../utils/constants';
 import NetworkPanel from './network/NetworkPanel';
 import { TabButton } from '../components/TabButton';
-import { setStorageItem } from 'src/utils/storage';
+import { setStorageItem } from '../utils/storage';
 
 // Convert enum to string literal type for better TypeScript compatibility
 const CONSOLE: DevToolsTabTypes = 'console';
