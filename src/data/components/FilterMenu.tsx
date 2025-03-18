@@ -266,16 +266,16 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     };
   }, [isTypeFilterOpen, position, field]);
 
-  console.log("Rendering FilterMenu for field:", field, "at position:", position);
+  console.log("Rendering filter menu at position:", position);
   
-  // For debugging, render directly instead of using portal
+  // For better compatibility, render directly rather than through a portal
   return (
     <div 
       ref={menuRef}
       className="convex-panel-filter-menu"
       style={{
-        position: 'relative', 
-        width: '100%',
+        position: 'fixed', 
+        width: '300px',
         background: '#1e1e1e',
         border: '1px solid #444',
         borderRadius: '8px',
@@ -283,7 +283,8 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
         padding: '16px',
         color: '#fff',
         fontSize: '14px',
-        pointerEvents: 'auto', // Ensure clicks register on the menu
+        pointerEvents: 'auto',
+        zIndex: 100000
       }}
       onClick={(e) => {
         console.log("Filter menu clicked");
@@ -319,7 +320,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               backgroundColor: '#333',
               color: '#fff',
               border: '1px solid #444',
-              borderRadius: '4px',
+              borderRadius: '8px',
               cursor: 'pointer',
               fontSize: '14px',
               textAlign: 'left'
@@ -343,14 +344,15 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
                 width: '100%',
                 backgroundColor: '#222',
                 border: '1px solid #444',
-                borderRadius: '4px',
+                borderRadius: '8px',
                 boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
                 marginTop: '4px',
                 zIndex: 1001,
                 maxHeight: '200px',
                 overflowY: 'auto',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                padding: '4px'
               }}
             >
               {operatorOptions.map(option => (
@@ -410,7 +412,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
                 backgroundColor: '#333',
                 color: '#fff',
                 border: '1px solid #444',
-                borderRadius: '4px',
+                borderRadius: '8px',
                 cursor: 'pointer',
                 fontSize: '14px',
                 textAlign: 'left'
@@ -434,14 +436,15 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
                   width: '100%',
                   backgroundColor: '#222',
                   border: '1px solid #444',
-                  borderRadius: '4px',
+                  borderRadius: '8px',
                   boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
                   marginTop: '4px',
                   zIndex: 1001,
                   maxHeight: '200px',
                   overflowY: 'auto',
                   display: 'flex',
-                  flexDirection: 'column'
+                  flexDirection: 'column',
+                  padding: '4px'
                 }}
               >
                 {typeOptions.map(option => (

@@ -356,6 +356,8 @@ export interface DataTableContentProps {
   tableName?: string;
   selectedDocument: TableDocument | null;
   setSelectedDocument: (doc: TableDocument | null) => void;
+  sortConfig?: SortConfig | null;
+  onSort?: (field: string) => void;
 }
 
 // Storage Debug Props
@@ -424,6 +426,8 @@ export interface UseTableDataReturn {
   observerTarget: (node: HTMLDivElement) => void;
   filters: FilterExpression;
   setFilters: React.Dispatch<React.SetStateAction<FilterExpression>>;
+  sortConfig: SortConfig | null;
+  setSortConfig: React.Dispatch<React.SetStateAction<SortConfig | null>>;
 }
 
 /**
@@ -583,4 +587,17 @@ export interface NetworkPanelProps {
   mergedTheme: ThemeClasses;
   settings: ConvexPanelSettings;
   containerSize: { width: number; height: number };
+}
+
+/**
+ * Sort direction for table columns
+ */
+export type SortDirection = 'asc' | 'desc';
+
+/**
+ * Sort configuration for table columns
+ */
+export interface SortConfig {
+  field: string;
+  direction: SortDirection;
 }

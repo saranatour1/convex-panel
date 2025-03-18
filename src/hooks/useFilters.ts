@@ -70,20 +70,37 @@ export const useFilters = ({
 
   /**
    * Updates filters when initialFilters changes, but only once per table
+   * or when new filters are explicitly provided from the parent
    */
   useEffect(() => {
-    if (selectedTable && initialFilters) {
-      // Only update if we haven't initialized this table yet or if the filters have changed
-      if (!initializedRef.current[selectedTable]) {
-        setFiltersState(initialFilters);
-        initializedRef.current[selectedTable] = true;
-      } else if (
-        // Check if initialFilters are different from current filters
-        JSON.stringify(initialFilters) !== JSON.stringify(filters) &&
-        // Only consider non-empty initialFilters
-        initialFilters.clauses.length > 0
-      ) {
-        setFiltersState(initialFilters);
+    // Skip empty initialFilters which can trigger circular updates
+    if (!selectedTable || !initialFilters || initialFilters.clauses.length === 0) {
+      return;
+    }
+    
+    // Only update in these cases:
+    // 1. First time for this table (initialization)
+    // 2. When parent sends a non-empty filter set that's different from current filters
+    if (!initializedRef.current[selectedTable]) {
+      // First time for this table - initialize with parent filters
+      console.log('Initializing filters for first time:', selectedTable);
+      setFiltersState(initialFilters);
+      initializedRef.current[selectedTable] = true;
+    } else {
+      // Convert to JSON once for comparison
+      const currentFiltersJson = JSON.stringify(filters);
+      const initialFiltersJson = JSON.stringify(initialFilters);
+      
+      // Only sync when parent has different filters
+      if (initialFiltersJson !== currentFiltersJson) {
+        // Prevent overrides of local filter changes when parent has stale data
+        const locallyChanged = filters.clauses.length === 0 && 
+          initialFilters.clauses.length === 1;
+          
+        if (!locallyChanged) {
+          console.log('Updating filters from parent:', initialFiltersJson);
+          setFiltersState(initialFilters);
+        }
       }
     }
   }, [selectedTable, initialFilters, filters]);
@@ -168,20 +185,24 @@ export const useFilters = ({
    * Handles the remove event for the filter
    */
   const handleFilterRemove = useCallback((field: string) => {
-    // Create a new filters object with the filter removed
-    const newFilters = {
-      clauses: filters.clauses.filter(c => c.field !== field)
-    };
+    console.log('Removing filter:', field);
     
-    // Update filters state and storage synchronously
-    if (selectedTable) {
-      saveTableFilters(selectedTable, newFilters);
-    }
-    setFilters(newFilters);
+    // Use the functional updater pattern to get the most current filters state
+    setFilters(currentFilters => {
+      const newFilters = {
+        clauses: currentFilters.clauses.filter(c => c.field !== field)
+      };
+      
+      console.log('Current filters (in updater):', JSON.stringify(currentFilters));
+      console.log('New filters after removal (in updater):', JSON.stringify(newFilters));
+      
+      // Return the new filters to update state
+      return newFilters;
+    });
     
     // Call the callback
     onFilterRemove(field);
-  }, [filters, onFilterRemove, setFilters, selectedTable]);
+  }, [onFilterRemove, setFilters]);
 
   /**
    * Clears the filters

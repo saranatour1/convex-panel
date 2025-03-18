@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { FilterClause, DataTableProps, RecentlyViewedTable, TableDocument } from '../types';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
+import { FilterClause, DataTableProps, RecentlyViewedTable, TableDocument, SortConfig, SortDirection } from '../types';
 import { useTableData } from '../hooks/useTableData';
 import { useFilters } from '../hooks/useFilters';
 import { 
@@ -111,7 +111,9 @@ const DataTable: React.FC<DataTableProps> = ({
     observerTarget,
     filters: tableFilters,
     setFilters: setTableFilters,
-    patchDocumentFields
+    patchDocumentFields,
+    sortConfig,
+    setSortConfig
   } = useTableData({
     convexUrl,
     accessToken,
@@ -150,17 +152,38 @@ const DataTable: React.FC<DataTableProps> = ({
     initialFilters: tableFilters
   });
 
+  // Ref to track when we're programmatically syncing to avoid loops
+  const isSyncingToTableData = useRef(false);
+  const lastSyncedFiltersRef = useRef('');
+
   /**
    * Sync filters from useFilters to useTableData with priority
    */
   useEffect(() => {
-    // Always update tableFilters when filters change
+    // Convert current filters to string for comparison
+    const currentFiltersJson = JSON.stringify(filters);
+    
+    // Skip if already synced these exact filters or if we're in the middle of syncing
+    if (isSyncingToTableData.current || lastSyncedFiltersRef.current === currentFiltersJson) {
+      return;
+    }
+    
+    console.log('Syncing filters to tableData:', currentFiltersJson);
+    isSyncingToTableData.current = true;
+    
+    // Update the table filters
     setTableFilters(filters);
+    
+    // Store what we just synced
+    lastSyncedFiltersRef.current = currentFiltersJson;
     
     // If filters are cleared, force a data refresh
     if (filters.clauses.length === 0) {
       fetchTableData(selectedTable, null);
     }
+    
+    // Reset the sync flag
+    isSyncingToTableData.current = false;
   }, [filters, setTableFilters, fetchTableData, selectedTable]);
 
   /**
@@ -227,7 +250,10 @@ const DataTable: React.FC<DataTableProps> = ({
 
     // Clear any selected document when switching tables
     setSelectedDocument(null);
-  }, [setSelectedTable]);
+    
+    // Clear sorting when switching tables
+    setSortConfig(null);
+  }, [setSelectedTable, setSortConfig]);
 
   /**
    * Get column headers
@@ -241,6 +267,70 @@ const DataTable: React.FC<DataTableProps> = ({
     // We now use handleFilterButtonClick from useFilters
     handleFilterButtonClick(e, field);
   };
+  
+  /**
+   * Handle sorting when a column header is clicked
+   */
+  const handleSort = useCallback((field: string) => {
+    // Use a functional update to ensure we have the latest state
+    setSortConfig(prevConfig => {
+      const newConfig = !prevConfig || prevConfig.field !== field
+        ? { field, direction: 'asc' as SortDirection }  // First click: sort ascending
+        : prevConfig.direction === 'asc'
+          ? { field, direction: 'desc' as SortDirection } // Second click: sort descending
+          : null;                                      // Third click: clear sorting
+      
+      // Apply client-side sorting first for instant feedback
+      if (documents && documents.length > 0) {
+        const sortedDocs = newConfig 
+          ? [...documents].sort((a, b) => {
+              const aValue = a[field];
+              const bValue = b[field];
+              
+              // Handle null/undefined values
+              if (aValue === null || aValue === undefined) return 1;
+              if (bValue === null || bValue === undefined) return -1;
+              
+              // Compare based on value type
+              if (typeof aValue === 'string' && typeof bValue === 'string') {
+                return newConfig.direction === 'asc' 
+                  ? aValue.localeCompare(bValue) 
+                  : bValue.localeCompare(aValue);
+              }
+              
+              if (typeof aValue === 'number' && typeof bValue === 'number') {
+                return newConfig.direction === 'asc' 
+                  ? aValue - bValue 
+                  : bValue - aValue;
+              }
+              
+              if (aValue instanceof Date && bValue instanceof Date) {
+                return newConfig.direction === 'asc' 
+                  ? aValue.getTime() - bValue.getTime() 
+                  : bValue.getTime() - aValue.getTime();
+              }
+              
+              // Default comparison for other types
+              const aStr = String(aValue);
+              const bStr = String(bValue);
+              return newConfig.direction === 'asc' 
+                ? aStr.localeCompare(bStr) 
+                : bStr.localeCompare(aStr);
+            })
+          : documents;
+        
+        // Update documents immediately for better UX
+        setDocuments(sortedDocs);
+      }
+      
+      // Refresh data with new sort
+      setTimeout(() => {
+        fetchTableData(selectedTable, null);
+      }, 0);
+      
+      return newConfig;
+    });
+  }, [setSortConfig, fetchTableData, selectedTable, documents, setDocuments]);
 
   return (
     <div className="convex-panel-data-layout">
@@ -305,6 +395,8 @@ const DataTable: React.FC<DataTableProps> = ({
               tableName={selectedTable}
               selectedDocument={selectedDocument}
               setSelectedDocument={setSelectedDocument}
+              sortConfig={sortConfig}
+              onSort={handleSort}
             />
           )}
         </div>

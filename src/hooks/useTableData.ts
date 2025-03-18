@@ -6,7 +6,8 @@ import {
   PageArgs, 
   FilterExpression, 
   UseTableDataProps,
-  UseTableDataReturn
+  UseTableDataReturn,
+  SortConfig
 } from '../types';
 import { saveActiveTable, getTableFilters } from '../utils/storage';
 import { fetchTablesFromApi } from '../utils/api';
@@ -77,6 +78,7 @@ export const useTableData = ({
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [filters, setFilters] = useState<FilterExpression>({ clauses: [] });
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
 
   /**
    * Use a ref to track the last fetch request
@@ -86,11 +88,18 @@ export const useTableData = ({
     tableName: string | null;
     filters: FilterExpression | null;
     cursor: string | null;
+    sortConfig: SortConfig | null;
   }>({
     tableName: null,
     filters: null,
-    cursor: null
+    cursor: null,
+    sortConfig: null
   });
+
+  /**
+   * Use a ref to track loading state
+   */
+  const loadingTimerRef = useRef<number | null>(null);
 
   /**
    * Wrapper for setSelectedTable that also updates localStorage
@@ -145,6 +154,8 @@ export const useTableData = ({
     const currentFilters = filtersRef.current;
     const filtersJson = JSON.stringify(currentFilters);
     const lastFiltersJson = lastFetch.filters ? JSON.stringify(lastFetch.filters) : null;
+    const sortJson = JSON.stringify(sortConfig);
+    const lastSortJson = JSON.stringify(lastFetch.sortConfig);
     
     // Always allow filter-related requests to go through (when cursor is null)
     // This ensures filter operations are always processed
@@ -152,14 +163,34 @@ export const useTableData = ({
       cursor !== null && // Skip this check for initial loads (filter operations)
       tableName === lastFetch.tableName && 
       cursor === lastFetch.cursor &&
-      filtersJson === lastFiltersJson
+      filtersJson === lastFiltersJson &&
+      sortJson === lastSortJson
     ) {
       return;
     }
     
+    // Clear any existing loading timer
+    if (loadingTimerRef.current !== null) {
+      clearTimeout(loadingTimerRef.current);
+      loadingTimerRef.current = null;
+    }
+    
     // For filter operations, set loading state immediately
     if (cursor === null) {
-      setIsLoading(true);
+      // Don't show loading state when only changing sort config
+      const isOnlySortChange = 
+        tableName === lastFetch.tableName && 
+        filtersJson === lastFiltersJson &&
+        sortJson !== lastSortJson;
+
+      if (!isOnlySortChange) {
+        // Use a timer to delay showing loading state
+        // This prevents flashing for quick operations
+        loadingTimerRef.current = window.setTimeout(() => {
+          setIsLoading(true);
+          loadingTimerRef.current = null;
+        }, 150); // Short delay to prevent flashing
+      }
     } else if (cursor) {
       setIsLoadingMore(true);
     }
@@ -168,7 +199,8 @@ export const useTableData = ({
     lastFetchRef.current = {
       tableName,
       filters: JSON.parse(JSON.stringify(currentFilters)),
-      cursor
+      cursor,
+      sortConfig: sortConfig ? { ...sortConfig } : null
     };
     
     setError(null);
@@ -180,7 +212,12 @@ export const useTableData = ({
         await new Promise(resolve => setTimeout(resolve, 300));
         
         // Generate mock documents based on the table schema
-        const mockDocuments = generateMockDocuments(tableName, cursor === null ? 25 : 10);
+        let mockDocuments = generateMockDocuments(tableName, cursor === null ? 25 : 10);
+        
+        // Apply sorting to mock data if sort config is provided
+        if (sortConfig) {
+          mockDocuments = sortDocuments([...mockDocuments], sortConfig);
+        }
                 
         if (cursor === null) {
           setDocuments(mockDocuments);
@@ -244,10 +281,23 @@ export const useTableData = ({
         throw new Error('Invalid response format');
       }
       
+      let newDocuments = result.page || [];
+      
+      // Apply sorting if sortConfig is provided
+      if (sortConfig) {
+        newDocuments = sortDocuments(newDocuments, sortConfig);
+      }
+      
       if (cursor === null) {
-        setDocuments(result.page || []);
+        setDocuments(newDocuments);
       } else {
-        setDocuments(prev => [...prev, ...(result.page || [])]);
+        // For pagination, we need to make sure the new documents are also sorted correctly
+        const combinedDocuments = [...documents, ...newDocuments];
+        const sortedCombined = sortConfig 
+          ? sortDocuments(combinedDocuments, sortConfig)
+          : combinedDocuments;
+        
+        setDocuments(sortedCombined);
       }
       
       setContinueCursor(result.continueCursor || null);
@@ -259,10 +309,16 @@ export const useTableData = ({
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(errorMessage);
     } finally {
+      // Clear loading timer if request finishes before timer fires
+      if (loadingTimerRef.current !== null) {
+        clearTimeout(loadingTimerRef.current);
+        loadingTimerRef.current = null;
+      }
+      
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [adminClient, useMockData, onError]);
+  }, [adminClient, convexUrl, onError, documents, useMockData, sortConfig]);
 
   /**
    * Generate mock documents for a table
@@ -649,6 +705,56 @@ export const useTableData = ({
     return fields;
   };
 
+  /**
+   * Helper function to sort documents based on sort configuration
+   */
+  const sortDocuments = (docs: TableDocument[], config: SortConfig): TableDocument[] => {
+    return [...docs].sort((a, b) => {
+      const aValue = a[config.field];
+      const bValue = b[config.field];
+      
+      // Handle null/undefined values (sort them to the end regardless of sort direction)
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+      
+      // Compare based on value type
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return config.direction === 'asc' 
+          ? aValue.localeCompare(bValue) 
+          : bValue.localeCompare(aValue);
+      }
+      
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return config.direction === 'asc' 
+          ? aValue - bValue 
+          : bValue - aValue;
+      }
+      
+      if (aValue instanceof Date && bValue instanceof Date) {
+        return config.direction === 'asc' 
+          ? aValue.getTime() - bValue.getTime() 
+          : bValue.getTime() - aValue.getTime();
+      }
+      
+      // Default comparison for other types (convert to string)
+      const aStr = String(aValue);
+      const bStr = String(bValue);
+      return config.direction === 'asc' 
+        ? aStr.localeCompare(bStr) 
+        : bStr.localeCompare(aStr);
+    });
+  };
+
+  // Clear loading timer on unmount
+  useEffect(() => {
+    return () => {
+      if (loadingTimerRef.current !== null) {
+        clearTimeout(loadingTimerRef.current);
+        loadingTimerRef.current = null;
+      }
+    };
+  }, []);
+
   return {
     tables,
     selectedTable,
@@ -670,6 +776,8 @@ export const useTableData = ({
     renderFieldType,
     observerTarget,
     filters,
-    setFilters
+    setFilters,
+    sortConfig,
+    setSortConfig
   };
 }; 

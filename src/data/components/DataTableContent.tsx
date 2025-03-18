@@ -1,7 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { DataTableContentProps, FilterClause } from '../../types';
+import { DataTableContentProps, FilterClause, SortConfig, SortDirection } from '../../types';
 import FilterMenu from './FilterMenu';
-import { FilterIcon } from '../../components/icons';
+import { SortIcon, FilterIcon } from '../../components/icons';
+
+const FilterIconWithState = ({ isActive }: { isActive: boolean }) => {
+  return (
+    <span className={`convex-panel-filter-icon ${isActive ? 'active' : ''}`}>
+      <FilterIcon />
+    </span>
+  );
+};
 
 const DataTableContent: React.FC<DataTableContentProps> = ({
   /**
@@ -121,10 +129,24 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
    * Callback to set the selected document.
    * Called when a row is clicked.
    */
-  setSelectedDocument
+  setSelectedDocument,
+
+  /**
+   * The current sort configuration.
+   * Used to determine which column is sorted and in which direction.
+   */
+  sortConfig,
+  
+  /**
+   * Callback function for sorting.
+   * Called when a column header is clicked for sorting.
+   * @param field The field to sort by
+   */
+  onSort
 }) => {
   const tableRef = useRef<HTMLTableElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const [hoveredHeader, setHoveredHeader] = useState<number | null>(null);
   const [editingCell, setEditingCell] = useState<{docId: string, field: string} | null>(null);
@@ -263,185 +285,204 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
   };
 
   /**
-   * Handle clicking outside of an editing cell
+   * Get sort direction for a column
    */
-  const handleClickOutside = (e: React.MouseEvent) => {
-    if (editingCell && inputRef.current && !inputRef.current.contains(e.target as Node)) {
-      handleSaveEdit(editingCell.docId, editingCell.field, editValue);
+  const getSortDirection = (field: string): SortDirection | null => {
+    if (!sortConfig || sortConfig.field !== field) {
+      return null;
+    }
+    return sortConfig.direction;
+  };
+  
+  /**
+   * Handle column header click for sorting
+   */
+  const handleHeaderClick = (field: string): void => {
+    if (onSort) {
+      // Apply visual feedback immediately
+      onSort(field);
     }
   };
 
-  // Debug logging for the filter menu
+  // Connect the observer to our loadMoreRef
   useEffect(() => {
-    if (filterMenuField || filterMenuPosition) {
-      console.log("Filter menu state changed:", { 
-        filterMenuField, 
-        filterMenuPosition,
-        hasPosition: !!filterMenuPosition
-      });
+    if (loadMoreRef.current && observerTarget) {
+      observerTarget(loadMoreRef.current);
     }
+  }, [observerTarget]);
+
+  // Debug filter menu rendering
+  useEffect(() => {
+    console.log("Filter menu state:", { filterMenuField, filterMenuPosition });
   }, [filterMenuField, filterMenuPosition]);
 
   return (
-    <div className="convex-panel-table-wrapper" onClick={handleClickOutside}>
-      <table className="convex-panel-data-table" ref={tableRef}>
-        <thead>
-          <tr className="convex-panel-table-header-row">
-            <th className="convex-panel-checkbox-header">
-              <input type="checkbox" className="convex-panel-checkbox" disabled />
-            </th>
-            {columnHeaders.map((header, index) => (
-              <th 
-                key={index} 
-                className={`convex-panel-column-header`}
-                style={{ 
-                  backgroundColor: hoveredHeader === index ? '#333' : 'transparent',
-                  position: 'relative'
-                }}
-                onMouseEnter={() => setHoveredHeader(index)}
-                onMouseLeave={() => setHoveredHeader(null)}
-              >
-                <div className="convex-panel-header-content" style={{ position: 'relative' }}>
-                  <span style={{ fontStyle: 'bold' }}>
-                    {header}
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      console.log("Filter button clicked for", header);
-                      onFilterButtonClick(e, header);
-                    }}
-                    className="convex-panel-filter-button"
-                    style={{ visibility: hoveredHeader === index || filterMenuField === header ? 'visible' : 'hidden' }}
-                    title={hasActiveFilter(header) ? "Edit filter" : "Add filter"}
-                  >
-                    <FilterIcon />
-                  </button>
-                  {/* Original conditional rendering with improved styling */}
-                  {filterMenuField === header && filterMenuPosition && (
-                    <div 
-                      style={{ 
-                        position: 'absolute', 
-                        zIndex: 1000,
-                        top: '30px',
-                        left: '0',
-                        minWidth: '300px',
-                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)'
-                      }}
-                    >
-                      <FilterMenu
-                        field={header}
-                        position={{ top: 0, left: 0 }}
-                        onApply={(filter) => {
-                          console.log("Filter applied:", filter);
-                          handleFilterApply(filter);
-                          onFilterMenuClose();
-                        }}
-                        onClose={() => {
-                          console.log("FilterMenu closed");
-                          onFilterMenuClose();
-                        }}
-                        existingFilter={getExistingFilter(header)}
-                      />
-                    </div>
-                  )}
-                </div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        {documents.length > 0 && (
-          <tbody>
-            {documents.map((doc, rowIndex) => {
-              const docId = doc._id?.toString() || '';
-              const isSelected = selectedDocument && selectedDocument._id === docId;
-              
-              return (
-                <tr 
-                  key={docId || rowIndex} 
-                  className={`convex-panel-table-row ${isSelected ? 'convex-panel-selected-row' : ''}`}
-                  onClick={() => handleRowClick(doc)}
-                >
-                  <td className="convex-panel-checkbox-cell">
-                    <input 
-                      type="checkbox" 
-                      className="convex-panel-checkbox" 
-                      checked={!!isSelected}
-                      onChange={() => {}} // Required for controlled component
-                    />
-                  </td>
-                  {columnHeaders.map(header => {
-                    const value = doc[header];
-                    const isId = header === '_id' || header === 'userId' || header.endsWith('Id');
-                    const isEditing = editingCell && 
-                                     editingCell.docId === docId && 
-                                     editingCell.field === header;
-                    const isUpdating = updatingCells[`${docId}-${header}`];
-                    const cellClassName = `convex-panel-table-cell ${isEditing ? 'editing' : ''} ${isUpdating ? 'updating' : ''}`;
-                    
+    <>
+      <div className="convex-panel-table-wrapper">
+        {isLoading && documents.length === 0 ? (
+          <div className="convex-panel-table-footer">
+            <p className="convex-panel-loading-message">Loading data...</p>
+          </div>
+        ) : documents.length === 0 ? (
+          <div className="convex-panel-table-footer">
+            <p className="convex-panel-empty-message">No documents found in this table</p>
+          </div>
+        ) : (
+          <>
+            <table className="convex-panel-data-table" ref={tableRef}>
+              <thead>
+                <tr className="convex-panel-table-header-row">
+                  {columnHeaders.map((header, index) => {
+                    const sortDirection = getSortDirection(header);
+                    const isSorted = sortDirection !== null;
                     return (
-                      <td 
-                        key={`${docId}-${header}`} 
-                        className={cellClassName}
-                        onDoubleClick={(e) => {
-                          e.stopPropagation(); // Prevent row selection on double click
-                          handleCellDoubleClick(doc, header);
+                      <th 
+                        key={header} 
+                        className={`convex-panel-column-header ${isSorted ? 'convex-panel-header-sorted' : ''} ${header === '_id' ? 'convex-panel-id-column' : ''}`}
+                        style={{ 
+                          backgroundColor: isSorted ? '#2a2a2a' : 
+                                          hoveredHeader === index ? '#333' : undefined,
+                          position: 'relative',
+                          width: header === '_id' ? '220px' : 'auto'
                         }}
+                        onMouseEnter={() => setHoveredHeader(index)}
+                        onMouseLeave={() => setHoveredHeader(null)}
                       >
-                        {isEditing ? (
-                          <input
-                            ref={inputRef}
-                            className="convex-panel-cell-edit-input"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            onKeyDown={(e) => handleInputKeyDown(e, docId, header)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        ) : isId ? (
-                          <span className="convex-panel-id-value">
-                            {formatValue(value, header)}
-                          </span>
-                        ) : (
-                          <span 
-                            className={`${value === undefined ? "convex-panel-empty-value" : ""} ${!isId ? "convex-panel-editable-cell" : ""}`}
-                            title={!isId ? "Double-click to edit" : ""}
+                        <div className="convex-panel-header-content">
+                          <div 
+                            className="convex-panel-header-label"
+                            style={{ 
+                              fontWeight: 'bold', 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              cursor: 'pointer',
+                              minHeight: '20px',
+                              marginRight: '4px'
+                            }}
+                            onClick={() => handleHeaderClick(header)}
                           >
-                            {isUpdating ? 'Saving...' : formatValue(value, header)}
-                          </span>
-                        )}
-                      </td>
+                            {header}
+                            <SortIcon direction={sortDirection} isHovered={hoveredHeader === index} />
+                          </div>
+                          {(hoveredHeader === index || hasActiveFilter(header)) && (
+                            <button
+                              onClick={(e) => onFilterButtonClick(e, header)}
+                              className="convex-panel-filter-button"
+                              style={{ marginLeft: 'auto' }}
+                              title={hasActiveFilter(header) ? "Edit filter" : "Add filter"}
+                            >
+                              <FilterIconWithState isActive={hasActiveFilter(header)} />
+                            </button>
+                          )}
+
+                          {/* Original conditional rendering with improved styling */}
+                          {filterMenuField === header && filterMenuPosition && (
+                            <div 
+                              style={{ 
+                                position: 'absolute', 
+                                zIndex: 1000,
+                                top: '30px',
+                                left: '0',
+                                minWidth: '300px',
+                                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)'
+                              }}
+                            >
+                              <FilterMenu
+                                field={header}
+                                position={{ top: 0, left: 0 }}
+                                onApply={(filter) => {
+                                  console.log("Filter applied:", filter);
+                                  handleFilterApply(filter);
+                                  onFilterMenuClose();
+                                }}
+                                onClose={() => {
+                                  console.log("FilterMenu closed");
+                                  onFilterMenuClose();
+                                }}
+                                existingFilter={getExistingFilter(header)}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </th>
                     );
                   })}
                 </tr>
-              );
-            })}
-          </tbody>
+              </thead>
+              <tbody>
+                {documents.map((doc) => {
+                  const docId = doc._id?.toString() || '';
+                  const isSelected = selectedDocument && selectedDocument._id === docId;
+                  
+                  return (
+                    <tr 
+                      key={docId} 
+                      className={`convex-panel-table-row ${isSelected ? 'convex-panel-selected-row' : ''}`}
+                      onClick={() => handleRowClick(doc)}
+                    >
+                      {columnHeaders.map(header => {
+                        const value = doc[header];
+                        const isId = header === '_id' || header === 'userId' || header.endsWith('Id');
+                        const isEditing = editingCell && 
+                                        editingCell.docId === docId && 
+                                        editingCell.field === header;
+                        const isUpdating = updatingCells[`${docId}-${header}`];
+                        const cellClassName = `convex-panel-table-cell ${isEditing ? 'editing' : ''} ${isUpdating ? 'updating' : ''}`;
+                        
+                        return (
+                          <td 
+                            key={`${docId}-${header}`} 
+                            className={cellClassName}
+                            onDoubleClick={(e) => {
+                              e.stopPropagation(); // Prevent row selection on double click
+                              handleCellDoubleClick(doc, header);
+                            }}
+                          >
+                            {isEditing ? (
+                              <input
+                                ref={inputRef}
+                                className="convex-panel-cell-edit-input"
+                                value={editValue}
+                                onChange={(e) => setEditValue(e.target.value)}
+                                onKeyDown={(e) => handleInputKeyDown(e, docId, header)}
+                                onBlur={() => handleSaveEdit(docId, header, editValue)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            ) : isId ? (
+                              <span className="convex-panel-id-value">
+                                {formatValue(value, header)}
+                              </span>
+                            ) : (
+                              <span 
+                                className={`${value === undefined ? "convex-panel-empty-value" : ""} ${!isId ? "convex-panel-editable-cell" : ""}`}
+                                title={!isId ? "Double-click to edit" : ""}
+                              >
+                                {isUpdating ? 'Saving...' : formatValue(value, header)}
+                              </span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            
+            {/* Intersection observer target */}
+            <div ref={loadMoreRef} className="convex-panel-observer-target">
+              {isLoadingMore ? (
+                <p className="convex-panel-loading-more-message">Loading more...</p>
+              ) : hasMore ? (
+                <p className="convex-panel-has-more-message">Scroll down to load more</p>
+              ) : (
+                <p className="convex-panel-end-message">End of table data</p>
+              )}
+            </div>
+          </>
         )}
-      </table>
-      
-      {/* Loading and end of content indicators */}
-      {isLoading && documents.length === 0 ? (
-        <div className="convex-panel-table-footer">
-          <p className="convex-panel-loading-message">Loading data...</p>
-        </div>
-      ) : !documents.length ? (
-        <div className="convex-panel-table-footer">
-          <p className="convex-panel-empty-message">No documents found in this table</p>
-        </div>
-      ) : (
-        <>
-          {/* Intersection observer target */}
-          <div ref={observerTarget} className="convex-panel-observer-target">
-            {isLoadingMore ? (
-              <p className="convex-panel-loading-more-message">Loading more...</p>
-            ) : hasMore ? (
-              <p className="convex-panel-has-more-message">Scroll down to load more</p>
-            ) : (
-              <p className="convex-panel-end-message">End of table data</p>
-            )}
-          </div>
-        </>
-      )}
-    </div>
+      </div>
+    </>
   );
 };
 

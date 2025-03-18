@@ -49,7 +49,9 @@ const FilterTag = memo(({
   const handleRemove = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('Filter removed before:', filter.field);
     onRemove(filter.field);
+    console.log('Filter removed after:', filter.field);
   }, [filter.field, onRemove]);
 
   /**
