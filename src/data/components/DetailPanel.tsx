@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { TableDocument } from '../../types';
 import { UI_DEFAULTS, STORAGE_KEYS } from '../../utils/constants';
 import { parseFieldValue, isFieldEditable } from '../../utils/documentEditing';
-import { EllipsisIcon, XIcon } from 'src/components/icons';
-// Import CodeMirror and VS Code theme
+import { EllipsisIcon, XIcon } from '../../components/icons';
 import CodeMirror from '@uiw/react-codemirror';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import { json } from '@codemirror/lang-json';
