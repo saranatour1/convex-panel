@@ -71,10 +71,10 @@ Here's a complete example:
 
 ```tsx
 import { ConvexPanel } from 'convex-panel';
-import { useConvex } from 'convex/react';
+import { ConvexReactClient } from "convex/react";
 
 export default function YourComponent() {
-  const convex = useConvex();
+  const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL);
 
   return (
     <>
@@ -96,8 +96,8 @@ The Convex Panel accepts the following props:
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `accessToken` | string | Yes | Your Convex access token (from `convex config`) |
-| `deployKey` | string | Yes | Your Convex deployment URL (or use CONVEX_DEPLOYMENT env var) |
-| `deployUrl` | string | No | Alternative to deployKey - your Convex deployment URL |
+| `deployKey` | string | No | Your Convex deployment key for admin-level access |
+| `deployUrl` | string | No | Your Convex deployment URL (or use NEXT_PUBLIC_CONVEX_URL env var) |
 | `convex` | ConvexReactClient | Yes | Convex client instance |
 | `theme` | ThemeClasses | No | Custom theme options |
 | `initialLimit` | number | No | Initial log limit (default: 100) |
@@ -106,7 +106,8 @@ The Convex Panel accepts the following props:
 | `maxStoredLogs` | number | No | Maximum number of logs to store (default: 500) |
 | `onLogFetch` | (logs: LogEntry[]) => void | No | Callback function when logs are fetched |
 | `onError` | (error: string) => void | No | Callback function when an error occurs |
-| `onToggle` | (isOpen: boolean) => void | No | Callback function when panel is opened/closed |
+| `buttonPosition` | 'bottom-left' \| 'bottom-center' \| 'bottom-right' \| 'right-center' \| 'top-right' | No | Position of the ConvexPanel button (default: 'bottom-right') |
+| `useMockData` | boolean | No | Whether to use mock data instead of real API data (default: false) |
 
 ## Features Documentation
 

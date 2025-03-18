@@ -136,66 +136,54 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
   setLogType,
 
   /**
-   * Settings passed as props to override localStorage settings.
-   * Controls visibility and behavior of toolbar components.
+   * Settings object with user preferences.
+   * Controls UI behavior and features.
    */
-  settings: propSettings
+  settings,
 }, ref) => {
   const logTypeDropdownRef = useRef<HTMLDivElement>(null);
-  const [localSettings, setLocalSettings] = useState<Partial<ConvexPanelSettings> | null>(null);
   const [isLogTypeDropdownOpen, setIsLogTypeDropdownOpen] = useState(false);
+  const [showRequestIdInput, setShowRequestIdInput] = useState(true);
+  const [showLimitInput, setShowLimitInput] = useState(true);
+  const [showSuccessCheckbox, setShowSuccessCheckbox] = useState(true);
+  const [localSettings, setLocalSettings] = useState<ConvexPanelSettings | null>(null);
   
-  /**
-   * Load settings from localStorage on mount
-   */
+  // Load settings from localStorage on mount
   useEffect(() => {
-    const savedSettings = getStorageItem<Partial<ConvexPanelSettings>>(STORAGE_KEYS.SETTINGS, {});
+    const savedSettings = getStorageItem<ConvexPanelSettings>(STORAGE_KEYS.SETTINGS, defaultSettings);
     setLocalSettings(savedSettings);
+    
+    // Update UI controls based on settings
+    setShowRequestIdInput(savedSettings.showRequestIdInput);
+    setShowLimitInput(savedSettings.showLimitInput);
+    setShowSuccessCheckbox(savedSettings.showSuccessCheckbox);
   }, []);
   
-  /**
-   * Update localSettings when propSettings changes
-   */
+  // Update settings when props change
   useEffect(() => {
-    if (propSettings) {
-      setLocalSettings(propSettings);
+    if (settings) {
+      setLocalSettings(settings);
     }
-  }, [propSettings]);
+  }, [settings]);
   
-  /**
-   * Use settings from props if provided, otherwise use settings from localStorage, with fallback to defaults
-   */
-  const effectiveSettings = propSettings || localSettings || {};
+  // Use settings from props if provided, otherwise use settings from localStorage, with fallback to defaults
+  const effectiveSettings = settings || localSettings || {};
   
-  /**
-   * IMPORTANT: Don't use default values when reading from settings
-   * This ensures that if a setting is explicitly set to false, it will be respected
-   */
-  const showRequestIdInput = effectiveSettings.showRequestIdInput !== undefined 
-    ? effectiveSettings.showRequestIdInput 
-    : defaultSettings.showRequestIdInput;
-    
-  const showLimitInput = effectiveSettings.showLimitInput !== undefined
-    ? effectiveSettings.showLimitInput
-    : defaultSettings.showLimitInput;
-    
-  const showSuccessCheckbox = effectiveSettings.showSuccessCheckbox !== undefined
-    ? effectiveSettings.showSuccessCheckbox
-    : defaultSettings.showSuccessCheckbox;
-
-  /**
-   * Handle clicking outside the dropdown
-   */
+  // Close dropdown when clicking outside
   useEffect(() => {
     if (!isLogTypeDropdownOpen) return;
     
     const handleClickOutside = (e: MouseEvent) => {
-      if (logTypeDropdownRef.current && !logTypeDropdownRef.current.contains(e.target as Node)) {
+      if (
+        logTypeDropdownRef.current && 
+        !logTypeDropdownRef.current.contains(e.target as Node)
+      ) {
         setIsLogTypeDropdownOpen(false);
       }
     };
     
     document.addEventListener('mousedown', handleClickOutside);
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -384,4 +372,4 @@ const LogsToolbar = React.forwardRef<HTMLDivElement, LogsToolbarProps>(({
 
 LogsToolbar.displayName = 'LogsToolbar';
 
-export default LogsToolbar; 
+export default LogsToolbar;

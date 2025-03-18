@@ -3,6 +3,11 @@ import { LogEntry } from '../types';
 
 // Memoizable filter predicates
 const createLogTypeFilter = (logType: LogType) => (log: LogEntry): boolean => {
+  // Always exclude frontend logs from regular logs view
+  if (log.topic === 'frontend') {
+    return false;
+  }
+  
   if (logType === LogType.ALL) return true;
   
   switch (logType) {

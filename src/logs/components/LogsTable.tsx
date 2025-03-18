@@ -3,7 +3,6 @@ import { FixedSizeList as List } from 'react-window';
 import { LogsTableProps, ThemeClasses } from '../../types';
 import LogRow from './LogRow';
 import LogDetailPanel from './LogDetailPanel';
-import { LiveIndicator } from '../../components/LiveIndicator';
 import { EmptyState } from '../../components/EmptyState';
 
 const TableHeader = ({ 

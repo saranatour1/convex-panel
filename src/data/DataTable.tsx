@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { FilterClause, DataTableProps } from '../types';
+import { FilterClause, DataTableProps, RecentlyViewedTable, TableDocument } from '../types';
 import { useTableData } from '../hooks/useTableData';
 import { useFilters } from '../hooks/useFilters';
 import { 
@@ -8,14 +8,12 @@ import {
   ActiveFilters, 
   FilterDebug,
   StorageDebug,
-  FilterMenu
+  DetailPanel
 } from './components';
-import { getStorageItem } from '../utils/storage';
+import { getStorageItem, getRecentlyViewedTables, updateRecentlyViewedTable } from '../utils/storage';
 import { ConvexPanelSettings } from '../settings';
-import '../styles/DataTable.css';
 import { defaultSettings } from '../utils/constants';
 import { STORAGE_KEYS } from '../utils/constants';
-import { FilterMenuState } from '../types';
 
 const DataTable: React.FC<DataTableProps> = ({
   /**
@@ -84,11 +82,8 @@ const DataTable: React.FC<DataTableProps> = ({
   
   const [searchText, setSearchText] = React.useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
-
-  const [filterMenuState, setFilterMenuState] = useState<FilterMenuState>({
-    isOpen: false,
-    position: { top: 0, left: 0 }
-  });
+  const [recentlyViewedTables, setRecentlyViewedTables] = useState<RecentlyViewedTable[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<TableDocument | null>(null);
   
   const [settings, setSettings] = useState<ConvexPanelSettings>(() => {
     if (externalSettings) {
@@ -192,6 +187,11 @@ const DataTable: React.FC<DataTableProps> = ({
           
           // Update the documents state
           setDocuments(updatedDocuments);
+
+          // Also update the selected document if it was modified
+          if (selectedDocument && params.ids.includes(selectedDocument._id?.toString() || '')) {
+            setSelectedDocument({ ...selectedDocument, ...params.fields });
+          }
         } else {
           // Fall back to refetching if local update is not possible
           fetchTableData(params.table, null);
@@ -202,13 +202,45 @@ const DataTable: React.FC<DataTableProps> = ({
         fetchTableData(params.table, null);
       }
     },
-    [patchDocumentFields, fetchTableData, documents, setDocuments]
+    [patchDocumentFields, fetchTableData, documents, setDocuments, selectedDocument]
   );
+
+  /**
+   * Load recently viewed tables from storage on initial render
+   */
+  useEffect(() => {
+    const storedRecentTables = getRecentlyViewedTables();
+    setRecentlyViewedTables(storedRecentTables);
+  }, []);
+
+  /**
+   * Handle table selection and update recently viewed tables
+   */
+  const handleTableSelect = useCallback((tableName: string) => {
+    setSelectedTable(tableName);
+    
+    // Update recently viewed tables
+    updateRecentlyViewedTable(tableName);
+    
+    // Update state with the latest recently viewed tables
+    setRecentlyViewedTables(getRecentlyViewedTables());
+
+    // Clear any selected document when switching tables
+    setSelectedDocument(null);
+  }, [setSelectedTable]);
 
   /**
    * Get column headers
    */
   const columnHeaders = getColumnHeaders();
+
+  // Determine if detail panel should be shown
+  const showDetailPanel = !!selectedDocument;
+
+  const onEditFilter = (e: React.MouseEvent, field: string) => {
+    // We now use handleFilterButtonClick from useFilters
+    handleFilterButtonClick(e, field);
+  };
 
   return (
     <div className="convex-panel-data-layout">
@@ -217,13 +249,14 @@ const DataTable: React.FC<DataTableProps> = ({
         selectedTable={selectedTable}
         searchText={searchText}
         onSearchChange={setSearchText}
-        onTableSelect={setSelectedTable}
+        onTableSelect={handleTableSelect}
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         theme={theme}
+        recentlyViewedTables={recentlyViewedTables}
       />
 
-      <div className="convex-panel-data-content">          
+      <div className={`convex-panel-data-content ${showDetailPanel ? 'with-detail-panel' : ''}`}>          
         <div className="convex-panel-data-container">
             
           {!filters || filters.clauses.length === 0 ? null : (
@@ -234,21 +267,7 @@ const DataTable: React.FC<DataTableProps> = ({
                     onClearAll={clearFilters}
                     selectedTable={selectedTable}
                     theme={theme}
-                    onEdit={(e: React.MouseEvent, field: string) => {
-                      // Find the existing filter
-                      const existingFilter = filters.clauses.find((f: FilterClause) => f.field === field);
-                      if (existingFilter) {
-                        // Open the filter menu with the existing filter values
-                        setFilterMenuState({
-                        isOpen: true,
-                        position: {
-                            top: e.clientY,
-                            left: e.clientX
-                        },
-                        editingFilter: existingFilter
-                        });
-                    }
-                    }}
+                    onEdit={onEditFilter}
                 />
             </div>
           )}
@@ -284,23 +303,22 @@ const DataTable: React.FC<DataTableProps> = ({
               activeFilters={filters}
               onUpdateDocument={handleUpdateDocument}
               tableName={selectedTable}
+              selectedDocument={selectedDocument}
+              setSelectedDocument={setSelectedDocument}
             />
           )}
         </div>
+        
+        {showDetailPanel && selectedTable && selectedDocument && (
+          <DetailPanel
+            document={selectedDocument}
+            tableName={selectedTable}
+            onClose={() => setSelectedDocument(null)}
+            formatValue={formatValue}
+            onUpdateDocument={handleUpdateDocument}
+          />
+        )}
       </div>
-      {filterMenuState.isOpen && (
-        <FilterMenu
-          field={filterMenuState.editingFilter?.field || ''}
-          position={filterMenuState.position}
-          onClose={() => setFilterMenuState(prev => ({ ...prev, isOpen: false }))}
-          onApply={(filter: FilterClause) => {
-            handleFilterApply(filter);
-            setFilterMenuState(prev => ({ ...prev, isOpen: false }));
-          }}
-          existingFilter={filterMenuState.editingFilter}
-          theme={theme}
-        />
-      )}
     </div>
   );
 };

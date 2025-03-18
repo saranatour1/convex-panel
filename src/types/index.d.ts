@@ -140,6 +140,7 @@ export interface LogsContainerProps {
   renderErrorWithRetry: () => React.ReactNode;
   onLogRowMouseEnter?: (logId: string, event: React.MouseEvent) => void;
   onLogRowMouseLeave?: () => void;
+  settings?: ConvexPanelSettings;
 }
 
 // LogsToolbar props
@@ -270,16 +271,12 @@ export interface FilterMenuState {
   isOpen: boolean;
   position: MenuPosition;
   editingFilter?: FilterClause;
+  field?: string;
 }
 
 // Filter Clause Props
 export interface FilterClause {
   field: string;
-  /**
-   * Filter operators:
-   * - Basic comparison: eq, neq, gt, gte, lt, lte
-   * - Type checking: isType (maps to 'type' in Convex), isNotType (maps to 'notype' in Convex)
-   */
   op: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'isType' | 'isNotType';
   value: any;
   enabled: boolean;
@@ -323,6 +320,11 @@ export interface ActiveFiltersProps {
 }
 
 // Data Table Sidebar Props
+export interface RecentlyViewedTable {
+  name: string;
+  timestamp: number;
+}
+
 export interface DataTableSidebarProps {
   tables: TableDefinition;
   selectedTable: string;
@@ -332,6 +334,7 @@ export interface DataTableSidebarProps {
   isSidebarCollapsed: boolean;
   onToggleSidebar: () => void;
   theme?: any;
+  recentlyViewedTables?: RecentlyViewedTable[];
 }
 
 // Data Table Content Props
@@ -351,7 +354,9 @@ export interface DataTableContentProps {
   activeFilters: FilterExpression;
   onUpdateDocument?: (params: { table: string, ids: string[], fields: Record<string, any> }) => Promise<void>;
   tableName?: string;
-} 
+  selectedDocument: TableDocument | null;
+  setSelectedDocument: (doc: TableDocument | null) => void;
+}
 
 // Storage Debug Props
 export interface StorageDebugProps {
@@ -453,33 +458,9 @@ export interface FetchTablesResponse {
  */
 // Health Container Props
 export interface HealthContainerProps {
-  /**
-   * URL of the deployment.
-   * Used to configure the connection to the deployment.
-   * @required
-   */
   deploymentUrl: string;
-  
-  /**
-   * Authentication token for accessing the deployment.
-   * Required for securing access to the deployment.
-   * Should be kept private and not exposed to clients.
-   * @required
-   */
   authToken: string;
-  
-  /**
-   * Version of the Convex package.
-   * Used to determine if an update is available.
-   * @default "1.18.0"
-   */
   convexVersion?: string;
-  
-  /**
-   * Whether to use mock data instead of real API calls.
-   * Useful for development, testing, and demos.
-   * @default false
-   */
   useMockData?: boolean;
 }
 
@@ -491,33 +472,10 @@ export interface CacheHitData {
 
 // Cache Hit Rate Chart Props
 export interface CacheHitRateChartProps {
-  /**
-   * URL of the deployment to fetch cache hit rate data from.
-   * Required for making API calls to the backend.
-   * @required
-   */
   deploymentUrl: string;
-  
-  /**
-   * Authentication token for accessing the API.
-   * Required for securing access to data.
-   * Should be kept private and not exposed to clients.
-   * @required
-   */
   authToken: string;
-  
-  /**
-   * Interval in milliseconds to refresh the cache hit rate data.
-   * Controls how frequently the chart updates with new data.
-   * @default 60000 (1 minute)
-   */
   refreshInterval?: number;
-  
-  /**
-   * Whether to use mock data instead of real API calls.
-   * Useful for development, testing, and demos.
-   * @default false
-   */
+  refreshInterval?: number;
   useMockData?: boolean;
 }
 
@@ -535,72 +493,18 @@ export interface FailureData {
 
 // Failure Rate Chart Props
 interface FailureRateChartProps {
-  /**
-   * URL of the deployment to fetch failure rate data from.
-   * Required for making API calls to the backend.
-   * @required
-   */
   deploymentUrl: string;
-  
-  /**
-   * Authentication token for accessing the API.
-   * Required for securing access to data.
-   * Should be kept private and not exposed to clients.
-   * @required
-   */
   authToken: string;
-  
-  /**
-   * Interval in milliseconds to refresh the failure rate data.
-   * Controls how frequently the chart updates with new data.
-   * @default 60000 (1 minute)
-   */
   refreshInterval?: number;
-  
-  /**
-   * Whether to use mock data instead of real API calls.
-   * Useful for development, testing, and demos.
-   * @default false
-   */
   useMockData?: boolean;
 }
 
 // Scheduler Lag Chart Props
 export interface SchedulerLagChartProps {
-  /**
-   * URL of the deployment to fetch scheduler lag data from.
-   * Required for making API calls to the backend.
-   * @required
-   */
   deploymentUrl: string;
-  
-  /**
-   * Authentication token for accessing the API.
-   * Required for securing access to data.
-   * Should be kept private and not exposed to clients.
-   * @required
-   */
   authToken: string;
-  
-  /**
-   * Interval in milliseconds to refresh the scheduler lag data.
-   * Controls how frequently the chart updates with new data.
-   * @default 60000 (1 minute)
-   */
   refreshInterval?: number;
-  
-  /**
-   * Boolean flag to control the visibility of the chart.
-   * Determines whether the chart should be displayed or not.
-   * @required
-   */
   showChart: boolean;
-  
-  /**
-   * Whether to use mock data instead of real API calls.
-   * Useful for development, testing, and demos.
-   * @default false
-   */
   useMockData?: boolean;
 }
 
@@ -622,4 +526,61 @@ export interface LogRowItemData {
   handleLogSelect: (log: LogEntry) => void;
   onLogRowMouseEnter?: (logId: string, event: React.MouseEvent) => void;
   onLogRowMouseLeave?: () => void;
+}
+
+// NetworkTable props
+export interface NetworkCall {
+  id: string;
+  url: string;
+  method: string;
+  status: number;
+  statusText: string;
+  size: string;
+  time: number;
+  type: string;
+  initiator: string;
+  timestamp: number;
+  startTime: number;
+  endTime: number;
+  duration: number;
+  isError: boolean;
+  request: {
+    headers: Record<string, string>;
+    body?: any;
+  };
+  response: {
+    headers: Record<string, string>;
+    body?: any;
+  };
+}
+
+export interface NetworkRowProps {
+  index: number;
+  style: React.CSSProperties;
+  data: {
+    calls: NetworkCall[];
+    isDetailPanelOpen: boolean;
+    mergedTheme: any;
+    handleCallSelect: (call: NetworkCall) => void;
+    onRowMouseEnter?: (callId: string, event: React.MouseEvent) => void;
+    onRowMouseLeave?: () => void;
+  };
+}
+
+export interface NetworkTableProps {
+  mergedTheme: ThemeClasses;
+  filteredCalls: NetworkCall[];
+  containerSize: { width: number; height: number };
+  isDetailPanelOpen: boolean;
+  selectedCall: NetworkCall | null;
+  setIsDetailPanelOpen: (isOpen: boolean) => void;
+  handleCallSelect: (call: NetworkCall) => void;
+  onRowMouseEnter?: (callId: string, event: React.MouseEvent) => void;
+  onRowMouseLeave?: () => void;
+}
+
+export interface NetworkPanelProps {
+  mergedTheme: ThemeClasses;
+  settings: ConvexPanelSettings;
+  containerSize: { width: number; height: number };
 }

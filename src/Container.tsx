@@ -1,26 +1,20 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { motion, HTMLMotionProps, PanInfo } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 import debounce from 'debounce';
 import { ContainerProps, LogEntry } from "./types";
-import { LogType } from './utils/constants';
 import { cardVariants } from './theme';
 import { getLogId } from './utils';
 import DataTable from './data/DataTable';
 import { SettingsButton, ConvexPanelSettings } from './settings';
 import { getStorageItem, setStorageItem } from './utils/storage';
 import { HealthContainer } from './health';
-import { defaultSettings, INTERVALS, STORAGE_KEYS, ROUTES, TabTypes } from './utils/constants';
+import { defaultSettings, INTERVALS, STORAGE_KEYS, TABS, TabTypes, LogType, DevToolsTabTypes } from './utils/constants';
 import { fetchLogsFromApi } from './utils/api';
 import { createFilterPredicate } from './utils/filters';
 import { TabButton } from './components/TabButton';
 import LogsContainer from './logs/LogsContainer';
-import { ConvexFavicon, RefreshIcon } from './components/icons';
-
-const TABS = [
-  { id: 'logs' as const, label: 'Logs' },
-  { id: 'data-tables' as const, label: 'Data' },
-  { id: 'health' as const, label: 'Health' },
-] as const;
+import { DevToolsContainer } from './devtools';
+import { ConvexFavicon } from './components/icons';
 
 const Container = ({
   /** 
@@ -203,6 +197,7 @@ const Container = ({
   const [cursor, setCursor] = useState<number | string>(0);
   const [excludeViewerQueries, setExcludeViewerQueries] = useState(true);
   const [convexUrl, setConvexUrl] = useState<string>(process.env.NEXT_PUBLIC_CONVEX_URL! || deployUrl!);
+  const unregisterConsoleHandler = useRef<(() => void) | null>(null);
   
   /**
    * Retrieve active tab from localStorage or use initialActiveTab
@@ -426,6 +421,13 @@ const Container = ({
         }
       }
     } catch (err) {
+      // Skip error handling entirely for aborted requests
+      if (err instanceof Error && err.name === 'AbortError') {
+        setIsLoading(false);
+        return;
+      }
+      
+      // Only log non-abort errors
       console.error("Error fetching logs:", err);
       
       // Skip API-specific error handling when using mock data
@@ -444,11 +446,6 @@ const Container = ({
             fetchLogs();
           }
         }, INTERVALS.RETRY_DELAY);
-        return;
-      }
-      
-      // Don't handle aborted requests as errors
-      if (err instanceof Error && err.name === 'AbortError') {
         return;
       }
       
@@ -804,9 +801,9 @@ const Container = ({
   /**
    * Handle tab changes
    */
-  const handleTabChange = useCallback((tab: TabTypes) => {
-    setActiveTab(tab);
-    setStorageItem(STORAGE_KEYS.ACTIVE_TAB, tab);
+  const handleTabChange = useCallback((tab: TabTypes | DevToolsTabTypes) => {
+    setActiveTab(tab as TabTypes);
+    setStorageItem(STORAGE_KEYS.ACTIVE_TAB, tab as TabTypes);
   }, []);
 
   // Cleanup effect to cancel pending requests on unmount
@@ -840,92 +837,137 @@ const Container = ({
     return false; // Versions are equal
   }, []);
 
+
+
   const renderContent = () => {
     // If the panel is closed, don't render anything
     if (!isOpen) {
       return null;
     }
 
-    // This function only handles the logs tab content
-    // If we're using mock data for logs, show the logs list
-    if (useMockData) {
-      return (
-        <LogsContainer
-          mergedTheme={mergedTheme}
-          isPaused={isPaused}
-          togglePause={togglePause}
-          clearLogs={clearLogs}
-          refreshLogs={refreshLogs}
-          isLoading={isLoading}
-          filterText={filterText}
-          setFilterText={setFilterText}
-          requestIdFilter={requestIdFilter}
-          setRequestIdFilter={setRequestIdFilter}
-          limit={limit}
-          setLimit={setLimit}
-          initialLimit={initialLimit}
-          showSuccess={showSuccess}
-          setShowSuccess={setShowSuccess}
-          isPermanentlyDisabled={isPermanentlyDisabled}
-          setIsPermanentlyDisabled={setIsPermanentlyDisabled}
-          setConsecutiveErrors={setConsecutiveErrors}
-          fetchLogs={fetchLogs}
-          logType={logType}
-          setLogType={setLogType}
-          filteredLogs={filteredLogs}
-          containerSize={containerSize}
-          isDetailPanelOpen={isDetailPanelOpen}
-          selectedLog={selectedLog}
-          setIsDetailPanelOpen={setIsDetailPanelOpen}
-          handleLogSelect={handleLogSelect}
-          error={error as Error | null}
-          renderErrorWithRetry={renderErrorWithRetry}
-        />
-      );
-    }
+    // Handle different tabs
+    switch (activeTab) {
+      case 'logs':
+        // This function only handles the logs tab content
+        // If we're using mock data for logs, show the logs list
+        if (useMockData) {
+          return (
+            <LogsContainer
+              mergedTheme={mergedTheme}
+              isPaused={isPaused}
+              togglePause={togglePause}
+              clearLogs={clearLogs}
+              refreshLogs={refreshLogs}
+              isLoading={isLoading}
+              filterText={filterText}
+              setFilterText={setFilterText}
+              requestIdFilter={requestIdFilter}
+              setRequestIdFilter={setRequestIdFilter}
+              limit={limit}
+              setLimit={setLimit}
+              initialLimit={initialLimit}
+              showSuccess={showSuccess}
+              setShowSuccess={setShowSuccess}
+              isPermanentlyDisabled={isPermanentlyDisabled}
+              setIsPermanentlyDisabled={setIsPermanentlyDisabled}
+              setConsecutiveErrors={setConsecutiveErrors}
+              fetchLogs={fetchLogs}
+              logType={logType}
+              setLogType={setLogType}
+              filteredLogs={filteredLogs}
+              containerSize={containerSize}
+              isDetailPanelOpen={isDetailPanelOpen}
+              selectedLog={selectedLog}
+              setIsDetailPanelOpen={setIsDetailPanelOpen}
+              handleLogSelect={handleLogSelect}
+              error={error as Error | null}
+              renderErrorWithRetry={renderErrorWithRetry}
+              settings={settings}
+            />
+          );
+        }
 
-    // For real data, handle various states
-    if (isPermanentlyDisabled) {
-      return renderPermanentlyDisabled();
-    }
+        // For real data, handle various states
+        if (isPermanentlyDisabled) {
+          return renderPermanentlyDisabled();
+        }
 
-    if (error && showRetryButton) {
-      return renderErrorWithRetry();
-    }
+        if (error && showRetryButton) {
+          return renderErrorWithRetry();
+        }
 
-    return (
-      <LogsContainer
-        mergedTheme={mergedTheme}
-        isPaused={isPaused}
-        togglePause={togglePause}
-        clearLogs={clearLogs}
-        refreshLogs={refreshLogs}
-        isLoading={isLoading}
-        filterText={filterText}
-        setFilterText={setFilterText}
-        requestIdFilter={requestIdFilter}
-        setRequestIdFilter={setRequestIdFilter}
-        limit={limit}
-        setLimit={setLimit}
-        initialLimit={initialLimit}
-        showSuccess={showSuccess}
-        setShowSuccess={setShowSuccess}
-        isPermanentlyDisabled={isPermanentlyDisabled}
-        setIsPermanentlyDisabled={setIsPermanentlyDisabled}
-        setConsecutiveErrors={setConsecutiveErrors}
-        fetchLogs={fetchLogs}
-        logType={logType}
-        setLogType={setLogType}
-        filteredLogs={filteredLogs}
-        containerSize={containerSize}
-        isDetailPanelOpen={isDetailPanelOpen}
-        selectedLog={selectedLog}
-        setIsDetailPanelOpen={setIsDetailPanelOpen}
-        handleLogSelect={handleLogSelect}
-        error={error as Error | null}
-        renderErrorWithRetry={renderErrorWithRetry}
-      />
-    );
+        return (
+          <LogsContainer
+            mergedTheme={mergedTheme}
+            isPaused={isPaused}
+            togglePause={togglePause}
+            clearLogs={clearLogs}
+            refreshLogs={refreshLogs}
+            isLoading={isLoading}
+            filterText={filterText}
+            setFilterText={setFilterText}
+            requestIdFilter={requestIdFilter}
+            setRequestIdFilter={setRequestIdFilter}
+            limit={limit}
+            setLimit={setLimit}
+            initialLimit={initialLimit}
+            showSuccess={showSuccess}
+            setShowSuccess={setShowSuccess}
+            isPermanentlyDisabled={isPermanentlyDisabled}
+            setIsPermanentlyDisabled={setIsPermanentlyDisabled}
+            setConsecutiveErrors={setConsecutiveErrors}
+            fetchLogs={fetchLogs}
+            logType={logType}
+            setLogType={setLogType}
+            filteredLogs={filteredLogs}
+            containerSize={containerSize}
+            isDetailPanelOpen={isDetailPanelOpen}
+            selectedLog={selectedLog}
+            setIsDetailPanelOpen={setIsDetailPanelOpen}
+            handleLogSelect={handleLogSelect}
+            error={error as Error | null}
+            renderErrorWithRetry={renderErrorWithRetry}
+            settings={settings}
+          />
+        );
+
+      case 'data-tables':
+        return (
+          <DataTable
+            key={`data-table-${JSON.stringify(settings)}-${useMockData}`}
+            convexUrl={convexUrl}
+            accessToken={accessToken}
+            onError={onError}
+            theme={theme}
+            baseUrl={baseUrl || ''}
+            convex={convex}
+            adminClient={adminClient}
+            settings={settings}
+            useMockData={useMockData}
+          />
+        );
+        
+      case 'health':
+        return (
+          <HealthContainer 
+            deploymentUrl={convexUrl}
+            authToken={accessToken}
+            useMockData={useMockData}
+          />
+        );
+
+      case 'devtools':
+        return (
+          <DevToolsContainer
+            mergedTheme={mergedTheme}
+            settings={settings}
+            containerSize={containerSize}
+          />
+        );
+        
+      default:
+        return null;
+    }
   };
 
   return (
@@ -1070,6 +1112,14 @@ const Container = ({
           deploymentUrl={convexUrl}
           authToken={accessToken}
           useMockData={useMockData}
+        />
+      )}
+
+      {activeTab === 'devtools' && (
+        <DevToolsContainer
+          mergedTheme={mergedTheme}
+          settings={settings}
+          containerSize={containerSize}
         />
       )}
     </motion.div>

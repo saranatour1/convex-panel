@@ -95,6 +95,8 @@ export const useFilters = ({
     e.stopPropagation();
     e.preventDefault();
     
+    console.log("Filter button clicked in useFilters for:", header);
+    
     const button = e.currentTarget;
     const rect = button.getBoundingClientRect();
     
@@ -124,6 +126,8 @@ export const useFilters = ({
       top: top,
       left: left,
     };
+    
+    console.log("Setting filter menu position:", menuPosition, "for field:", header);
     
     setFilterMenuPosition(menuPosition);
     setFilterMenuField(header);

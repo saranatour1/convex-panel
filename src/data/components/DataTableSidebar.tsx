@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { DataTableSidebarProps } from '../../types';
+import { DataTableSidebarProps, RecentlyViewedTable } from '../../types';
 import { STORAGE_KEYS } from '../../utils/constants';
 import { PanelCollapseIcon, PanelExpandIcon } from '../../components/icons';
 
@@ -60,7 +60,13 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
    * See ThemeClasses interface for available options.
    * @default {}
    */
-  theme = {}
+  theme = {},
+  
+  /**
+   * Recently viewed tables with timestamps
+   * Used to display a list of recently accessed tables
+   */
+  recentlyViewedTables = []
 }) => {
   /**
    * Save sidebar state in localStorage
@@ -75,6 +81,13 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
   const filteredTables = Object.keys(tables).filter(tableName =>
     tableName.toLowerCase().includes(searchText.toLowerCase())
   );
+
+  /**
+   * Sort recently viewed tables by timestamp (most recent first)
+   */
+  const sortedRecentlyViewed = [...recentlyViewedTables]
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 5); // Limit to 5 most recent
 
   return (
     <div 
@@ -114,7 +127,32 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
         )}
       </div>
       <div className="convex-panel-sidebar-content">
-        {filteredTables.map(tableName => (
+        {!isSidebarCollapsed && sortedRecentlyViewed.length > 0 && (
+          <div className="convex-panel-sidebar-recent-container">
+            <div className="convex-panel-sidebar-section-title">Recently Viewed</div>
+            {sortedRecentlyViewed.map(table => (
+              <button
+                key={`recent-${table.name}`}
+                className={`convex-panel-sidebar-table-button ${
+                  selectedTable === table.name ? 'convex-panel-sidebar-table-selected' : 'convex-panel-sidebar-table-unselected'
+                }`}
+                onClick={() => onTableSelect(table.name)}
+                title={`${table.name} (viewed ${new Date(table.timestamp).toLocaleString()})`}
+              >
+                {table.name}
+              </button>
+            ))}
+            <div className="convex-panel-sidebar-divider"></div>
+          </div>
+        )}
+        
+        {!isSidebarCollapsed && filteredTables.length > 0 && (
+          <div className="convex-panel-sidebar-all-tables-container">
+            <div className="convex-panel-sidebar-section-title">All Tables</div>
+          </div>
+        )}
+        
+        {filteredTables.sort().map(tableName => (
           <button
             key={tableName}
             className={`convex-panel-sidebar-table-button ${

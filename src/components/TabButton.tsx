@@ -1,18 +1,22 @@
 import React from 'react';
-import { TabTypes } from '../utils/constants';
-import { LogsIcon, DataIcon, HealthIcon } from './icons';
+import { DevToolsTabTypes, TabTypes } from '../utils/constants';
+import { LogsIcon, DataIcon, HealthIcon, DevToolsIcon, ConsoleIcon, NetworkIcon } from './icons';
 
 interface TabButtonProps {
-  tabId: TabTypes;
+  tabId: TabTypes | DevToolsTabTypes;
   label: string;
-  activeTab: TabTypes;
-  onClick: (tab: TabTypes) => void;
+  activeTab: TabTypes | DevToolsTabTypes;
+  onClick: (tab: TabTypes | DevToolsTabTypes) => void;
+  devtools?: boolean;
 }
 
 const TAB_ICONS = {
   logs: LogsIcon,
   'data-tables': DataIcon,
   health: HealthIcon,
+  devtools: DevToolsIcon,
+  console: ConsoleIcon,
+  network: NetworkIcon
 } as const;
 
 export const TabButton: React.FC<TabButtonProps> = ({
@@ -20,8 +24,9 @@ export const TabButton: React.FC<TabButtonProps> = ({
   label,
   activeTab,
   onClick,
+  devtools = false
 }) => {
-  const Icon = TAB_ICONS[tabId];
+  const Icon = TAB_ICONS[tabId as keyof typeof TAB_ICONS] || DevToolsIcon;
   
   return (
     <button
@@ -31,7 +36,7 @@ export const TabButton: React.FC<TabButtonProps> = ({
       aria-controls={`tab-content-${tabId}`}
       data-state={activeTab === tabId ? 'active' : 'inactive'}
       id={`tab-trigger-${tabId}`}
-      className="convex-panel-tab-button"
+      className={`${devtools ? 'convex-panel-devtools-tab-button' : 'convex-panel-tab-button'}`}
       tabIndex={activeTab === tabId ? 0 : -1}
       data-orientation="horizontal"
       onClick={() => onClick(tabId)}

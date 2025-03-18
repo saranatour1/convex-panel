@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { FilterMenuProps, FilterClause } from '../../types';
@@ -11,12 +9,25 @@ import { ChevronDownIcon } from '../../components/icons';
  */
 const getPortalContainer = () => {
   let container = document.getElementById('portal-root');
+  console.log("Looking for portal-root, exists:", !!container);
+  
   if (!container) {
     container = document.createElement('div');
     container.id = 'portal-root';
     container.className = 'convex-panel-container';
     document.body.appendChild(container);
+    console.log("Created new portal-root container:", container);
   }
+  
+  // Ensure the container is visible and correctly positioned
+  container.style.position = 'fixed';
+  container.style.top = '0';
+  container.style.left = '0';
+  container.style.width = '100%';
+  container.style.height = '100%';
+  container.style.pointerEvents = 'none';
+  container.style.zIndex = '9999';
+  
   return container;
 };
 
@@ -81,6 +92,8 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
    * Handle click outside to close the menu.
    */
   useEffect(() => {
+    console.log("FilterMenu mounted with position:", position, "and field:", field);
+    
     // Handle click outside to close the menu
     const handleClickOutside = (e: MouseEvent) => {
       // If this is an internal click that we're tracking, don't close
@@ -234,6 +247,8 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
    * Update effect to handle type filter dropdown.
    */
   useEffect(() => {
+    console.log("FilterMenu mounted with position:", position, "and field:", field);
+    
     if (!isTypeFilterOpen) return;
     
     const handleClickOutsideTypeDropdown = (e: MouseEvent) => {
@@ -249,26 +264,41 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutsideTypeDropdown);
     };
-  }, [isTypeFilterOpen]);
+  }, [isTypeFilterOpen, position, field]);
 
-  return createPortal(
+  console.log("Rendering FilterMenu for field:", field, "at position:", position);
+  
+  // For debugging, render directly instead of using portal
+  return (
     <div 
       ref={menuRef}
       className="convex-panel-filter-menu"
       style={{
-        top: `${position.top}px`,
-        left: `${position.left}px`,
-        zIndex: 9999, // Make sure it's on top
-        position: 'fixed', // Ensure fixed positioning
-        background: '#171717',
-        border: '2px solid #404040',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+        position: 'relative', 
+        width: '100%',
+        background: '#1e1e1e',
+        border: '1px solid #444',
+        borderRadius: '8px',
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
+        padding: '16px',
+        color: '#fff',
+        fontSize: '14px',
+        pointerEvents: 'auto', // Ensure clicks register on the menu
       }}
       onClick={(e) => {
+        console.log("Filter menu clicked");
         e.stopPropagation();
       }}
       onMouseDown={handleMenuMouseDown}
     >
+      <div className="convex-panel-filter-menu-title" style={{ 
+        marginBottom: '16px', 
+        fontSize: '16px',
+        fontWeight: 'bold',
+        color: '#ccc'
+      }}>
+        Filter: {field}
+      </div>
       <div className="convex-panel-filter-menu-group">
         <label className="convex-panel-filter-menu-label">Operator</label>
         <div 
@@ -280,6 +310,20 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
             onClick={handleDropdownToggle}
             onMouseDown={(e) => e.stopPropagation()}
             className="convex-panel-filter-menu-dropdown-button"
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+              padding: '8px 12px',
+              backgroundColor: '#333',
+              color: '#fff',
+              border: '1px solid #444',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              textAlign: 'left'
+            }}
           >
             <span>
               {operatorOptions.find(opt => opt.value === operator)?.label || 'Select operation'}
@@ -292,6 +336,22 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               className="convex-panel-filter-menu-dropdown-content"
               onClick={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.stopPropagation()}
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                width: '100%',
+                backgroundColor: '#222',
+                border: '1px solid #444',
+                borderRadius: '4px',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+                marginTop: '4px',
+                zIndex: 1001,
+                maxHeight: '200px',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
             >
               {operatorOptions.map(option => (
                 <button
@@ -300,6 +360,26 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
                   className={`convex-panel-filter-menu-option ${operator === option.value ? 'convex-panel-filter-menu-option-selected' : ''}`}
                   onClick={(e) => handleOptionSelect(option.value, e)}
                   onMouseDown={(e) => e.stopPropagation()}
+                  style={{
+                    padding: '8px 12px',
+                    textAlign: 'left',
+                    backgroundColor: operator === option.value ? '#444' : 'transparent',
+                    border: 'none',
+                    borderBottom: '1px solid #333',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                    display: 'block',
+                    width: '100%'
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#444';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (operator !== option.value) {
+                      (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
+                    }
+                  }}
                 >
                   {option.label}
                 </button>
@@ -321,6 +401,20 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               onClick={handleTypeFilterToggle}
               onMouseDown={(e) => e.stopPropagation()}
               className="convex-panel-filter-menu-dropdown-button"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+                padding: '8px 12px',
+                backgroundColor: '#333',
+                color: '#fff',
+                border: '1px solid #444',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                textAlign: 'left'
+              }}
             >
               <span>
                 {typeOptions.find(opt => opt.value === value)?.label || 'Select type'}
@@ -333,6 +427,22 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
                 className="convex-panel-filter-menu-dropdown-content"
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  width: '100%',
+                  backgroundColor: '#222',
+                  border: '1px solid #444',
+                  borderRadius: '4px',
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
+                  marginTop: '4px',
+                  zIndex: 1001,
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
               >
                 {typeOptions.map(option => (
                   <button
@@ -341,6 +451,26 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
                     className={`convex-panel-filter-menu-option ${value === option.value ? 'convex-panel-filter-menu-option-selected' : ''}`}
                     onClick={(e) => handleTypeSelect(option.value, e)}
                     onMouseDown={(e) => e.stopPropagation()}
+                    style={{
+                      padding: '8px 12px',
+                      textAlign: 'left',
+                      backgroundColor: value === option.value ? '#444' : 'transparent',
+                      border: 'none',
+                      borderBottom: '1px solid #333',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s',
+                      display: 'block',
+                      width: '100%'
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#444';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (value !== option.value) {
+                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
+                      }
+                    }}
                   >
                     {option.label}
                   </button>
@@ -358,20 +488,38 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               onKeyDown={(e) => e.stopPropagation()}
               className="convex-panel-filter-menu-textarea"
               placeholder='Enter value (e.g. "text", 123, true)'
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                backgroundColor: '#333',
+                color: '#fff',
+                border: '1px solid #444',
+                borderRadius: '4px',
+                resize: 'vertical',
+                minHeight: '100px',
+                fontFamily: 'monospace',
+                fontSize: '14px'
+              }}
             />
-            <p className="convex-panel-filter-menu-hint">
+            <p className="convex-panel-filter-menu-hint" style={{ color: '#999', fontSize: '12px', marginTop: '4px' }}>
               For arrays or objects, use valid JSON format
             </p>
           </>
         )}
       </div>
       
-      <div className="convex-panel-filter-menu-actions">
+      <div className="convex-panel-filter-menu-actions" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px', gap: '8px' }}>
         <button
           type="button"
           onClick={handleCancel}
           onMouseDown={(e) => e.stopPropagation()}
-          className="convex-panel-filter-menu-cancel-button"
+          className="convex-panel-clear-button"
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#555';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#444';
+          }}
         >
           Cancel
         </button>
@@ -379,13 +527,18 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
           type="button"
           onClick={handleApply}
           onMouseDown={(e) => e.stopPropagation()}
-          className="convex-panel-filter-menu-apply-button"
+          className="convex-panel-live-button"
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#3b56e4';
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#4863f7';
+          }}
         >
           {isEditing ? 'Update Filter' : 'Apply Filter'}
         </button>
       </div>
-    </div>,
-    getPortalContainer()
+    </div>
   );
 };
 

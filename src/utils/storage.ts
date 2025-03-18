@@ -150,4 +150,38 @@ export function clearAllStorage(): void {
   } catch (error) {
     console.error('Error clearing convex-panel storage:', error);
   }
+}
+
+/**
+ * Get recently viewed tables from storage
+ */
+export function getRecentlyViewedTables() {
+  return getStorageItem<{ name: string; timestamp: number }[]>(
+    STORAGE_KEYS.RECENTLY_VIEWED_TABLES, 
+    []
+  );
+}
+
+/**
+ * Update recently viewed tables in storage
+ * Adds a table to the recently viewed list with current timestamp
+ * If the table already exists, updates its timestamp and moves it to the top
+ */
+export function updateRecentlyViewedTable(tableName: string): void {
+  const recentTables = getRecentlyViewedTables();
+  
+  // Filter out the current table if it exists
+  const filteredTables = recentTables.filter(table => table.name !== tableName);
+  
+  // Add the table with the current timestamp
+  const updatedRecentTables = [
+    { name: tableName, timestamp: Date.now() },
+    ...filteredTables
+  ];
+  
+  // Only keep the 10 most recent tables
+  const trimmedRecentTables = updatedRecentTables.slice(0, 10);
+  
+  // Save to storage
+  setStorageItem(STORAGE_KEYS.RECENTLY_VIEWED_TABLES, trimmedRecentTables);
 } 

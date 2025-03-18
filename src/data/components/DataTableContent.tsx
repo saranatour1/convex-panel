@@ -109,7 +109,19 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
    * Used to identify the table being displayed.
    * @required
    */
-  tableName
+  tableName,
+  
+  /**
+   * The currently selected document.
+   * Used to highlight the selected row.
+   */
+  selectedDocument,
+  
+  /**
+   * Callback to set the selected document.
+   * Called when a row is clicked.
+   */
+  setSelectedDocument
 }) => {
   const tableRef = useRef<HTMLTableElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -143,6 +155,21 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
    */
   const hasActiveFilter = (header: string) => {
     return activeFilters.clauses.some((filter) => filter.field === header);
+  };
+
+  /**
+   * Handle row click to select a document
+   */
+  const handleRowClick = (doc: any) => {
+    if (editingCell) return; // Don't select row if we're editing a cell
+    
+    if (selectedDocument && selectedDocument._id === doc._id) {
+      // If clicking on already selected row, deselect it
+      setSelectedDocument(null);
+    } else {
+      // Otherwise select the row
+      setSelectedDocument(doc);
+    }
   };
 
   /**
@@ -244,6 +271,17 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
     }
   };
 
+  // Debug logging for the filter menu
+  useEffect(() => {
+    if (filterMenuField || filterMenuPosition) {
+      console.log("Filter menu state changed:", { 
+        filterMenuField, 
+        filterMenuPosition,
+        hasPosition: !!filterMenuPosition
+      });
+    }
+  }, [filterMenuField, filterMenuPosition]);
+
   return (
     <div className="convex-panel-table-wrapper" onClick={handleClickOutside}>
       <table className="convex-panel-data-table" ref={tableRef}>
@@ -256,16 +294,20 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
               <th 
                 key={index} 
                 className={`convex-panel-column-header`}
-                style={{ backgroundColor: hoveredHeader === index ? '#333' : 'transparent' }}
+                style={{ 
+                  backgroundColor: hoveredHeader === index ? '#333' : 'transparent',
+                  position: 'relative'
+                }}
                 onMouseEnter={() => setHoveredHeader(index)}
                 onMouseLeave={() => setHoveredHeader(null)}
               >
-                <div className="convex-panel-header-content">
+                <div className="convex-panel-header-content" style={{ position: 'relative' }}>
                   <span style={{ fontStyle: 'bold' }}>
                     {header}
                   </span>
                   <button
                     onClick={(e) => {
+                      console.log("Filter button clicked for", header);
                       onFilterButtonClick(e, header);
                     }}
                     className="convex-panel-filter-button"
@@ -274,17 +316,33 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
                   >
                     <FilterIcon />
                   </button>
+                  {/* Original conditional rendering with improved styling */}
                   {filterMenuField === header && filterMenuPosition && (
-                    <FilterMenu
-                      field={header}
-                      position={filterMenuPosition}
-                      onApply={(filter) => {
-                        handleFilterApply(filter);
-                        onFilterMenuClose();
+                    <div 
+                      style={{ 
+                        position: 'absolute', 
+                        zIndex: 1000,
+                        top: '30px',
+                        left: '0',
+                        minWidth: '300px',
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)'
                       }}
-                      onClose={onFilterMenuClose}
-                      existingFilter={getExistingFilter(header)}
-                    />
+                    >
+                      <FilterMenu
+                        field={header}
+                        position={{ top: 0, left: 0 }}
+                        onApply={(filter) => {
+                          console.log("Filter applied:", filter);
+                          handleFilterApply(filter);
+                          onFilterMenuClose();
+                        }}
+                        onClose={() => {
+                          console.log("FilterMenu closed");
+                          onFilterMenuClose();
+                        }}
+                        existingFilter={getExistingFilter(header)}
+                      />
+                    </div>
                   )}
                 </div>
               </th>
@@ -295,14 +353,21 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
           <tbody>
             {documents.map((doc, rowIndex) => {
               const docId = doc._id?.toString() || '';
+              const isSelected = selectedDocument && selectedDocument._id === docId;
               
               return (
                 <tr 
                   key={docId || rowIndex} 
-                  className="convex-panel-table-row"
+                  className={`convex-panel-table-row ${isSelected ? 'convex-panel-selected-row' : ''}`}
+                  onClick={() => handleRowClick(doc)}
                 >
                   <td className="convex-panel-checkbox-cell">
-                    <input type="checkbox" className="convex-panel-checkbox" />
+                    <input 
+                      type="checkbox" 
+                      className="convex-panel-checkbox" 
+                      checked={!!isSelected}
+                      onChange={() => {}} // Required for controlled component
+                    />
                   </td>
                   {columnHeaders.map(header => {
                     const value = doc[header];
@@ -317,7 +382,10 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
                       <td 
                         key={`${docId}-${header}`} 
                         className={cellClassName}
-                        onDoubleClick={() => handleCellDoubleClick(doc, header)}
+                        onDoubleClick={(e) => {
+                          e.stopPropagation(); // Prevent row selection on double click
+                          handleCellDoubleClick(doc, header);
+                        }}
                       >
                         {isEditing ? (
                           <input

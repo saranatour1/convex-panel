@@ -15,7 +15,17 @@ export const STORAGE_KEYS: Record<string, string> = {
   TABLE_FILTERS: `${STORAGE_PREFIX}:table-filters`,
   SIDEBAR_COLLAPSED: `${STORAGE_PREFIX}:sidebar-collapsed`,
   LOG_TYPE_FILTER: `${STORAGE_PREFIX}:log-type-filter`,
+  DEVTOOLS_ACTIVE_TAB: `${STORAGE_PREFIX}:devtools-active-tab`,
+  RECENTLY_VIEWED_TABLES: `${STORAGE_PREFIX}:recently-viewed-tables`,
+  DETAIL_PANEL_WIDTH: `${STORAGE_PREFIX}:detail-panel-width`,
 }
+
+// Default UI measurements
+export const UI_DEFAULTS = {
+  DETAIL_PANEL_DEFAULT_WIDTH: 400, // pixels
+  DETAIL_PANEL_MIN_WIDTH: 300, // pixels
+  DETAIL_PANEL_MAX_WIDTH: 800, // pixels
+};
 
 /**
  * Interval constants for polling and retries
@@ -57,8 +67,11 @@ export const INTERVALS = {
   MAX_CONSECUTIVE_ERRORS: 5
 };
 
-// Tab types
-export type TabTypes = 'logs' | 'data-tables' | 'health';
+// Types for main tabs
+export type TabTypes = 'logs' | 'data-tables' | 'health' | 'devtools';
+
+// Types for DevTools sub-tabs
+export type DevToolsTabTypes = 'console' | 'network';
 
 // Convex dashboard log types
 export enum LogType {
@@ -119,3 +132,25 @@ export const operatorOptions = [
   { value: 'isType', label: 'Is type' },
   { value: 'isNotType', label: 'Is not type' },
 ];
+
+// Console Filter Types
+export const CONSOLE_FILTER_TYPES = [
+  { value: 'all', label: 'All' },
+  { value: 'info', label: 'Info' },
+  { value: 'warning', label: 'Warning' },
+  { value: 'error', label: 'Error'},
+  { value: 'debug', label: 'Debug' }
+]
+
+export const TABS = [
+  { id: 'logs' as const, label: 'Logs' },
+  { id: 'data-tables' as const, label: 'Data' },
+  { id: 'health' as const, label: 'Health' },
+  { id: 'devtools' as const, label: 'DevTools' },
+] as const;
+
+export const DEVTOOL_TABS = [
+  { id: 'console' as const, label: 'Console' },
+  { id: 'network' as const, label: 'Network' },
+  // { id: 'application' as const, label: 'Application' },
+] as const;
