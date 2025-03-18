@@ -52,7 +52,6 @@ export const DevToolsContainer: React.FC<DevToolsContainerProps> = ({
 
   // Debug: Log the incoming logs array
   useEffect(() => {
-    console.log('DevToolsContainer received logs:', logs);
     // Merge incoming logs with local logs
     if (logs && logs.length > 0) {
       setLocalLogs(prevLocalLogs => {

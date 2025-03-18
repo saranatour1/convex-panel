@@ -102,6 +102,42 @@ export const useTableData = ({
   const loadingTimerRef = useRef<number | null>(null);
 
   /**
+   * Request cache to prevent duplicate calls
+   * Maps cache keys to timestamps to expire old entries
+   */
+  const requestCacheRef = useRef<Map<string, number>>(new Map());
+  
+  /**
+   * Cache expiration time in milliseconds
+   * This ensures we don't completely prevent refetches for too long
+   */
+  const CACHE_EXPIRY_TIME = 2000; // 2 seconds
+  
+  /**
+   * Track fetch debounce timers by table name
+   * This allows us to debounce repeated requests for the same table
+   */
+  const debounceTimersRef = useRef<Record<string, number>>({});
+  
+  /**
+   * Debounce time in milliseconds for table data fetches
+   */
+  const DEBOUNCE_TIME = 300; // 300ms
+  
+  /**
+   * Function to clean up expired cache entries
+   * Using useRef instead of useCallback to avoid circular dependencies
+   */
+  const cleanupCacheRef = useRef((cache: Map<string, number>) => {
+    const now = Date.now();
+    for (const [key, timestamp] of cache.entries()) {
+      if (now - timestamp > CACHE_EXPIRY_TIME) {
+        cache.delete(key);
+      }
+    }
+  });
+  
+  /**
    * Wrapper for setSelectedTable that also updates localStorage
    */
   const setSelectedTable = useCallback((tableName: string) => {
@@ -125,7 +161,7 @@ export const useTableData = ({
             accessToken,
             adminClient
           });
-      
+
       setTables(tableData);
       setSelectedTable(newSelectedTable);
       
@@ -148,7 +184,13 @@ export const useTableData = ({
     
     // For real data, we need adminClient
     if (!useMockData && !adminClient) return;
+    
+    // Clean up expired cache entries
+    cleanupCacheRef.current(requestCacheRef.current);
         
+    // Generate a unique request ID for logging
+    const requestId = Date.now();
+    
     // Check if this is a duplicate request
     const lastFetch = lastFetchRef.current;
     const currentFilters = filtersRef.current;
@@ -157,17 +199,53 @@ export const useTableData = ({
     const sortJson = JSON.stringify(sortConfig);
     const lastSortJson = JSON.stringify(lastFetch.sortConfig);
     
-    // Always allow filter-related requests to go through (when cursor is null)
-    // This ensures filter operations are always processed
+    // Create a cache key for deduplication
+    const cacheKey = `${tableName}|${cursor || 'null'}|${filtersJson}|${sortJson}`;
+    
+    // Check the request cache first
+    if (requestCacheRef.current.has(cacheKey)) {
+      const cacheTime = requestCacheRef.current.get(cacheKey) || 0;
+      const now = Date.now();
+      
+      // If we have a recent cache hit, skip this request
+      if (now - cacheTime < CACHE_EXPIRY_TIME) {
+        console.debug(`[${requestId}] Cache hit, skipping fetchTableData:`, {
+          tableName,
+          cursor,
+          cacheKey,
+          cacheAge: now - cacheTime
+        });
+        return;
+      }
+    }
+    
+    // Add this request to the cache
+    requestCacheRef.current.set(cacheKey, Date.now());
+    
+    // Enhanced deduplication - check if we've already made this exact request recently
     if (
-      cursor !== null && // Skip this check for initial loads (filter operations)
+      cursor !== null && // Always allow first page requests to refresh data
       tableName === lastFetch.tableName && 
       cursor === lastFetch.cursor &&
       filtersJson === lastFiltersJson &&
       sortJson === lastSortJson
     ) {
+      console.debug(`[${requestId}] Skipping duplicate fetchTableData request:`, {
+        tableName,
+        cursor,
+        filters: currentFilters,
+        sortConfig
+      });
       return;
     }
+    
+    console.debug(`[${requestId}] Executing fetchTableData:`, {
+      tableName,
+      cursor,
+      filters: currentFilters,
+      sortConfig,
+      cacheKey
+    });
     
     // Clear any existing loading timer
     if (loadingTimerRef.current !== null) {
@@ -195,7 +273,7 @@ export const useTableData = ({
       setIsLoadingMore(true);
     }
     
-    // Update last fetch reference
+    // Update last fetch reference immediately to prevent duplicate calls
     lastFetchRef.current = {
       tableName,
       filters: JSON.parse(JSON.stringify(currentFilters)),
@@ -216,7 +294,7 @@ export const useTableData = ({
         
         // Apply sorting to mock data if sort config is provided
         if (sortConfig) {
-          mockDocuments = sortDocuments([...mockDocuments], sortConfig);
+          mockDocuments = sortDocuments(mockDocuments, sortConfig);
         }
                 
         if (cursor === null) {
@@ -319,6 +397,23 @@ export const useTableData = ({
       setIsLoadingMore(false);
     }
   }, [adminClient, convexUrl, onError, documents, useMockData, sortConfig]);
+
+  /**
+   * Helper to debounce a table fetch
+   */
+  const debouncedFetchTableData = useCallback((tableName: string, cursor: string | null = null) => {
+    // Clear any existing debounce timer for this table
+    if (debounceTimersRef.current[tableName]) {
+      clearTimeout(debounceTimersRef.current[tableName]);
+    }
+    
+    // Set a new debounce timer
+    debounceTimersRef.current[tableName] = window.setTimeout(() => {
+      fetchTableData(tableName, cursor);
+      // Clear the timer reference after execution
+      delete debounceTimersRef.current[tableName];
+    }, DEBOUNCE_TIME);
+  }, [fetchTableData]);
 
   /**
    * Generate mock documents for a table
@@ -559,22 +654,72 @@ export const useTableData = ({
 
   /**
    * Add a dedicated effect to handle filter changes and fetch data
+   * Separating the filter effect from the table selection effect to avoid duplicate fetches
    */
   useEffect(() => {
-    if (selectedTable) {
-      // Only fetch if we have filters or if this is a filter clear operation
-      const previousFilters = lastFetchRef.current.filters;
-      const hadPreviousFilters = previousFilters && Array.isArray(previousFilters.clauses) && previousFilters.clauses.length > 0;
+    if (selectedTable && !filtersRef.current.clauses.length && !sortConfig) {
+      // For initial table load, we'll use a single approach
+      // Using a ref to track the most recent request to prevent duplicates
+      const lastFetch = lastFetchRef.current;
       
-      if (filters.clauses.length > 0 || hadPreviousFilters) {
-        // Reset cursor when filters change
-        setContinueCursor(null);
-        setHasMore(true);
-        // Immediate fetch for filter changes to improve responsiveness
+      // Don't fetch if we've already fetched this table with no filters
+      if (lastFetch.tableName === selectedTable && 
+          (!lastFetch.filters || lastFetch.filters.clauses.length === 0) &&
+          !lastFetch.sortConfig) {
+        return;
+      }
+      
+      // For mock data, fetch immediately
+      if (useMockData) {
         fetchTableData(selectedTable, null);
+      } else {
+        // Use debounced fetch for better performance
+        debouncedFetchTableData(selectedTable, null);
       }
     }
-  }, [filters, selectedTable, fetchTableData]);
+  }, [selectedTable, fetchTableData, debouncedFetchTableData, useMockData, sortConfig]);
+
+  /**
+   * Dedicated effect for sort config changes
+   */
+  useEffect(() => {
+    if (!selectedTable || isLoading || !sortConfig) return;
+    
+    const prevSortConfig = lastFetchRef.current.sortConfig;
+    const sortChanged = JSON.stringify(prevSortConfig) !== JSON.stringify(sortConfig);
+    
+    if (sortChanged) {
+      // For sort changes, we don't need to reset the cursor usually,
+      // but if we're changing sort direction/field, it makes sense
+      setContinueCursor(null);
+      setHasMore(true);
+      
+      // Use debounced fetch for sort operations
+      debouncedFetchTableData(selectedTable, null);
+    }
+  }, [sortConfig, selectedTable, debouncedFetchTableData, isLoading]);
+  
+  /**
+   * Dedicated effect to handle filter changes 
+   */
+  useEffect(() => {
+    if (!selectedTable || isLoading) return;
+    
+    // Only fetch if we have filters or if this is a filter clear operation
+    const previousFilters = lastFetchRef.current.filters;
+    const hadPreviousFilters = previousFilters && Array.isArray(previousFilters.clauses) && previousFilters.clauses.length > 0;
+    const filtersChanged = hadPreviousFilters !== (filters.clauses.length > 0) || 
+      JSON.stringify(previousFilters?.clauses || []) !== JSON.stringify(filters.clauses || []);
+    
+    if (filtersChanged) {
+      // Reset cursor when filters change
+      setContinueCursor(null);
+      setHasMore(true);
+      
+      // Use debounced fetch for filter changes
+      debouncedFetchTableData(selectedTable, null);
+    }
+  }, [filters, selectedTable, debouncedFetchTableData, isLoading]);
 
   /**
    * Patch fields

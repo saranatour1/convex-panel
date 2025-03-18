@@ -311,11 +311,6 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
     }
   }, [observerTarget]);
 
-  // Debug filter menu rendering
-  useEffect(() => {
-    console.log("Filter menu state:", { filterMenuField, filterMenuPosition });
-  }, [filterMenuField, filterMenuPosition]);
-
   return (
     <>
       <div className="convex-panel-table-wrapper">
@@ -391,12 +386,10 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
                                 field={header}
                                 position={{ top: 0, left: 0 }}
                                 onApply={(filter) => {
-                                  console.log("Filter applied:", filter);
                                   handleFilterApply(filter);
                                   onFilterMenuClose();
                                 }}
                                 onClose={() => {
-                                  console.log("FilterMenu closed");
                                   onFilterMenuClose();
                                 }}
                                 existingFilter={getExistingFilter(header)}

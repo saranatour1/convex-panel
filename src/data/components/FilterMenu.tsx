@@ -1,35 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import { FilterMenuProps, FilterClause } from '../../types';
 import { operatorOptions, typeOptions } from '../../utils/constants';
 import { ChevronDownIcon } from '../../components/icons';
-
-/**
- * Get portal container.
- */
-const getPortalContainer = () => {
-  let container = document.getElementById('portal-root');
-  console.log("Looking for portal-root, exists:", !!container);
-  
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'portal-root';
-    container.className = 'convex-panel-container';
-    document.body.appendChild(container);
-    console.log("Created new portal-root container:", container);
-  }
-  
-  // Ensure the container is visible and correctly positioned
-  container.style.position = 'fixed';
-  container.style.top = '0';
-  container.style.left = '0';
-  container.style.width = '100%';
-  container.style.height = '100%';
-  container.style.pointerEvents = 'none';
-  container.style.zIndex = '9999';
-  
-  return container;
-};
 
 /**
  * Filter menu.
@@ -92,7 +64,6 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
    * Handle click outside to close the menu.
    */
   useEffect(() => {
-    console.log("FilterMenu mounted with position:", position, "and field:", field);
     
     // Handle click outside to close the menu
     const handleClickOutside = (e: MouseEvent) => {
@@ -246,9 +217,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
   /**
    * Update effect to handle type filter dropdown.
    */
-  useEffect(() => {
-    console.log("FilterMenu mounted with position:", position, "and field:", field);
-    
+  useEffect(() => {    
     if (!isTypeFilterOpen) return;
     
     const handleClickOutsideTypeDropdown = (e: MouseEvent) => {
@@ -265,8 +234,6 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
       document.removeEventListener('mousedown', handleClickOutsideTypeDropdown);
     };
   }, [isTypeFilterOpen, position, field]);
-
-  console.log("Rendering filter menu at position:", position);
   
   // For better compatibility, render directly rather than through a portal
   return (
@@ -287,7 +254,6 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
         zIndex: 100000
       }}
       onClick={(e) => {
-        console.log("Filter menu clicked");
         e.stopPropagation();
       }}
       onMouseDown={handleMenuMouseDown}

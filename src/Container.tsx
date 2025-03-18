@@ -303,7 +303,7 @@ const Container = ({
     // For real data, we use convexUrl and accessToken
     // For mock data, we can skip
     if (!useMockData && (!convexUrl || !accessToken)) {
-      console.log("Missing convexUrl or accessToken, skipping fetch");
+      console.error("Missing convexUrl or accessToken, skipping fetch");
       return;
     }
         

@@ -189,6 +189,7 @@ export async function fetchTablesFromApi({
     } catch (err) {
       console.error("Error fetching table size:", err);
     }
+
     
     selectedTable = Object.keys(tableData)[0] || '';
   }

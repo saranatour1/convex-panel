@@ -168,7 +168,6 @@ const DataTable: React.FC<DataTableProps> = ({
       return;
     }
     
-    console.log('Syncing filters to tableData:', currentFiltersJson);
     isSyncingToTableData.current = true;
     
     // Update the table filters

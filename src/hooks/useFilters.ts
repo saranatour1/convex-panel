@@ -83,7 +83,6 @@ export const useFilters = ({
     // 2. When parent sends a non-empty filter set that's different from current filters
     if (!initializedRef.current[selectedTable]) {
       // First time for this table - initialize with parent filters
-      console.log('Initializing filters for first time:', selectedTable);
       setFiltersState(initialFilters);
       initializedRef.current[selectedTable] = true;
     } else {
@@ -98,7 +97,6 @@ export const useFilters = ({
           initialFilters.clauses.length === 1;
           
         if (!locallyChanged) {
-          console.log('Updating filters from parent:', initialFiltersJson);
           setFiltersState(initialFilters);
         }
       }
@@ -111,9 +109,7 @@ export const useFilters = ({
   const handleFilterButtonClick = useCallback((e: React.MouseEvent, header: string) => {
     e.stopPropagation();
     e.preventDefault();
-    
-    console.log("Filter button clicked in useFilters for:", header);
-    
+        
     const button = e.currentTarget;
     const rect = button.getBoundingClientRect();
     
@@ -143,9 +139,7 @@ export const useFilters = ({
       top: top,
       left: left,
     };
-    
-    console.log("Setting filter menu position:", menuPosition, "for field:", header);
-    
+        
     setFilterMenuPosition(menuPosition);
     setFilterMenuField(header);
   }, []);
@@ -184,18 +178,13 @@ export const useFilters = ({
   /**
    * Handles the remove event for the filter
    */
-  const handleFilterRemove = useCallback((field: string) => {
-    console.log('Removing filter:', field);
-    
+  const handleFilterRemove = useCallback((field: string) => {    
     // Use the functional updater pattern to get the most current filters state
     setFilters(currentFilters => {
       const newFilters = {
         clauses: currentFilters.clauses.filter(c => c.field !== field)
       };
-      
-      console.log('Current filters (in updater):', JSON.stringify(currentFilters));
-      console.log('New filters after removal (in updater):', JSON.stringify(newFilters));
-      
+        
       // Return the new filters to update state
       return newFilters;
     });
