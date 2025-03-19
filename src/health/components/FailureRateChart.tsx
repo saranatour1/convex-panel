@@ -68,7 +68,7 @@ const FailureRateChart: React.FC<FailureRateChartProps> = ({
    */
   useEffect(() => {
     if (chartFunctionNames.length > 0) {
-      setVisibleLines(prev => {
+      setVisibleLines((prev: Record<string, boolean>) => {
         const updatedVisibility = { ...prev };
         let changed = false;
         

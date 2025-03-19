@@ -55,7 +55,7 @@ export const useFilters = ({
    * Wrapper for setFilters that also updates localStorage
    */
   const setFilters = useCallback((filtersOrUpdater: React.SetStateAction<FilterExpression>) => {
-    setFiltersState(prev => {
+    setFiltersState((prev: FilterExpression) => {
       const newFilters = typeof filtersOrUpdater === 'function' 
         ? filtersOrUpdater(prev) 
         : filtersOrUpdater;

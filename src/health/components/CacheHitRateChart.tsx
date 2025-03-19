@@ -68,7 +68,7 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
    */
   useEffect(() => {
     if (chartFunctionNames.length > 0) {
-      setVisibleLines(prev => {
+      setVisibleLines((prev: Record<string, boolean>) => {
         const updatedVisibility = { ...prev };
         let changed = false;
         

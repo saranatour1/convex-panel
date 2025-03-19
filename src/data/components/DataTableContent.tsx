@@ -217,7 +217,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
     if (!docId || !field || !tableName || !onUpdateDocument) return;
     
     const cellKey = `${docId}-${field}`;
-    setUpdatingCells(prev => ({ ...prev, [cellKey]: true }));
+    setUpdatingCells((prev: {[key: string]: boolean}) => ({ ...prev, [cellKey]: true }));
     
     try {
       // Find the document and get the original value to determine its type
@@ -267,7 +267,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
     } catch (error) {
       console.error('Failed to update document:', error);
     } finally {
-      setUpdatingCells(prev => ({ ...prev, [cellKey]: false }));
+      setUpdatingCells((prev: {[key: string]: boolean}) => ({ ...prev, [cellKey]: false }));
     }
   };
 

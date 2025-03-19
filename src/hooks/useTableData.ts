@@ -300,7 +300,7 @@ export const useTableData = ({
         if (cursor === null) {
           setDocuments(mockDocuments);
         } else {
-          setDocuments(prev => [...prev, ...mockDocuments]);
+          setDocuments((prev: TableDocument[]) => [...prev, ...mockDocuments]);
         }
         
         // Set a fake cursor for pagination
@@ -309,7 +309,7 @@ export const useTableData = ({
         // Simulate having more data for the first page, then no more
         setHasMore(cursor === null);
         
-        setDocumentCount(prev => cursor === null ? mockDocuments.length : prev + mockDocuments.length);
+        setDocumentCount((prev: number) => cursor === null ? mockDocuments.length : prev + mockDocuments.length);
         return;
       }
       
@@ -380,7 +380,7 @@ export const useTableData = ({
       
       setContinueCursor(result.continueCursor || null);
       setHasMore(!result.isDone);
-      setDocumentCount(prev => cursor === null ? result.page.length : prev + result.page.length);
+      setDocumentCount((prev: number) => cursor === null ? result.page.length : prev + result.page.length);
       
     } catch (err) {
       console.error('Error fetching table data:', err);

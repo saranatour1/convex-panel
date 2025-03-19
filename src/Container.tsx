@@ -381,7 +381,7 @@ const Container = ({
             
       // Add logs to the list
       if (newLogs.length > 0) {
-        setLogs(prev => {
+        setLogs((prev: LogEntry[]) => {
           // Sort logs by timestamp in descending order (newest first)
           // This ensures consistent chronological ordering regardless of when logs are received
           const combined = [...newLogs, ...prev];
@@ -439,7 +439,7 @@ const Container = ({
       
       // Handle timeout errors
       if (err instanceof Error && err.message.includes('HTTP 504') && retryAttempts < INTERVALS.MAX_RETRY_ATTEMPTS) {
-        setRetryAttempts(prev => prev + 1);
+        setRetryAttempts((prev: number) => prev + 1);
         setError(`Request timed out. Retrying in ${INTERVALS.RETRY_DELAY/1000} seconds... (Attempt ${retryAttempts + 1}/${INTERVALS.MAX_RETRY_ATTEMPTS})`);
         
         setTimeout(() => {
@@ -455,7 +455,7 @@ const Container = ({
       }
       
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
-      setConsecutiveErrors(prev => prev + 1);
+      setConsecutiveErrors((prev: number) => prev + 1);
       
       if (consecutiveErrors >= INTERVALS.MAX_CONSECUTIVE_ERRORS) {
         setIsPermanentlyDisabled(true);
@@ -673,7 +673,7 @@ const Container = ({
    */
   useEffect(() => {
     const handleWindowResize = () => {
-      setPosition(prev => constrainPosition(prev));
+      setPosition((prev: { x: number; y: number }) => constrainPosition(prev));
       
       // Constrain container size if window gets smaller
       const windowWidth = window.innerWidth;

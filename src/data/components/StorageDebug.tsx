@@ -39,7 +39,7 @@ const StorageDebug: React.FC<StorageDebugProps> = ({
    * Force re-render when filters change.
    */
   useEffect(() => {
-    setForceUpdate(prev => prev + 1);
+    setForceUpdate((prev: number) => prev + 1);
   }, [filters]);
   
   /**

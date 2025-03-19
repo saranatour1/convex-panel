@@ -9,7 +9,7 @@ const FilterDebug: React.FC<FilterDebugProps> = ({ filters, selectedTable }) => 
   
   // Force re-render when filters change
   useEffect(() => {
-    setForceUpdate(prev => prev + 1);
+    setForceUpdate((prev: number) => prev + 1);
   }, [filters]);
   
   return (

@@ -94,7 +94,7 @@ export const NetworkPanel: React.FC<NetworkPanelProps> = ({
       
       // Add to state if recording
       if (isRecording) {
-        setNetworkCalls(prev => [networkCall, ...prev]);
+        setNetworkCalls((prev: NetworkCall[]) => [networkCall, ...prev]);
       }
       
       try {
@@ -149,7 +149,7 @@ export const NetworkPanel: React.FC<NetworkPanelProps> = ({
         
         // Update in state if recording
         if (isRecording) {
-          setNetworkCalls(prev => 
+          setNetworkCalls((prev: NetworkCall[]) => 
             prev.map(call => call.id === id ? updatedCall : call)
           );
         }
@@ -180,7 +180,7 @@ export const NetworkPanel: React.FC<NetworkPanelProps> = ({
         
         // Update in state if recording
         if (isRecording) {
-          setNetworkCalls(prev => 
+          setNetworkCalls((prev: NetworkCall[]) => 
             prev.map(call => call.id === id ? errorCall : call)
           );
         }
