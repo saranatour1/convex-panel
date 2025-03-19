@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, PanInfo } from 'framer-motion';
 import debounce from 'debounce';
-import { ContainerProps, LogEntry } from "./types/index";
+// @ts-ignore
+import { ContainerProps, LogEntry } from "./types";
 import { cardVariants } from './theme';
 import { getLogId } from './utils';
 import DataTable from './data/DataTable';
