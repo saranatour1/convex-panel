@@ -282,11 +282,11 @@ export const NetworkPanel: React.FC<NetworkPanelProps> = ({
         </div>
       </div>
       
-      <div className="convex-panel-network-content" style={{ height: containerSize.height - 44 }}>
+      <div className="convex-panel-network-content" style={{ height: containerSize.height }}>
         <NetworkTable 
           mergedTheme={mergedTheme}
           filteredCalls={filteredCalls}
-          containerSize={{ width: containerSize.width, height: containerSize.height - 44 }}
+          containerSize={{ width: containerSize.width, height: containerSize.height }}
           isDetailPanelOpen={isDetailPanelOpen}
           selectedCall={selectedCall}
           setIsDetailPanelOpen={setIsDetailPanelOpen}
