@@ -303,4 +303,41 @@
   padding: 16px;
   color: #fff;
   font-size: 14px;
+}
+
+/* Collapsed sidebar icon styling */
+.convex-panel-sidebar-collapsed .convex-panel-tree-icon,
+.convex-panel-sidebar-collapsed .convex-panel-tree-code-icon {
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.convex-panel-sidebar-collapsed .convex-panel-tree-icon:hover,
+.convex-panel-sidebar-collapsed .convex-panel-tree-code-icon:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.convex-panel-sidebar-collapsed .convex-panel-tree-lock-icon {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+}
+
+.convex-panel-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.convex-panel-tooltip-content {
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
 } 

@@ -15,6 +15,8 @@ import { TabButton } from './components/TabButton';
 import LogsContainer from './logs/LogsContainer';
 import { DevToolsContainer } from './devtools';
 import { ConvexFavicon } from './components/icons';
+import { FunctionsProvider } from './functions/FunctionsProvider';
+import { FunctionsView } from './functions/FunctionsView';
 
 const Container = ({
   /** 
@@ -167,7 +169,7 @@ const Container = ({
    */
   useMockData = false
 }: ContainerProps) => {
-  let baseUrl;
+  let baseUrl = process.env.NEXT_PUBLIC_CONVEX_URL! || deployUrl!;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFetchTime = useRef<number>(0);
@@ -608,7 +610,10 @@ const Container = ({
    * Start drag
    */
   function startDrag(event: React.PointerEvent) {
-    dragControls.start(event);
+    const target = event.target as HTMLElement;
+    if (target.closest('#convex-panel-header')) {
+      dragControls.start(event);
+    }
   }
 
   /**
@@ -672,8 +677,15 @@ const Container = ({
    */
   useEffect(() => {
     const handleWindowResize = () => {
-      setPosition(prev => constrainPosition(prev));
-      
+
+      setPosition((prev: { x: number; y: number }) => {
+        const newPos = {
+          x: prev.x + 0,
+          y: prev.y + 0
+        };
+        return constrainPosition(newPos);
+      });
+
       // Constrain container size if window gets smaller
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
@@ -964,6 +976,17 @@ const Container = ({
             containerSize={containerSize}
           />
         );
+
+      case 'functions':
+        return (
+          <FunctionsProvider
+            initialEntries={[]}
+            initialModules={new Map()}
+            convexClient={adminClient}
+          >
+            <FunctionsView theme={mergedTheme} authToken={accessToken} baseUrl={baseUrl} />
+          </FunctionsProvider>
+        );
         
       default:
         return null;
@@ -983,6 +1006,9 @@ const Container = ({
         dragControls,
         dragMomentum: false,
         dragElastic: 0,
+        dragListener: false,
+        whileDrag: { cursor: 'grabbing' },
+        onPointerDown: startDrag,
         onDragEnd: (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
           setPosition((prev: { x: number; y: number }) => {
             const newPos = {
@@ -999,11 +1025,10 @@ const Container = ({
         }
       } as any}
     >
-      <div className="convex-panel-header-container">
+      <div id="convex-panel-header" className="convex-panel-header-container">
         <div 
           className="convex-panel-header" 
           role="presentation"
-          onPointerDown={startDrag}
           style={{ cursor: 'grab' }}
         >
           <div className="convex-panel-header-content convex-panel-header-content-main"> 
@@ -1121,6 +1146,17 @@ const Container = ({
           settings={settings}
           containerSize={containerSize}
         />
+      )}
+
+      {activeTab === 'functions' && (
+        <FunctionsProvider
+          initialEntries={[]}
+          initialModules={new Map()}
+          convexClient={adminClient}
+          authToken={accessToken}
+        >
+          <FunctionsView theme={mergedTheme} authToken={accessToken} baseUrl={baseUrl} />
+        </FunctionsProvider>
       )}
     </motion.div>
   );

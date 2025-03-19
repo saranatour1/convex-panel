@@ -42,21 +42,32 @@ module.exports = {
   input: 'src/index.ts',
   output: [
     {
-      file: pkg.main,
+      dir: 'dist',
       format: 'cjs',
       sourcemap: true,
-      exports: 'named'
+      exports: 'named',
+      entryFileNames: 'index.js',
+      chunkFileNames: 'chunks/[name]-[hash].js'
     },
     {
-      file: pkg.module,
+      dir: 'dist',
       format: 'esm',
       sourcemap: true,
-      exports: 'named'
-    },
+      exports: 'named',
+      entryFileNames: 'index.esm.js',
+      chunkFileNames: 'chunks/[name]-[hash].esm.js'
+    }
   ],
   plugins: [
     peerDepsExternal(),
-    resolve(),
+    resolve({
+      browser: true,
+      preferBuiltins: false,
+      resolveOnly: [
+        /^(?!@monaco-editor\/react)/,
+        /^(?!monaco-editor)/
+      ]
+    }),
     commonjs(),
     cssImport(),
     url({
@@ -66,17 +77,19 @@ module.exports = {
     typescript({
       tsconfig: './tsconfig.json',
       exclude: ['**/__tests__/**', '**/*.test.ts', '**/*.test.tsx'],
+      declaration: true,
+      declarationDir: './dist/types',
+      rootDir: 'src',
+      outDir: './dist'
     }),
-    terser(),
-    {
-      name: 'copy-css',
-      buildEnd() {
-        console.info('CSS files copied to dist/styles');
-      }
-    }
+    terser()
   ],
   external: [
     ...Object.keys(pkg.peerDependencies || {}),
     ...Object.keys(pkg.dependencies || {}),
+    'monaco-editor',
+    '@monaco-editor/react',
+    /^monaco-editor\/.*/,
+    /^@monaco-editor\/react\/.*/
   ],
 }; 

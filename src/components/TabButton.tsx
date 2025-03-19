@@ -1,6 +1,6 @@
 import React from 'react';
 import { DevToolsTabTypes, TabTypes } from '../utils/constants';
-import { LogsIcon, DataIcon, HealthIcon, DevToolsIcon, ConsoleIcon, NetworkIcon } from './icons';
+import { LogsIcon, DataIcon, HealthIcon, DevToolsIcon, ConsoleIcon, NetworkIcon, FunctionIcon } from './icons';
 
 interface TabButtonProps {
   tabId: TabTypes | DevToolsTabTypes;
@@ -16,7 +16,8 @@ const TAB_ICONS = {
   health: HealthIcon,
   devtools: DevToolsIcon,
   console: ConsoleIcon,
-  network: NetworkIcon
+  network: NetworkIcon,
+  functions: FunctionIcon
 } as const;
 
 export const TabButton: React.FC<TabButtonProps> = ({

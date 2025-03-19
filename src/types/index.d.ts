@@ -601,3 +601,58 @@ export interface SortConfig {
   field: string;
   direction: SortDirection;
 }
+
+/**
+ * Functions
+ */
+export type UdfType = 'query' | 'mutation' | 'action' | 'httpaction';
+
+export type Visibility = {
+  kind: 'public' | 'internal';
+};
+
+export type FileNode = {
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  children?: FileNode[];
+};
+
+export type ModuleFunction = {
+  name: string;
+  identifier: string;
+  udfType: UdfType;
+  visibility: Visibility;
+  file: {
+    name: string;
+    path: string;
+  };
+  sourceCode?: string;
+  args?: Record<string, any>;
+  returnType?: string;
+};
+
+export type FunctionsState = {
+  selectedFunction: ModuleFunction | null;
+  setSelectedFunction: (fn: ModuleFunction | null) => void;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  rootEntries: FileNode[];
+  modules: ModuleFunction[];
+};
+
+export interface File {
+  type: 'file';
+  name: string;
+  identifier: string;
+  functions: ModuleFunction[];
+}
+
+export interface Folder {
+  type: 'folder';
+  name: string;
+  identifier: string;
+  children: FileOrFolder[];
+}
+
+export type FileOrFolder = File | Folder; 

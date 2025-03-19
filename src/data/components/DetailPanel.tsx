@@ -3,13 +3,7 @@ import { TableDocument } from '../../types';
 import { UI_DEFAULTS, STORAGE_KEYS } from '../../utils/constants';
 import { parseFieldValue, isFieldEditable } from '../../utils/documentEditing';
 import { EllipsisIcon, XIcon } from '../../components/icons';
-import CodeMirror from '@uiw/react-codemirror';
-import { vscodeDark } from '@uiw/codemirror-theme-vscode';
-import { json } from '@codemirror/lang-json';
-
-//=========================================================================
-// TYPES & INTERFACES
-//=========================================================================
+import { MonacoEditor } from '../../components/MonacoEditor';
 
 interface DetailPanelProps {
   document: TableDocument;
@@ -39,11 +33,6 @@ interface HeaderMenuProps {
   hasDeletePermission: boolean;
 }
 
-//=========================================================================
-// SUB-COMPONENTS
-//=========================================================================
-
-// JSON Document Editor with CodeMirror
 const DocumentEditor: React.FC<DocumentEditorProps> = ({
   value,
   onChange,
@@ -54,28 +43,28 @@ const DocumentEditor: React.FC<DocumentEditorProps> = ({
   const [isFormatHovered, setIsFormatHovered] = useState(false);
   
   return (
-    <div className="convex-panel-full-document-editor">
+    <div className="convex-panel-full-document-editor" style={{ height: '460px !important' }}>
       <div className="convex-panel-full-document-editor-container" style={{
         position: 'relative',
-        border: 'none',
+        border: 'none !important',
         borderRadius: '4px',
         overflow: 'hidden',
-        height: '460px',
+        height: '460px !important',
       }}>
-        <CodeMirror
+        <MonacoEditor
           value={value}
+          readOnly={false}
+          language="json"
           height="460px"
-          theme={vscodeDark}
-          extensions={[json()]}
-          onChange={onChange}
-          basicSetup={{
-            lineNumbers: true,
-            foldGutter: true,
-            highlightActiveLine: true,
-            bracketMatching: true,
-            autocompletion: true,
-            closeBrackets: true,
-            highlightSelectionMatches: true
+          theme='clouds-midnight'
+          options={{
+            minimap: {
+              enabled: false
+            },
+            wordWrap: 'on',
+            fontSize: 14,
+            fontWeight: 'normal',
+            fontFamily: 'monospace',
           }}
         />
       </div>
@@ -159,7 +148,6 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({
             </div>
           )}
           
-          {hasDeletePermission && (
             <div 
               className="convex-panel-detail-dropdown-item convex-panel-detail-dropdown-item-delete"
               onClick={onDelete}
@@ -194,7 +182,6 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({
                  'Delete'}
               </span>
             </div>
-          )}
         </div>
       )}
     </div>
@@ -259,7 +246,6 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
       if (a === '_id' || a === 'id') return -1;
       if (b === '_id' || b === 'id') return 1;
       
-      // Name/email fields should come next
       const specialFields = ['name', 'firstName', 'lastName', 'title', 'email', 'emailAddress'];
       const aIsSpecial = specialFields.includes(a);
       const bIsSpecial = specialFields.includes(b);
@@ -629,7 +615,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
     e.preventDefault();
     
     // Ensure we're in browser environment
-    if (typeof window === 'undefined' || typeof document === 'undefined') {
+    if (typeof window === 'undefined') {
       return;
     }
     
@@ -647,19 +633,32 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
     };
     
     const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
     };
     
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
   }, [panelWidth]);
+
+  // Add cleanup effect for resize event listeners
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined') {
+        const cleanup = () => {
+          window.removeEventListener('mousemove', () => {});
+          window.removeEventListener('mouseup', () => {});
+        };
+        cleanup();
+      }
+    };
+  }, []);
   
   return (
     <div 
       className="convex-panel-detail-panel"
       ref={panelRef}
-      style={{ width: panelWidth }}
+      style={{ width: panelWidth, backgroundColor: "#1E1E1E !important" }}
     >
       <div 
         className="convex-panel-detail-resize-handle"
@@ -697,65 +696,67 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
         </div>
       </div>
       
-      {/* Content area - either full document editor or fields */}
-      {isEditingFullDocument ? (
-        <DocumentEditor
-          value={fullDocumentValue}
-          onChange={setFullDocumentValue}
-          onSave={handleSaveFullDocument}
-          onCancel={handleCancelFullEdit}
-          isSaving={isSaving}
-        />
-      ) : (
-        <>
-          {/* Filter input */}
-          <div className="convex-panel-detail-filter">
-            <input
-              type="text"
-              placeholder="Search fields..."
-              value={fieldFilter}
-              onChange={(e) => setFieldFilter(e.target.value)}
-              className="convex-panel-sidebar-search"
-            />
-            {fieldFilter && (
-              <div 
-                className="convex-panel-detail-filter-clear" 
-                onClick={() => setFieldFilter('')}
-                title="Clear filter"
-              >
-                ×
-              </div>
-            )}
-          </div>
-          
-          <div className="convex-panel-detail-content">
-            {visibleFields.length === 0 ? (
-              <div className="convex-panel-detail-no-results">
-                No fields match your filter
-              </div>
-            ) : (
-              visibleFields.map(field => {
-                const value = document[field];
-                const canEdit = onUpdateDocument && isFieldEditable(field, value);
-                
-                return (
-                  <div key={field} className="convex-panel-detail-field">
-                    <div className="convex-panel-detail-field-name">
-                      {field}
+      <div className="convex-panel-data-detail-content" style={{ overflowY: 'auto', padding: '0rem !important' }}>
+        {/* Content area - either full document editor or fields */}
+        {isEditingFullDocument ? (
+          <DocumentEditor
+            value={fullDocumentValue}
+            onChange={setFullDocumentValue}
+            onSave={handleSaveFullDocument}
+            onCancel={handleCancelFullEdit}
+            isSaving={isSaving}
+          />
+        ) : (
+          <>
+            {/* Filter input */}
+            <div className="convex-panel-detail-filter" style={{ position: 'sticky', top: '0', zIndex: '5' }}>
+              <input
+                type="text"
+                placeholder="Search fields..."
+                value={fieldFilter}
+                onChange={(e) => setFieldFilter(e.target.value)}
+                className="convex-panel-sidebar-search"
+              />
+              {fieldFilter && (
+                <div 
+                  className="convex-panel-detail-filter-clear" 
+                  onClick={() => setFieldFilter('')}
+                  title="Clear filter"
+                >
+                  ×
+                </div>
+              )}
+            </div>
+            
+            <div className="convex-panel-data-fields-container">
+              {visibleFields.length === 0 ? (
+                <div className="convex-panel-detail-no-results">
+                  No fields match your filter
+                </div>
+              ) : (
+                visibleFields.map(field => {
+                  const value = document[field];
+                  const canEdit = onUpdateDocument && isFieldEditable(field, value);
+                  
+                  return (
+                    <div key={field} className="convex-panel-detail-field" style={{ gap: '0.25rem' }}>
+                      <div className="convex-panel-detail-field-name">
+                        {field}
+                      </div>
+                      <div 
+                        className={`convex-panel-detail-field-value ${canEdit ? 'editable' : ''}`}
+                        onClick={canEdit ? () => handleFieldClick(field, value) : undefined}
+                      >
+                        {renderValue(value, field)}
+                      </div>
                     </div>
-                    <div 
-                      className={`convex-panel-detail-field-value ${canEdit ? 'editable' : ''}`}
-                      onClick={canEdit ? () => handleFieldClick(field, value) : undefined}
-                    >
-                      {renderValue(value, field)}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </>
-      )}
+                  );
+                })
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };
