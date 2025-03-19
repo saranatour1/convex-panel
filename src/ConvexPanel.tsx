@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, ErrorInfo } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, useDragControls } from 'framer-motion';
 import { motion } from 'framer-motion';
+// @ts-ignore
 import { ButtonProps } from './types';
 import { LogType } from './utils/constants';
 import { defaultTheme, buttonVariants } from './theme';
