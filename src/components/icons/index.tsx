@@ -1,3 +1,4 @@
+// @ts-ignore
 import { SortDirection } from "../../types";
 
 export const LogsIcon = () => (
