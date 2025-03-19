@@ -183,7 +183,7 @@ export const mockFetchLogsFromApi = async (cursor: number | string = 0): Promise
   
   // Always add new logs each time
   const numNewLogs = Math.floor(Math.random() * 3) + 3;
-  const newLogs = [];
+  const newLogs: LogEntry[] = [];
   for (let i = 0; i < numNewLogs; i++) {
     newLogs.push(addNewMockLog());
   }
