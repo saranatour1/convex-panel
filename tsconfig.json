@@ -18,8 +18,8 @@
     "declaration": true,
     "declarationDir": "dist",
     "outDir": "dist",
-    "baseUrl": ".",
     "types": ["node"],
+    "baseUrl": ".",
     "typeRoots": [
       "./node_modules/@types",
       "./src/types"
