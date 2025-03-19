@@ -10,7 +10,6 @@ import { ConvexReactClient } from 'convex/react';
 import { ConvexClient } from 'convex/browser';
 // @ts-ignore
 import cssText from './styles/convex-panel.css';
-import dataSortingCssText from './styles/data-table-sorting.css';
 import { STORAGE_KEYS, TabTypes } from './utils/constants';
 import { getStorageItem } from './utils/storage';
 import { ConvexLogo } from './components/icons';
@@ -28,7 +27,7 @@ const injectStyles = () => {
 
   const styleElement = document.createElement('style');
   styleElement.id = styleId;
-  styleElement.textContent = cssText + dataSortingCssText;
+  styleElement.textContent = cssText;
   
   // Append to head
   document.head.appendChild(styleElement);
