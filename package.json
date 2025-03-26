@@ -46,7 +46,8 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "@monaco-editor/react": "^4.7.0",
+    "@monaco-editor/react": "^4.6.0",
+    "monaco-editor": "^0.45.0",
     "@types/recharts": "^1.8.29",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",
