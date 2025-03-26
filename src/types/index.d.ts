@@ -2,6 +2,10 @@ import React, { ReactNode } from "react";
 import { LogType } from "../utils/constants";
 import { ConvexReactClient } from "convex/react";
 import { ConvexClient } from 'convex/browser';
+import {
+  DiffEditorProps,
+  EditorProps,
+} from "@monaco-editor/react";
 
 /**
  * Logs
@@ -136,7 +140,7 @@ export interface LogsContainerProps {
   selectedLog: LogEntry | null;
   setIsDetailPanelOpen: (open: boolean) => void;
   handleLogSelect: (log: LogEntry) => void;
-  error: Error | null;
+  error: Error | string | null;
   renderErrorWithRetry: () => React.ReactNode;
   onLogRowMouseEnter?: (logId: string, event: React.MouseEvent) => void;
   onLogRowMouseLeave?: () => void;
@@ -178,7 +182,7 @@ export interface LogsTableProps {
   selectedLog: LogEntry | null;
   setIsDetailPanelOpen: (isOpen: boolean) => void;
   handleLogSelect: (log: LogEntry) => void;
-  error: string | null;
+  error: Error | string | null;
   renderErrorWithRetry: () => React.ReactNode;
   isPaused: boolean;
   onLogRowMouseEnter?: (logId: string, event: React.MouseEvent) => void;
@@ -601,3 +605,113 @@ export interface SortConfig {
   field: string;
   direction: SortDirection;
 }
+
+/**
+ * Functions
+ */
+export type UdfType = 'query' | 'mutation' | 'action' | 'httpaction';
+
+export type Visibility = {
+  kind: 'public' | 'internal';
+};
+
+export type FileNode = {
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  children?: FileNode[];
+};
+
+export type ModuleFunction = {
+  name: string;
+  identifier: string;
+  udfType: UdfType;
+  visibility: Visibility;
+  file: {
+    name: string;
+    path: string;
+  };
+  sourceCode?: string;
+  args?: Record<string, any>;
+  returnType?: string;
+};
+
+export type FunctionsState = {
+  selectedFunction: ModuleFunction | null;
+  setSelectedFunction: (fn: ModuleFunction | null) => void;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  rootEntries: FileNode[];
+  modules: ModuleFunction[];
+};
+
+export interface File {
+  type: 'file';
+  name: string;
+  identifier: string;
+  functions: ModuleFunction[];
+}
+
+export interface Folder {
+  type: 'folder';
+  name: string;
+  identifier: string;
+  children: FileOrFolder[];
+}
+
+export type FileOrFolder = File | Folder; 
+
+export const editorOptions: EditorProps["options"] &
+  DiffEditorProps["options"] = {
+  tabFocusMode: false,
+  automaticLayout: true,
+  minimap: { enabled: false },
+  overviewRulerBorder: false,
+  scrollBeyondLastLine: false,
+  find: {
+    addExtraSpaceOnTop: false,
+    autoFindInSelection: "never",
+    seedSearchStringFromSelection: "never",
+  },
+  lineNumbers: "off",
+  glyphMargin: false,
+  lineDecorationsWidth: 0,
+  lineNumbersMinChars: 0,
+  scrollbar: {
+    alwaysConsumeMouseWheel: false,
+    horizontalScrollbarSize: 8,
+    verticalScrollbarSize: 8,
+    useShadows: false,
+    vertical: "visible",
+  },
+  suggest: { preview: false },
+  hideCursorInOverviewRuler: true,
+  quickSuggestions: false,
+  parameterHints: { enabled: false },
+  suggestOnTriggerCharacters: false,
+  snippetSuggestions: "none",
+  contextmenu: false,
+  codeLens: false,
+  disableLayerHinting: true,
+  inlayHints: { enabled: "off" },
+  inlineSuggest: { enabled: false },
+  hover: { above: false },
+  guides: {
+    bracketPairs: false,
+    bracketPairsHorizontal: false,
+    highlightActiveBracketPair: false,
+    indentation: false,
+    highlightActiveIndentation: false,
+  },
+  bracketPairColorization: { enabled: false },
+  matchBrackets: "never",
+  tabCompletion: "off",
+  selectionHighlight: false,
+  renderLineHighlight: "none",
+};
+
+export type ProjectEnvVarConfig = {
+  name: string;
+  value: string;
+  deploymentTypes: ("dev" | "preview" | "prod")[];
+};

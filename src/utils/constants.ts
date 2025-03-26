@@ -18,6 +18,7 @@ export const STORAGE_KEYS: Record<string, string> = {
   DEVTOOLS_ACTIVE_TAB: `${STORAGE_PREFIX}:devtools-active-tab`,
   RECENTLY_VIEWED_TABLES: `${STORAGE_PREFIX}:recently-viewed-tables`,
   DETAIL_PANEL_WIDTH: `${STORAGE_PREFIX}:detail-panel-width`,
+  SELECTED_FUNCTION: `${STORAGE_PREFIX}:selected-function`,
 }
 
 // Default UI measurements
@@ -67,10 +68,9 @@ export const INTERVALS = {
   MAX_CONSECUTIVE_ERRORS: 5
 };
 
-// Types for main tabs
-export type TabTypes = 'logs' | 'data-tables' | 'health' | 'devtools';
-
-// Types for DevTools sub-tabs
+// Types for tabs
+export type TabTypes = 'logs' | 'data-tables' | 'health' | 'devtools' | 'functions';
+export type FunctionTabTypes = 'insights' | 'code' | 'function input';
 export type DevToolsTabTypes = 'console' | 'network';
 
 // Convex dashboard log types
@@ -98,14 +98,18 @@ export const defaultSettings = {
 
 // API Routes
 export const ROUTES = {
-  STREAM_FUNCTION_LOGS: '/api/app_metrics/stream_function_logs',
+  STREAM_FUNCTION_LOGS: '/api/stream_function_logs',
   SHAPES2: '/api/shapes2',
   CACHE_HIT_RATE: '/api/app_metrics/cache_hit_percentage_top_k',
   FAILURE_RATE: '/api/app_metrics/failure_percentage_top_k',
-  SCHEDULER_LAG: '/api/app_metrics/scheduled_job_lag',
+  LIST_FUNCTION_LOGS: '/api/list_function_logs',
+  SCHEDULER_LAG: '/api/app_metrics/scheduler_lag_top_k',
+  GET_SOURCE_CODE: '/api/get_source_code',
   NPM_CONVEX: 'https://registry.npmjs.org/convex/latest',
-  CONVEX_CHANGELOG: 'https://github.com/get-convex/convex-js/blob/main/CHANGELOG.md'
-}
+  CONVEX_CHANGELOG: 'https://github.com/get-convex/convex-js/blob/main/CHANGELOG.md',
+  UDF_RATE: '/api/app_metrics/udf_rate',
+  LATENCY_PERCENTILES: '/api/app_metrics/latency_percentiles'
+} as const;
 
 // Filter types
 export const typeOptions = [
@@ -147,6 +151,7 @@ export const TABS = [
   { id: 'data-tables' as const, label: 'Data' },
   { id: 'health' as const, label: 'Health' },
   { id: 'devtools' as const, label: 'DevTools' },
+  { id: 'functions' as const, label: 'Functions' },
 ] as const;
 
 export const DEVTOOL_TABS = [

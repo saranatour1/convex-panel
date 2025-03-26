@@ -73,7 +73,6 @@ export const useTableData = ({
   const [error, setError] = useState<string | null>(null);
   const [documents, setDocuments] = useState<TableDocument[]>([]);
   const [documentCount, setDocumentCount] = useState<number>(0);
-  const [insertionStatus, setInsertionStatus] = useState<string>('');
   const [continueCursor, setContinueCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -162,6 +161,8 @@ export const useTableData = ({
             adminClient
           });
 
+      console.log('tableData', tableData);
+
       setTables(tableData);
       setSelectedTable(newSelectedTable);
       
@@ -209,12 +210,6 @@ export const useTableData = ({
       
       // If we have a recent cache hit, skip this request
       if (now - cacheTime < CACHE_EXPIRY_TIME) {
-        console.debug(`[${requestId}] Cache hit, skipping fetchTableData:`, {
-          tableName,
-          cursor,
-          cacheKey,
-          cacheAge: now - cacheTime
-        });
         return;
       }
     }
@@ -236,16 +231,10 @@ export const useTableData = ({
         filters: currentFilters,
         sortConfig
       });
+      setHasMore(false);
+      setIsLoadingMore(false);
       return;
     }
-    
-    console.debug(`[${requestId}] Executing fetchTableData:`, {
-      tableName,
-      cursor,
-      filters: currentFilters,
-      sortConfig,
-      cacheKey
-    });
     
     // Clear any existing loading timer
     if (loadingTimerRef.current !== null) {
@@ -751,10 +740,17 @@ export const useTableData = ({
    * Observer target
    */
   const observerTarget = useCallback((node: HTMLDivElement) => {
+    // Return early if we've reached the end of the table or if loading
     if (!node || !hasMore || isLoading || isLoadingMore) return;
+    
+    // If hasMore is false, don't set up the observer at all
+    if (!hasMore) {
+      return () => {};
+    }
     
     const observer = new IntersectionObserver(
       entries => {
+        // Only trigger if we still have more data to load
         if (entries[0]?.isIntersecting && hasMore && !isLoading && !isLoadingMore) {
           setIsLoadingMore(true);
           fetchTableData(selectedTable, continueCursor);
@@ -794,24 +790,60 @@ export const useTableData = ({
     if (value === undefined || value === null) {
       return 'unset';
     }
-    
-    // Format _creationTime in M/D/YYYY, h:mm:ss AM/PM format
-    if (fieldName === '_creationTime' && typeof value === 'number') {
-      const date = new Date(value);
-      return date.toLocaleString('en-US', {
-        month: 'numeric',
-        day: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
-      });
-    }
-    
+
+    // Helper function to recursively filter underscore fields
+    const filterUnderscoreFields = (obj: any): any => {
+      if (Array.isArray(obj)) {
+        return obj.map(item => {
+          if (typeof item === 'object' && item !== null) {
+            return filterUnderscoreFields(item);
+          }
+          return item;
+        });
+      }
+      
+      if (typeof obj === 'object' && obj !== null) {
+        const filtered: Record<string, any> = {};
+        for (const [key, val] of Object.entries(obj)) {
+          if (!key.startsWith('_')) {
+            filtered[key] = typeof val === 'object' && val !== null
+              ? filterUnderscoreFields(val)
+              : val;
+          }
+        }
+        return filtered;
+      }
+      
+      return obj;
+    };
+
+    // Handle objects (including the root level)
     if (typeof value === 'object') {
-      return JSON.stringify(value);
+      // If this is a field that starts with underscore, return the raw value
+      if (fieldName?.startsWith('_')) {
+        return String(value);
+      }
+      const filtered = filterUnderscoreFields(value);
+      return JSON.stringify(filtered);
     }
+    
+    // Handle non-object values
+    if (fieldName?.startsWith('_')) {
+      if (fieldName === '_creationTime' && typeof value === 'number') {
+        const date = new Date(value);
+        return date.toLocaleString('en-US', {
+          month: 'numeric',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        });
+      }
+      return String(value);
+    }
+    
     return String(value);
   };
 

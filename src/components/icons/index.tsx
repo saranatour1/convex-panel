@@ -3,7 +3,7 @@ import { SortDirection } from "../../types";
 
 export const LogsIcon = () => (
   <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="-mt-1">
-    <path d="M3.89949 5.50002C3.89949 5.27911 3.7204 5.10003 3.49949 5.10003C3.27857 5.10003 3.09949 5.27911 3.09949 5.50002L3.09949 12.5343L1.78233 11.2172C1.62612 11.061 1.37285 11.061 1.21664 11.2172C1.06043 11.3734 1.06043 11.6267 1.21664 11.7829L3.21664 13.7829C3.29166 13.8579 3.3934 13.9 3.49949 13.9C3.60557 13.9 3.70732 13.8579 3.78233 13.7829L5.78233 11.7829C5.93854 11.6267 5.93854 11.3734 5.78233 11.2172C5.62612 11.061 5.37285 11.061 5.21664 11.2172L3.89949 12.5343L3.89949 5.50002ZM8.49998 13C8.22383 13 7.99998 12.7762 7.99998 12.5C7.99998 12.2239 8.22383 12 8.49998 12H14.5C14.7761 12 15 12.2239 15 12.5C15 12.7762 14.7761 13 14.5 13H8.49998ZM8.49998 10C8.22383 10 7.99998 9.77617 7.99998 9.50002C7.99998 9.22388 8.22383 9.00002 8.49998 9.00002H14.5C14.7761 9.00002 15 9.22388 15 9.50002C15 9.77617 14.7761 10 14.5 10H8.49998C8.22383 10 7.99998 9.77617 7.99998 9.50002ZM7.99998 6.50002C7.99998 6.77617 8.22383 7.00002 8.49998 7.00002H14.5C14.7761 7.00002 15 6.77617 15 6.50002C15 6.22388 14.7761 6.00002 14.5 6.00002H8.49998C8.22383 6.00002 7.99998 6.22388 7.99998 6.50002Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd" />
+    <path d="M3.89949 5.50002C3.89949 5.27911 3.7204 5.10003 3.49949 5.10003C3.27857 5.10003 3.09949 5.27911 3.09949 5.50002L3.09949 12.5343L1.78233 11.2172C1.62612 11.061 1.37285 11.061 1.21664 11.2172C1.06043 11.3734 1.06043 11.6267 1.21664 11.7829L3.21664 13.7829C3.29166 13.8579 3.3934 13.9 3.49949 13.9C3.60557 13.9 3.70732 13.8579 3.78233 13.7829L5.78233 11.7829C5.93854 11.6267 5.93854 11.3734 5.78233 11.2172C5.62612 11.061 5.37285 11.061 5.21664 11.2172L3.89949 12.5343L3.89949 5.50002ZM8.49998 13C8.22383 13 7.99998 12.7762 7.99998 12.5C7.99998 12.2239 8.22383 12 8.49998 12H14.5C14.7761 12 15 12.2239 15 12.5C15 12.7762 14.7761 13 14.5 13H8.49998C8.22383 10 7.99998 9.77617 7.99998 9.50002ZM7.99998 6.50002C7.99998 6.77617 8.22383 7.00002 8.49998 7.00002H14.5C14.7761 7.00002 15 6.77617 15 6.50002C15 6.22388 14.7761 6.00002 14.5 6.00002H8.49998C8.22383 6.00002 7.99998 6.22388 7.99998 6.50002Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd" />
   </svg>
 );
 
@@ -93,15 +93,31 @@ export const FilterIcon = ({ isActive }: { isActive?: boolean } = {}) => (
   </svg>
 );
 
-export const ChevronDownIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 15 15" fill="none">
+export const ChevronDownIcon = ({ className }: { className?: string }) => (
+  <svg width="12" height="12" viewBox="0 0 15 15" fill="none" className={className}>
     <path d="M3.5 5.5L7.5 9.5L11.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
+export const ChevronRightIcon = ({ className }: { className?: string }) => (
+  <svg width="12" height="12" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+  </svg>
+);
+
+// @ts-ignore
 export const RedXIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="convex-panel-filter-remove-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
@@ -256,3 +272,79 @@ export const SortIcon = ({ direction, isHovered }: { direction: SortDirection | 
     </span>
   );
 };
+
+export const CodeIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+  </svg>
+);
+
+export const MagnifyingGlassIcon = ({ className }: { className?: string }) => (
+  <svg width="15" height="15" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+  </svg>
+);
+
+export const ArrowPathIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
+  </svg>
+);
+
+export const PlayIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+  </svg>
+);
+
+export const CodeBracketIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+  </svg>
+);
+
+export const FolderIcon = ({ className, style, width = 15, height = 15 }: { className?: string, style?: React.CSSProperties, width?: number, height?: number }) => (
+  <svg style={style} width={width} height={height} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+  </svg>
+);
+
+export const FolderOpenIcon = ({ className, style, width = 15, height = 15 }: { className?: string, style?: React.CSSProperties, width?: number, height?: number }) => (
+  <svg style={style} width={width} height={height} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
+  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+  </svg>
+);
+
+export const FunctionIcon = ({ className }: { className?: string }) => (
+  <svg width="15" height="15" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="none" strokeWidth="1.5" fill="currentColor" className={className}>
+    <path d="M4.77207 20C4.22502 20 3.79437 19.8619 3.48012 19.5858C3.16004 19.3096 3 18.9759 3 18.5847C3 18.3028 3.09602 18.0755 3.28807 17.9029C3.4743 17.7303 3.68671 17.644 3.92532 17.644C4.1581 17.644 4.3676 17.7217 4.55383 17.877C4.73424 18.0381 4.82444 18.2539 4.82444 18.5243C4.82444 18.6681 4.77789 18.8091 4.68477 18.9471C4.58584 19.091 4.53637 19.1888 4.53637 19.2406C4.53637 19.3038 4.56838 19.3528 4.6324 19.3873C4.69059 19.4218 4.76334 19.4391 4.85063 19.4391C5.29874 19.4391 5.63919 19.0852 5.87197 18.3776C6.10475 17.6757 6.58778 15.6217 7.32105 12.2157L8.05432 9.1521H6.74491L6.91077 8.41855H8.22017C8.32493 7.9813 8.54607 7.38871 8.88361 6.64078C9.22696 5.88709 9.66343 5.28012 10.193 4.81985C10.8332 4.27328 11.4908 4 12.1659 4C12.7071 4 13.1494 4.12082 13.4927 4.36246C13.8419 4.6041 14.0165 4.96368 14.0165 5.44121C14.0165 5.72312 13.9263 5.95038 13.7459 6.12298C13.5713 6.28982 13.3618 6.37325 13.1174 6.37325C12.8788 6.37325 12.6722 6.28982 12.4976 6.12298C12.323 5.95613 12.2357 5.76052 12.2357 5.53614C12.2357 5.3808 12.2823 5.22258 12.3754 5.06149C12.4743 4.89464 12.5238 4.79684 12.5238 4.76807C12.5238 4.7278 12.5034 4.67602 12.4627 4.61273C12.4161 4.5552 12.3346 4.52643 12.2182 4.52643C11.8923 4.52643 11.5955 4.75081 11.3278 5.19957C11.066 5.64833 10.8215 6.30421 10.5946 7.16721L10.2629 8.41855H11.9214L11.7556 9.1521H10.1406C9.29098 13.283 8.58972 15.9928 8.03686 17.2816C7.25703 19.0939 6.16877 20 4.77207 20Z">
+    </path>
+    <path d="M12.0786 16.3495L13.676 10.7055C13.7401 10.4754 13.7866 10.2941 13.8157 10.1618C13.8739 9.91442 13.903 9.74182 13.903 9.64401C13.903 9.43114 13.8361 9.29881 13.7022 9.24703C13.5684 9.19525 13.3094 9.16361 12.9253 9.1521V8.68608C13.6702 8.64006 14.2493 8.58828 14.6625 8.53074C15.0757 8.47321 15.6925 8.36677 16.5131 8.21143L15.4306 11.4822L15.4743 11.5081C15.4452 11.5369 15.6198 11.2751 15.9981 10.7228C16.3763 10.1647 16.7371 9.71305 17.0805 9.36785C17.418 9.0169 17.7701 8.73786 18.1368 8.53074C18.5092 8.31787 18.8991 8.21143 19.3065 8.21143C19.6848 8.21143 20.0049 8.31787 20.2667 8.53074C20.5344 8.74362 20.6683 9.09169 20.6683 9.57497C20.6683 10.0237 20.4064 11.0133 19.8826 12.5437C19.3531 14.0683 19.0883 14.8853 19.0883 14.9946C19.0883 15.0982 19.1203 15.1787 19.1843 15.2362C19.2483 15.288 19.3123 15.3139 19.3763 15.3139C19.5335 15.3139 19.7662 15.1183 20.0747 14.7271C20.2376 14.52 20.4151 14.2639 20.6072 13.959L21 14.2093C20.5577 14.9169 20.1823 15.4261 19.8739 15.7368C19.3385 16.2718 18.7711 16.5394 18.1717 16.5394C17.8516 16.5394 17.5635 16.4473 17.3075 16.2632C17.0572 16.0791 16.9321 15.7886 16.9321 15.3916C16.9321 15.1384 16.9932 14.7702 17.1154 14.2869C17.2376 13.8037 17.386 13.306 17.5606 12.794L18.451 10.1532C18.4685 10.0899 18.483 10.0352 18.4947 9.98921C18.5063 9.94319 18.5121 9.89716 18.5121 9.85113C18.5121 9.71881 18.4656 9.62675 18.3725 9.57497C18.2852 9.52319 18.1891 9.4973 18.0844 9.4973C17.7177 9.4973 17.3104 9.77922 16.8623 10.343C16.4142 10.9011 16.0475 11.4592 15.7624 12.0173C15.4539 12.6214 15.195 13.2341 14.9855 13.8554C14.7759 14.4768 14.5257 15.3082 14.2347 16.3495H12.0786Z">
+    </path>
+  </svg>
+);
+
+export const LockIcon = ({ className }: { className?: string }) => (
+  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <path d="M5 4.63601C5 3.76031 5.24219 3.1054 5.64323 2.67357C6.03934 2.24705 6.64582 1.9783 7.5014 1.9783C8.35745 1.9783 8.96306 2.24652 9.35823 2.67208C9.75838 3.10299 10 3.75708 10 4.63325V5.99999H5V4.63601ZM4 5.99999V4.63601C4 3.58148 4.29339 2.65754 4.91049 1.99307C5.53252 1.32329 6.42675 0.978302 7.5014 0.978302C8.57583 0.978302 9.46952 1.32233 10.091 1.99162C10.7076 2.65557 11 3.57896 11 4.63325V5.99999H12C12.5523 5.99999 13 6.44771 13 6.99999V13C13 13.5523 12.5523 14 12 14H3C2.44772 14 2 13.5523 2 13V6.99999C2 6.44771 2.44772 5.99999 3 5.99999H4ZM3 6.99999H12V13H3V6.99999Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd">
+  </path>
+  </svg>
+);
+
+export function ClipboardIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+    </svg>
+  );
+} 
