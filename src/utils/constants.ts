@@ -68,10 +68,9 @@ export const INTERVALS = {
   MAX_CONSECUTIVE_ERRORS: 5
 };
 
-// Types for main tabs
+// Types for tabs
 export type TabTypes = 'logs' | 'data-tables' | 'health' | 'devtools' | 'functions';
-
-// Types for DevTools sub-tabs
+export type FunctionTabTypes = 'insights' | 'code' | 'function input';
 export type DevToolsTabTypes = 'console' | 'network';
 
 // Convex dashboard log types
@@ -107,7 +106,9 @@ export const ROUTES = {
   SCHEDULER_LAG: '/api/app_metrics/scheduler_lag_top_k',
   GET_SOURCE_CODE: '/api/get_source_code',
   NPM_CONVEX: 'https://registry.npmjs.org/convex/latest',
-  CONVEX_CHANGELOG: 'https://github.com/get-convex/convex-js/blob/main/CHANGELOG.md'
+  CONVEX_CHANGELOG: 'https://github.com/get-convex/convex-js/blob/main/CHANGELOG.md',
+  UDF_RATE: '/api/app_metrics/udf_rate',
+  LATENCY_PERCENTILES: '/api/app_metrics/latency_percentiles'
 } as const;
 
 // Filter types

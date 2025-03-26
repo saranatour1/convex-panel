@@ -13,7 +13,7 @@ import {
   fetchPerformanceCacheHitRate, 
   fetchPerformanceFailureRate, 
   fetchPerformanceInvocationRate,
-  fetchSourceCode
+  fetchPerformanceExecutionTime,
 } from '../utils/api';
 import { format } from 'date-fns';
 
@@ -52,6 +52,32 @@ interface DataPoint {
   value: number;
 }
 
+interface LineKey {
+  key: string;
+  name: string;
+  color: string;
+}
+
+interface TimePoint {
+  time: string;
+  [key: string]: number | string;  // Allow dynamic metric keys
+}
+
+interface PerformanceDataPoint {
+  secs_since_epoch: number;
+  nanos_since_epoch: number;
+}
+
+interface LatencyDataPoint {
+  0: PerformanceDataPoint;
+  1: number | null;
+}
+
+interface LatencySeries {
+  0: number;
+  1: LatencyDataPoint[];
+}
+
 function SingleGraph({
   title,
   dataSource,
@@ -67,9 +93,9 @@ function SingleGraph({
   useEffect(() => {
     async function getChartData() {
       try {
+        // Use current time as end and 1 hour before as start
         const initEndDate = new Date();
-        const initStartDate = new Date(initEndDate);
-        initStartDate.setHours(initStartDate.getHours() - 1);
+        const initStartDate = new Date(initEndDate.getTime() - 60 * 60 * 1000);
         const data = await dataSource(initStartDate, initEndDate);
         setChartData(data);
         setError(null);
@@ -80,7 +106,46 @@ function SingleGraph({
       }
     }
     void getChartData();
+
+    // Refresh data every minute
+    const intervalId = setInterval(getChartData, 60000);
+    return () => clearInterval(intervalId);
   }, [dataSource]);
+
+  // Get Y-axis configuration based on metric type
+  const getYAxisConfig = () => {
+    switch (title) {
+      case "Cache Hit Rate":
+        return {
+          domain: [0, 100],
+          ticks: [0, 25, 50, 75, 100],
+          tickFormatter: (value: number) => `${value}%`
+        };
+      case "Function Calls":
+        return {
+          domain: [0, 16],
+          allowDataOverflow: true,
+          ticks: [0, 4, 8, 12, 16],
+          tickFormatter: (value: number) => value.toString()
+        };
+      case "Errors":
+        return {
+          domain: [0, 4],
+          allowDataOverflow: true,
+          ticks: [0, 1, 2, 3, 4],
+          tickFormatter: (value: number) => value.toString()
+        };
+      case "Execution Time":
+        return {
+          domain: [0, 340],
+          allowDataOverflow: true,
+          ticks: [0, 85, 170, 255, 340],
+          tickFormatter: (value: number) => `${value}ms`
+        };
+    }
+  };
+
+  const yAxisConfig = getYAxisConfig();
 
   return (
     <div style={{ 
@@ -89,7 +154,6 @@ function SingleGraph({
       borderLeft: '1px solid #333',
       borderRight: '1px solid #333',
       borderBottom: '1px solid #333',
-    
     }}>
       <h3 className="convex-panel-health-header convex-panel-table-header-theme">{title}</h3>
       <div style={{ width: '100%', height: 'calc(100% - 40px)' }}>
@@ -121,6 +185,8 @@ function SingleGraph({
                 stroke="rgba(255,255,255,0.1)"
                 tick={{ fill: '#cccccc', fontSize: 12 }}
                 dy={10}
+                interval="preserveStartEnd"
+                minTickGap={30}
               />
               <YAxis
                 axisLine={false}
@@ -128,11 +194,10 @@ function SingleGraph({
                 stroke="rgba(255,255,255,0.1)"
                 tick={{ fill: '#cccccc', fontSize: 12 }}
                 width={40}
-                domain={title === "Cache Hit Rate" ? [0, 100] : [0, 4]}
-                ticks={title === "Cache Hit Rate" ? [0, 25, 50, 75, 100] : [0, 1, 2, 3, 4]}
-                tickFormatter={(value) =>
-                  title === "Cache Hit Rate" ? `${value}%` : value.toString()
-                }
+                domain={yAxisConfig.domain}
+                allowDataOverflow={yAxisConfig.allowDataOverflow}
+                ticks={yAxisConfig.ticks}
+                tickFormatter={yAxisConfig.tickFormatter}
               />
               <Tooltip
                 contentStyle={{
@@ -144,6 +209,11 @@ function SingleGraph({
                 }}
                 labelStyle={{ color: '#cccccc' }}
                 cursor={{ stroke: 'rgba(255,255,255,0.2)' }}
+                formatter={(value: number) => {
+                  if (title === "Cache Hit Rate") return `${value}%`;
+                  if (title === "Execution Time") return `${value}ms`;
+                  return value;
+                }}
               />
               {chartData.lineKeys.map((line) => {
                 const dataKey = line.key;
@@ -159,6 +229,8 @@ function SingleGraph({
                     strokeWidth={1.5}
                     dot={false}
                     activeDot={{ r: 4, strokeWidth: 0 }}
+                    connectNulls={true}
+                    isAnimationActive={false}
                   />
                 );
               })}
@@ -178,79 +250,84 @@ function SingleGraph({
 export function PerformanceGraphs({ functionId, functionPath, udfType, authToken, baseUrl }: PerformanceGraphsProps) {
   const { convexClient } = useFunctionsState();
 
-  const genErrorOrInvocationFunc = (metric: string, name: string, color: string) => {
-    return async (start: Date, end: Date) => {
+  function genErrorOrInvocationFunc(metric: string) {
+    return async (start: Date, end: Date): Promise<ChartData> => {
+      const dataMap = new Map<number, TimePoint>();
+      
       try {
-        const now = Math.floor(end.getTime() / 1000);
-        const oneHourAgo = Math.floor(start.getTime() / 1000);
-
-        const window = {
+        const timeWindow = {
           start: {
-            secs_since_epoch: oneHourAgo,
+            secs_since_epoch: Math.floor(start.getTime() / 1000),
             nanos_since_epoch: 0
           },
           end: {
-            secs_since_epoch: now,
+            secs_since_epoch: Math.floor(end.getTime() / 1000),
             nanos_since_epoch: 0
           },
           num_buckets: 60
         };
 
-        let data;
-        if (metric === 'invocations') {
-          data = await fetchPerformanceInvocationRate(baseUrl, authToken, functionPath, udfType, window);
+        if (metric === 'latency') {
+          const latencyData = await fetchPerformanceExecutionTime(baseUrl, authToken, functionPath, udfType, timeWindow);
+          // Process all latency series
+          latencyData.forEach((series: LatencySeries) => {
+            const percentile = series[0];
+            series[1].forEach((point: LatencyDataPoint) => {
+              const timestamp = point[0].secs_since_epoch;
+              const value = point[1] ?? 0;
+              if (!dataMap.has(timestamp)) {
+                const date = new Date(timestamp * 1000);
+                dataMap.set(timestamp, {
+                  time: format(date, 'h:mm a'),
+                  p50: 0,
+                  p90: 0,
+                  p95: 0,
+                  p99: 0
+                });
+              }
+              const timePoint = dataMap.get(timestamp)!;
+              if (percentile === 50) timePoint.p50 = value;
+              else if (percentile === 90) timePoint.p90 = value;
+              else if (percentile === 95) timePoint.p95 = value;
+              else if (percentile === 99) timePoint.p99 = value;
+            });
+          });
         } else {
-          data = await fetchPerformanceFailureRate(baseUrl, authToken, functionPath, udfType, window);
+          const invocationData = await fetchPerformanceInvocationRate(baseUrl, authToken, functionPath, udfType, timeWindow);
+          invocationData.forEach((point: [PerformanceDataPoint, number | null]) => {
+            const timestamp = point[0].secs_since_epoch;
+            const value = point[1] ?? 0;
+            const date = new Date(timestamp * 1000);
+            dataMap.set(timestamp, {
+              time: format(date, 'h:mm a'),
+              metric: value
+            });
+          });
         }
 
-        if (!data || !Array.isArray(data)) {
-          console.warn('Invalid data format received:', data);
-          return {
-            data: [],
-            xAxisKey: 'time',
-            lineKeys: [{ key: 'metric', name, color }]
-          };
-        }
-
-        // Generate timestamps for all buckets
-        const interval = (now - oneHourAgo) / 60;
-        const timestamps = Array.from({ length: 60 }, (_, i) => {
-          const timestamp = oneHourAgo + (i * interval);
-          return {
-            secs_since_epoch: Math.floor(timestamp),
-            nanos_since_epoch: 0
-          };
-        });
-
-        // Create a map of existing data points
-        const dataMap = new Map(
-          data.filter(point => 
-            point && 
-            Array.isArray(point) && 
-            point.length === 2 && 
-            point[0]?.secs_since_epoch && 
-            typeof point[1] === 'number'
-          ).map(point => [point[0].secs_since_epoch, point[1]])
-        );
-
-        // Fill in missing data points with zeros
-        const chartData = timestamps.map(timestamp => ({
-          time: format(new Date(timestamp.secs_since_epoch * 1000), 'hh:mm a'),
-          metric: dataMap.get(timestamp.secs_since_epoch) || 0
-        }));
-
+        // Sort data points by timestamp
+        const sortedData = Array.from(dataMap.entries())
+          .sort(([a], [b]) => a - b)
+          .map(([_, point]) => point);
 
         return {
-          data: chartData,
+          data: sortedData,
           xAxisKey: 'time',
-          lineKeys: [{ key: 'metric', name, color }]
+          lineKeys: metric === 'latency' ? [
+            { key: 'p50', name: '1ms p50', color: '#2196f3' },
+            { key: 'p90', name: '171ms p90', color: '#ff9800' },
+            { key: 'p95', name: '171ms p95', color: '#4caf50' },
+            { key: 'p99', name: '171ms p99', color: '#f44336' }
+          ] : [
+            { key: 'metric', name: metric === 'errors' ? 'Errors' : 'Function Calls', color: metric === 'errors' ? '#f44336' : '#2196f3' }
+          ]
         };
       } catch (err) {
-        console.error('Error processing metrics:', err);
+        console.error('Error processing performance data:', err);
         throw err;
       }
     };
-  };
+  }
 
   const calcCacheHitPercentage = async (start: Date, end: Date) => {
     try {
@@ -266,43 +343,81 @@ export function PerformanceGraphs({ functionId, functionPath, udfType, authToken
           secs_since_epoch: now,
           nanos_since_epoch: 0
         },
-        num_buckets: 60  // Changed from 30 to 60 to match other metrics
+        num_buckets: 60
       };
 
       const data = await fetchPerformanceCacheHitRate(baseUrl, authToken, functionPath, udfType, window);
 
-      if (!data || !data.data || !data.data[0] || !data.data[0].points) {
+      if (!data || !Array.isArray(data)) {
         return {
           data: [],
           xAxisKey: 'time',
-          lineKeys: [{ key: 'metric', name: '%', color: 'rgb(var(--chart-line-1))' }]
+          lineKeys: [] as LineKey[]
         };
       }
 
+      // Process each series
+      const seriesData = new Map<string, Map<number, number>>();
+      const lineKeys: LineKey[] = [];
+      
+      data.forEach(([seriesName, points]: [string, Array<[{secs_since_epoch: number}, number | null]>]) => {
+        // Skip if no points
+        if (!points || !Array.isArray(points)) return;
+
+        // Create a map of data points for this series
+        const seriesPoints = new Map(
+          points
+            .filter(point => point && point[0])
+            .map(([timestamp, value]) => [
+              timestamp.secs_since_epoch,
+              typeof value === 'number' ? value : 0
+            ])
+        );
+
+        seriesData.set(seriesName, seriesPoints);
+        
+        // Add line key with appropriate color
+        const color = seriesName === '_rest' ? 'rgb(var(--chart-line-1))' : 
+                     seriesName.includes('stripe') ? '#f59e0b' :
+                     seriesName.includes('stats') ? '#3b82f6' : '#10b981';
+        
+        lineKeys.push({
+          key: `metric_${seriesName}`,
+          name: seriesName === '_rest' ? 'Other' : seriesName.split('.js:')[1] || seriesName,
+          color
+        });
+      });
+
       // Generate timestamps for all buckets
-      const interval = (now - oneHourAgo) / 60;
-      const timestamps = Array.from({ length: 60 }, (_, i) => ({
-        secs_since_epoch: Math.floor(oneHourAgo + (i * interval)),
-        nanos_since_epoch: 0
-      }));
+      const interval = Math.floor((now - oneHourAgo) / 60);
+      const timestamps = Array.from({ length: 60 }, (_, i) => oneHourAgo + (i * interval));
 
-      // Create a map of existing data points
-      const dataMap = new Map(
-        data.data[0].points
-          .filter((point: DataPoint) => point && point.timestamp && typeof point.value === 'number')
-          .map((point: DataPoint) => [point.timestamp.secs_since_epoch, point.value])
-      );
+      // Create chart data points
+      const chartData = timestamps.map(timestamp => {
+        const date = new Date(timestamp * 1000);
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12;
+        const formattedMinutes = minutes.toString().padStart(2, '0');
+        const timeString = `${formattedHours}:${formattedMinutes} ${ampm}`;
 
-      // Fill in missing data points with zeros
-      const chartData = timestamps.map(timestamp => ({
-        time: format(new Date(timestamp.secs_since_epoch * 1000), 'hh:mm a'),
-        metric: Math.round((Number(dataMap.get(timestamp.secs_since_epoch) || 0) + Number.EPSILON) * 100) / 100
-      }));
+        const timePoint: TimePoint = {
+          time: timeString
+        };
+
+        // Add data point for each series
+        seriesData.forEach((points, seriesName) => {
+          timePoint[`metric_${seriesName}`] = Math.round((points.get(timestamp) || 0) * 100) / 100;
+        });
+
+        return timePoint;
+      });
 
       return {
         data: chartData,
         xAxisKey: 'time',
-        lineKeys: [{ key: 'metric', name: '%', color: 'rgb(var(--chart-line-1))' }]
+        lineKeys
       };
     } catch (err) {
       console.error('Error fetching cache hit rate:', err);
@@ -319,31 +434,19 @@ export function PerformanceGraphs({ functionId, functionPath, udfType, authToken
     }}>
       <SingleGraph
         title="Function Calls"
-        dataSource={genErrorOrInvocationFunc(
-          "invocations",
-          "Function Calls",
-          "#3b82f6" // Blue color
-        )}
+        dataSource={genErrorOrInvocationFunc("invocations")}
         syncId="fnMetrics"
       />
       <SingleGraph
         title="Errors"
-        dataSource={genErrorOrInvocationFunc(
-          "errors",
-          "Errors",
-          "#ef4444" // Red color
-        )}
+        dataSource={genErrorOrInvocationFunc("errors")}
         syncId="fnMetrics"
       />
       {udfType.toLowerCase() === "query" && (
         <>
           <SingleGraph
             title="Execution Time"
-            dataSource={genErrorOrInvocationFunc(
-              "execution_time",
-              "Execution Time",
-              "#f59e0b" // Amber color
-            )}
+            dataSource={genErrorOrInvocationFunc("latency")}
             syncId="fnMetrics"
           />
           <SingleGraph

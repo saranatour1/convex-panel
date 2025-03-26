@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
+// @ts-ignore
 import { motion, PanInfo } from 'framer-motion';
-import debounce from 'debounce';
+// @ts-ignore
+import debounce from 'lodash/debounce';
 import { ContainerProps, LogEntry } from "./types";
 import { cardVariants } from './theme';
 import { getLogId } from './utils';
@@ -850,7 +852,6 @@ const Container = ({
   }, []);
 
 
-
   const renderContent = () => {
     // If the panel is closed, don't render anything
     if (!isOpen) {
@@ -980,9 +981,10 @@ const Container = ({
       case 'functions':
         return (
           <FunctionsProvider
-            initialEntries={[]}
             initialModules={new Map()}
             convexClient={adminClient}
+            baseUrl={deployUrl || ''}
+
           >
             <FunctionsView theme={mergedTheme} authToken={accessToken} baseUrl={baseUrl} />
           </FunctionsProvider>
@@ -1150,10 +1152,10 @@ const Container = ({
 
       {activeTab === 'functions' && (
         <FunctionsProvider
-          initialEntries={[]}
+          // initialEntries={[]}
           initialModules={new Map()}
           convexClient={adminClient}
-          authToken={accessToken}
+          baseUrl={deployUrl || ''}
         >
           <FunctionsView theme={mergedTheme} authToken={accessToken} baseUrl={baseUrl} />
         </FunctionsProvider>

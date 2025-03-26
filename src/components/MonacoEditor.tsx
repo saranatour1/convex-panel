@@ -47,14 +47,17 @@ export function MonacoEditor({
         'editor.lineHighlightBackground': '#f3b01c30',
         'editor.selectionBackground': '#73597E80',
         'editor.inactiveSelectionBackground': '#73597E40',
-        "editor.fontFamily": "monospace",
-      }
+        "editor.fontFamily": "Menlo, Monaco, 'Courier New', monospace",
+        "editor.fontSize": "14px",
+      },
+      
     });
 
     monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
       noSemanticValidation: true,
       noSyntaxValidation: true,
     });
+
   };
   
 
@@ -109,26 +112,60 @@ export function MonacoEditor({
       theme="clouds-midnight"
       value={value}
       options={{
-        readOnly,
-        minimap: { enabled: true },
-        scrollBeyondLastLine: false,
-        fontSize: 14,
-        fontFamily: 'monospace',
-        lineNumbers: 'on',
-        renderLineHighlight: 'all',
-        scrollbar: {
-          vertical: 'visible',
-          horizontal: 'visible',
-        },
+        tabFocusMode: false,
         automaticLayout: true,
+        minimap: { enabled: false },
+        overviewRulerBorder: false,
+        scrollBeyondLastLine: false,
+        find: {
+          addExtraSpaceOnTop: false,
+          autoFindInSelection: "never",
+          seedSearchStringFromSelection: "never",
+        },
+        lineNumbers: "off",
+        glyphMargin: false,
+        lineDecorationsWidth: 0,
+        lineNumbersMinChars: 0,
+        scrollbar: {
+          alwaysConsumeMouseWheel: false,
+          horizontalScrollbarSize: 8,
+          verticalScrollbarSize: 8,
+          useShadows: false,
+          vertical: "visible",
+        },
+        suggest: { preview: false },
+        hideCursorInOverviewRuler: true,
+        quickSuggestions: false,
+        parameterHints: { enabled: false },
+        suggestOnTriggerCharacters: false,
+        snippetSuggestions: "none",
+        contextmenu: false,
+        codeLens: false,
+        disableLayerHinting: true,
+        inlayHints: { enabled: "off" },
+        inlineSuggest: { enabled: false },
+        hover: { above: false },
+        guides: {
+          bracketPairs: false,
+          bracketPairsHorizontal: false,
+          highlightActiveBracketPair: false,
+          indentation: false,
+          highlightActiveIndentation: false,
+        },
+        bracketPairColorization: { enabled: false },
+        matchBrackets: "never",
+        tabCompletion: "off",
+        selectionHighlight: false,
+        renderLineHighlight: "none",
+        readOnly: true,
+        wordWrap: "on",
+        domReadOnly: true,
+        fontSize: 14,
+        fontFamily: "Menlo, Monaco, 'Courier New', monospace !important",
         folding: true,
         foldingHighlight: true,
         showFoldingControls: 'always',
-        bracketPairColorization: {
-          enabled: true,
-        },
       }}
-      className='convex-panel-monaco-editor'
       beforeMount={handleEditorWillMount}
       onMount={handleEditorDidMount}
       onChange={(value, event) => {

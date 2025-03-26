@@ -73,7 +73,6 @@ export const useTableData = ({
   const [error, setError] = useState<string | null>(null);
   const [documents, setDocuments] = useState<TableDocument[]>([]);
   const [documentCount, setDocumentCount] = useState<number>(0);
-  const [insertionStatus, setInsertionStatus] = useState<string>('');
   const [continueCursor, setContinueCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -161,6 +160,8 @@ export const useTableData = ({
             accessToken,
             adminClient
           });
+
+      console.log('tableData', tableData);
 
       setTables(tableData);
       setSelectedTable(newSelectedTable);

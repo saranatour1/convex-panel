@@ -344,25 +344,22 @@ export const fetchPerformanceFailureRate = async (
   udfType: string,
   window: any
 ) => {
-  // Extract just the file path (e.g., "users.js" from "users.js:viewer")
-  const path = functionPath.split(':')[0];
-
   const params = new URLSearchParams({
+    metric: 'errors',
+    path: functionPath,
     window: JSON.stringify(window),
-    k: '3',
-    path,
     udfType
   });
 
-  const normalizedToken = authToken.startsWith('Convex ') ? authToken : `Convex ${authToken}`;
-
   const response = await fetch(
-    `${deploymentUrl}${ROUTES.FAILURE_RATE}?${params}`,
+    `${deploymentUrl}${ROUTES.UDF_RATE}?${params}`,
     {
       headers: {
-        'Authorization': normalizedToken,
+        'Authorization': `Convex ${authToken}`,
         'Content-Type': 'application/json',
         'Convex-Client': 'dashboard-0.0.0',
+        'Origin': 'https://dashboard.convex.dev',
+        'Referer': 'https://dashboard.convex.dev/'
       }
     }
   );
@@ -375,7 +372,9 @@ export const fetchPerformanceFailureRate = async (
     throw new Error(`Failed to fetch failure rate: HTTP ${response.status}`);
   }
 
-  return response.json();
+  const data = await response.json();
+
+  return data;
 };
 
 /**
@@ -547,9 +546,6 @@ const fetchPerformanceMetric = async (
 
       if (!response.ok) {
         const responseText = await response.text();
-        console.error('Response status:', response.status);
-        console.error('Response headers:', Object.fromEntries(response.headers.entries()));
-        console.error('Response body:', responseText);
         
         if (response.status === 500) {
           throw new Error(`Internal server error: ${responseText}`);
@@ -558,7 +554,9 @@ const fetchPerformanceMetric = async (
         throw new Error(`Failed to fetch performance metric: HTTP ${response.status}`);
       }
 
-      return response.json();
+      const data = await response.json();
+
+      return data;
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
       if (retryCount < MAX_RETRIES - 1) {
@@ -601,30 +599,81 @@ export async function fetchPerformanceInvocationRate(
     num_buckets: number;
   }
 ) {
-  const encodedPath = encodeURIComponent(functionPath);
-  const encodedWindow = encodeURIComponent(JSON.stringify(window));
+  const params = new URLSearchParams({
+    metric: 'invocations',
+    path: functionPath,
+    window: JSON.stringify(window),
+    udfType
+  });
   
   const response = await fetch(
-    `${baseUrl}/api/app_metrics/cache_hit_percentage?path=${encodedPath}&window=${encodedWindow}&udfType=${udfType}`,
+    `${baseUrl}${ROUTES.UDF_RATE}?${params}`,
     {
       headers: {
         Authorization: `Convex ${authToken}`,
         'Content-Type': 'application/json',
-        'Convex-Client': 'convex-panel-extension',
-        'Origin': baseUrl,
-        'Referer': baseUrl
+        'Convex-Client': 'dashboard-0.0.0',
+        'Origin': 'https://dashboard.convex.dev',
+        'Referer': 'https://dashboard.convex.dev/'
       },
     }
   );
 
-  const data = await response.json();
-
   if (!response.ok) {
+    console.error('Response status:', response.status);
+    console.error('Response headers:', response.headers);
+    const responseText = await response.text();
+    console.error('Response body:', responseText);
     throw new Error(`Failed to fetch invocation rate: ${response.statusText}`);
   }
 
+  const data = await response.json();
+
   return data;
 }
+
+/**
+ * Fetch execution time (latency) metrics for a specific function
+ */
+export const fetchPerformanceExecutionTime = async (
+  baseUrl: string,
+  authToken: string,
+  functionPath: string,
+  udfType: string,
+  window: any
+) => {
+  const params = new URLSearchParams({
+    percentiles: JSON.stringify([50, 90, 95, 99]),
+    path: functionPath,
+    window: JSON.stringify(window),
+    udfType
+  });
+
+  const response = await fetch(
+    `${baseUrl}${ROUTES.LATENCY_PERCENTILES}?${params}`,
+    {
+      headers: {
+        'Authorization': `Convex ${authToken}`,
+        'Content-Type': 'application/json',
+        'Convex-Client': 'dashboard-0.0.0',
+        'Origin': 'https://dashboard.convex.dev',
+        'Referer': 'https://dashboard.convex.dev/'
+      }
+    }
+  );
+
+  if (!response.ok) {
+    console.error('Response status:', response.status);
+    console.error('Response headers:', response.headers);
+    const responseText = await response.text();
+    console.error('Response body:', responseText);
+    throw new Error(`Failed to fetch execution time: HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  return data;
+};
 
 /**
  * Fetch source code for a function

@@ -3636,6 +3636,53 @@
   .convex-panel-highlighted-line-margin {
     border-left: 2px solid rgb(243, 176, 28, 0.2) !important;
   }
+
+  /* readOnlyEditor styles */
+  .readonlyEditor .monaco-editor .cursors-layer .cursor {
+    display: none !important;
+  }
+  .readonlyEditor .monacoLineHighlight {
+    background-color: rgb(243, 176, 28, 0.3);
+    padding: 2px 0px;
+  }
+
+  .monaco-editor .monaco-editor-background,
+  .margin {
+    @apply bg-background-secondary !important;
+  }
+
+  .monaco-editor,
+  .margin,
+  .monaco-scrollable-element {
+    @apply bg-background-secondary !important;
+  }
+
+  /* Makes spans in hovers not take up too much vertical space */
+  .monaco-hover-content span {
+    margin-bottom: 0px !important;
+  }
+
+  /* Makes icon rendering in monaco work */
+  [class^="codicon-"],
+  [class*="codicon-"] {
+    font-family: "codicon" !important;
+  }
+  [class^="codicon-"].hover-decoration,
+  [class*="codicon-"].hover-decoration {
+    position: relative;
+    top: 0.125rem;
+    /* This is important to ensure the icon does not push the text out of the line */
+    line-height: 9px;
+  }
+
+  /* Recharts style */
+  .recharts-tooltip-cursor {
+    @apply fill-background-tertiary;
+  }
+
+  .recharts-tooltip-wrapper {
+    outline: none;
+  }
 }
 
 .flex { display: flex; }

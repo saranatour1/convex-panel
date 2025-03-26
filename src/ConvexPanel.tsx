@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo, ErrorInfo } from 'react';
-import Image from 'next/image';
+import { useState, useEffect, useMemo } from 'react';
+// @ts-ignore
 import { AnimatePresence, useDragControls } from 'framer-motion';
+// @ts-ignore
 import { motion } from 'framer-motion';
 import { ButtonProps } from './types';
 import { LogType } from './utils/constants';

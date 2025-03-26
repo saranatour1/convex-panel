@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react';
 import { FileOrFolder, ModuleFunction, File, Folder, UdfType } from '../types';
 import { fetchFunctionSpec } from '../utils/api';
+import { ConvexClient } from 'convex/browser';
 
 // HTTP methods supported by Convex
 export const ROUTABLE_HTTP_METHODS = [
@@ -42,18 +43,26 @@ export function displayNameToIdentifier(path: string) {
   return `${filePath}:${exportName}`;
 }
 
+interface FunctionResult {
+  success: boolean;
+  value?: any;
+  errorMessage?: string;
+  errorData?: any;
+  logLines: string[];
+}
+
 interface FunctionsContextType {
   selectedFunction: ModuleFunction | null;
   setSelectedFunction: (fn: ModuleFunction | null) => void;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   rootEntries: FileOrFolder[];
-  modules: Map<string, ModuleFunction[]>;
+  modules: Map<string, any>;
   isLoading: boolean;
   error: string | null;
   refreshFunctions: () => Promise<void>;
-  executeFunction: (fn: ModuleFunction, args?: any) => Promise<any>;
-  convexClient: any;
+  executeFunction: (fn: ModuleFunction) => Promise<FunctionResult>;
+  convexClient: ConvexClient | null;
 }
 
 interface FunctionResponse {
@@ -71,25 +80,25 @@ interface FunctionResponse {
   };
 }
 
+interface FunctionsProviderProps {
+  initialModules: Map<string, any>;
+  convexClient: ConvexClient | null;
+  children: React.ReactNode;
+  baseUrl: string;
+}
+
 const FunctionsContext = createContext<FunctionsContextType | null>(null);
 
-export function FunctionsProvider({
+export function FunctionsProvider({ 
+  initialModules = new Map(), 
+  convexClient = null, 
   children,
-  initialEntries = [],
-  initialModules = new Map(),
-  convexClient,
-  authToken,
-}: {
-  children: React.ReactNode;
-  initialEntries?: FileOrFolder[];
-  initialModules?: Map<string, ModuleFunction[]>;
-  convexClient?: any;
-  authToken?: string;
-}) {
+  baseUrl,
+}: FunctionsProviderProps) {
   const [selectedFunction, setSelectedFunction] = useState<ModuleFunction | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [rootEntries, setRootEntries] = useState<FileOrFolder[]>(initialEntries);
-  const [modules, setModules] = useState<Map<string, ModuleFunction[]>>(initialModules);
+  const [rootEntries, setRootEntries] = useState<FileOrFolder[]>([]);
+  const [modules] = useState<Map<string, any>>(initialModules);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -241,7 +250,6 @@ export function FunctionsProvider({
       sortChildren(root);
 
       setRootEntries(root);
-      setModules(moduleMap);
     } catch (err) {
       console.error('Error processing functions:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch functions');
@@ -250,26 +258,84 @@ export function FunctionsProvider({
     }
   };
 
-  const executeFunction = async (fn: ModuleFunction, args?: any) => {
+  const executeFunction = useCallback(async (fn: ModuleFunction): Promise<FunctionResult> => {
     if (!convexClient) {
-      throw new Error('Convex client not available');
+      throw new Error('Convex client is not initialized');
     }
 
-    try {
-      switch (fn.udfType) {
-        case 'query':
-          return await convexClient.query(fn.identifier)(args);
-        case 'mutation':
-          return await convexClient.mutation(fn.identifier)(args);
-        case 'action':
-          return await convexClient.action(fn.identifier)(args);
-        default:
-          throw new Error(`Unsupported function type: ${fn.udfType}`);
-      }
-    } catch (err) {
-      throw err instanceof Error ? err : new Error('Failed to execute function');
+    console.log('BASE URL:', baseUrl);
+    const url = baseUrl;
+
+    if (!url) {
+      throw new Error('Convex URL is not available');
     }
-  };
+
+    // Create the source code for the function
+    const source = `
+      import { query, internalQuery } from "convex:/_system/repl/wrappers.js";
+      export default ${fn.udfType}({
+        handler: async (ctx) => {
+          return await ctx.db.query("${fn.file.path}").take(10);
+        }
+      });`;
+
+    try {
+      const response = await fetch(`${url}/api/run_test_function`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bundle: {
+            path: `${fn.file.path}.js`,
+            source,
+          },
+          adminKey: (convexClient as any)._auth?.token || '',
+          args: {},
+          format: 'convex_encoded_json'
+        })
+      });
+
+      console.log('Response:', response);
+
+      if (!response.ok) {
+        if (response.status >= 400 && response.status <= 499) {
+          const body = await response.json();
+          return {
+            success: false,
+            errorMessage: body.message?.toString() || 'Client error occurred',
+            logLines: [],
+          };
+        }
+        return {
+          success: false,
+          errorMessage: 'Server error occurred. Please try again or contact support.',
+          logLines: [],
+        };
+      }
+
+      const body = await response.json();
+      return body.status === 'success'
+        ? {
+            success: true,
+            value: body.value,
+            logLines: body.logLines || [],
+          }
+        : {
+            success: false,
+            errorMessage: body.errorMessage,
+            errorData: body.errorData,
+            logLines: body.logLines || [],
+          };
+    } catch (err) {
+      console.error('Error executing function:', err);
+      return {
+        success: false,
+        errorMessage: err instanceof Error ? err.message : 'An unknown error occurred',
+        logLines: [],
+      };
+    }
+  }, [convexClient]);
 
   useEffect(() => {
     refreshFunctions();
