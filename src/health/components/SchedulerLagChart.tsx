@@ -50,7 +50,7 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
    */
   useMockData = false
 }) => {
-  const [chartData, setChartData] = useState<Array<{time: string, lag: number}>>([]);
+  const [chartData, setChartData] = useState<Array<{time: string, lag: number | null}>>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<'on_time' | 'delayed' | 'error'>('on_time');
@@ -73,7 +73,7 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
       setReceivedSuccessResponse(true);
       
       // Process the data for Recharts format
-      let formattedData: Array<{time: string, lag: number}> = [];
+      let formattedData: Array<{time: string, lag: number | null}> = [];
       
       try {
         // Handle different data formats for mock vs real data
@@ -83,7 +83,7 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
             try {
               const timestamp = item[0]?.secs_since_epoch ? item[0].secs_since_epoch * 1000 : Date.now();
               const timeLabel = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-              const lagValue = typeof item[1] === 'number' ? item[1] : 0;
+              const lagValue = typeof item[1] === 'number' ? item[1] : null;
               
               return {
                 time: timeLabel,
@@ -94,7 +94,7 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
               // Return a fallback item if there's an error
               return {
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                lag: 0
+                lag: null
               };
             }
           });
@@ -110,7 +110,7 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
               try {
                 const timestamp = item[0]?.secs_since_epoch ? item[0].secs_since_epoch * 1000 : Date.now();
                 const timeLabel = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const lagValue = typeof item[1] === 'number' ? item[1] : 0;
+                const lagValue = typeof item[1] === 'number' ? item[1] : null;
                 
                 return {
                   time: timeLabel,
@@ -121,14 +121,14 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
                 // Return a fallback item if there's an error
                 return {
                   time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                  lag: 0
+                  lag: null
                 };
               }
             });
             
             // Determine status based on lag values for real data
-            const lagValues = formattedData.map((item) => item.lag);
-            const maxLag = Math.max(...lagValues);
+            const lagValues = formattedData.map((item) => item.lag).filter((lag): lag is number => lag !== null);
+            const maxLag = lagValues.length > 0 ? Math.max(...lagValues) : 0;
             if (maxLag > 2) {
               setStatus('delayed');
               setMessage('Scheduled functions are experiencing some delays.');
@@ -142,7 +142,7 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
             const now = Date.now();
             formattedData = Array.from({ length: 10 }, (_, i) => {
               const time = new Date(now - i * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-              return { time, lag: 0 };
+              return { time, lag: null };
             }).reverse();
             
             setStatus('on_time');
@@ -155,7 +155,7 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
         const now = Date.now();
         formattedData = Array.from({ length: 10 }, (_, i) => {
           const time = new Date(now - i * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          return { time, lag: 0 };
+          return { time, lag: null };
         }).reverse();
         
         setStatus('error');
@@ -239,7 +239,10 @@ const SchedulerLagChart: React.FC<SchedulerLagChartProps> = ({
                     color: '#cccccc' 
                   }}
                   labelStyle={{ color: '#cccccc' }}
-                  formatter={(value: any) => [`${value.toFixed(2)} minutes`, 'Lag Time']}
+                  formatter={(value: any) => {
+                    if (value === null || value === undefined) return ['N/A', 'Lag Time'];
+                    return [`${Number(value).toFixed(2)} minutes`, 'Lag Time'];
+                  }}
                 />
                 <Legend 
                   wrapperStyle={{ color: '#cccccc' }}
