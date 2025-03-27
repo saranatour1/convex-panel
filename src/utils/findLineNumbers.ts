@@ -23,14 +23,13 @@ export function findLineNumbers(
   const result = new Map<string, number>();
 
   // First try to find raw source code exports
-  for (const [index, line] of lines.entries()) {
+  Array.from(lines.entries()).forEach(([index, line]) => {
     const lineno = index + 1;
     const rawMatch = line.match(rawExportRegex) || line.match(rawExportArrowRegex);
     if (rawMatch && expectedExports.includes(rawMatch[1])) {
       result.set(rawMatch[1], lineno);
-      continue;
     }
-  }
+  });
 
   // If we found all exports, return early
   if (expectedExports.every(exp => result.has(exp))) {
@@ -42,72 +41,71 @@ export function findLineNumbers(
   const exportMap = new Map<string, string>();
 
   // Look for oneline exports first
-  for (const line of lines) {
+  lines.forEach(line => {
     const onelineMatch = line.match(onelineExportRegex);
     if (onelineMatch) {
       const pieces = onelineMatch[1].split(",").map((l) => l.trim());
-      for (const piece of pieces) {
+      pieces.forEach(piece => {
         const itemMatch = piece.match(onelineItemRegex);
         if (!itemMatch) {
           console.warn(`Item ${piece} in ${line} didn't match item regex`);
-          continue;
+          return;
         }
         const origIdentifier = itemMatch[1];
         const exportIdentifier = itemMatch[2]
           ? itemMatch[2].slice(" as ".length)
           : origIdentifier;
         exportMap.set(exportIdentifier, origIdentifier);
-      }
-      break;
+      });
     }
-  }
+  });
 
   // Look for multi-line export block
-  for (const line of lines) {
+  lines.forEach(line => {
     if (line === "export {") {
       foundExport = true;
-      continue;
+      return;
     }
     if (foundExport && line === "};") {
       foundExport = false;
-      break;
+      return;
     }
     if (!foundExport) {
-      continue;
+      return;
     }
     const exportMatch = line.match(exportRegex);
     if (!exportMatch) {
       console.warn(`Line ${line} did not match export regex`);
-      continue;
+      return;
     }
     const origIdentifier = exportMatch[1];
     const exportIdentifier = exportMatch[2]
       ? exportMatch[2].slice(" as ".length)
       : origIdentifier;
     exportMap.set(exportIdentifier, origIdentifier);
-  }
+  });
 
   // Find bundled declarations
   const lineNumbers = new Map<string, number>();
-  for (const [index, line] of lines.entries()) {
+  Array.from(lines.entries()).forEach(([index, line]) => {
     const lineno = index + 1;
     const definitionMatch = line.match(definitionRegex);
     if (!definitionMatch) {
-      continue;
+      return;
     }
     const origIdentifier = definitionMatch[1];
     lineNumbers.set(origIdentifier, lineno);
-  }
+  });
 
   // Stitch the bundled relations together
-  for (const exported of expectedExports) {
+  expectedExports.forEach(exported => {
     if (result.has(exported)) {
-      continue; // Skip if we already found it in raw source
+      return; // Skip if we already found it in raw source
     }
     const origIdentifier = exportMap.get(exported);
     if (origIdentifier === undefined) {
       console.warn(`Couldn't find export ${exported} in `, exportMap);
-      continue;
+      return;
     }
     const lineNumber = lineNumbers.get(origIdentifier);
     if (lineNumber === undefined) {
@@ -115,10 +113,10 @@ export function findLineNumbers(
         `Couldn't find line number for ${exported} -> ${origIdentifier} in `,
         lineNumbers,
       );
-      continue;
+      return;
     }
     result.set(exported, lineNumber);
-  }
+  });
 
   return result;
 } 
