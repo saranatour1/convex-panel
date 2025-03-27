@@ -1,6 +1,6 @@
 {
   "name": "convex-panel",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A React component for monitoring and debugging Convex applications",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
