@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, FC } from "react";
 import { LogType } from "../utils/constants";
 import { ConvexReactClient } from "convex/react";
 import { ConvexClient } from 'convex/browser';
@@ -500,7 +500,7 @@ export interface FailureData {
 }
 
 // Failure Rate Chart Props
-interface FailureRateChartProps {
+export interface FailureRateChartProps {
   deploymentUrl: string;
   authToken: string;
   refreshInterval?: number;
@@ -598,9 +598,6 @@ export interface NetworkPanelProps {
  */
 export type SortDirection = 'asc' | 'desc';
 
-/**
- * Sort configuration for table columns
- */
 export interface SortConfig {
   field: string;
   direction: SortDirection;
@@ -715,3 +712,12 @@ export type ProjectEnvVarConfig = {
   value: string;
   deploymentTypes: ("dev" | "preview" | "prod")[];
 };
+
+export interface ConvexPanelProps {
+  accessToken: string;
+  deployKey: string;
+}
+
+declare const ConvexPanel: FC<ConvexPanelProps>;
+
+export default ConvexPanel;

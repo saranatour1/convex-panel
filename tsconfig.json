@@ -17,8 +17,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "declaration": true,
-    "declarationDir": "dist",
-    "outDir": "dist",
+    "declarationDir": "./dist",
+    "emitDeclarationOnly": false,
+    "outDir": "./dist",
     "baseUrl": ".",
     "typeRoots": [
       "./node_modules/@types",

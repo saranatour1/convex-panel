@@ -7,14 +7,16 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/index.js"
     },
     "./utils/getConvexToken": {
+      "types": "./dist/utils/getConvexToken.d.ts",
       "import": "./dist/utils/getConvexToken.js",
       "require": "./dist/utils/getConvexToken.js",
-      "types": "./dist/utils/getConvexToken.d.ts"
+      "default": "./dist/utils/getConvexToken.js"
     }
   },
   "files": [

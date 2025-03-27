@@ -3,6 +3,7 @@ export { default as LogsToolbar } from './logs/components/LogsToolbar';
 export type { ButtonProps, ThemeClasses } from './types';
 export type { LogEntry } from './types';
 export { LogType } from './utils/constants';
+export type { ConvexPanelProps } from './types';
 
 export { ConvexPanel };
 export default ConvexPanel;
