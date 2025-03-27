@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { DataTableContentProps, FilterClause, SortConfig, SortDirection } from '../../types';
+import { DataTableContentProps, FilterClause, SortConfig, SortDirection, TableDocument } from '../../types';
 import FilterMenu from './FilterMenu';
 import { SortIcon, FilterIcon } from '../../components/icons';
 
@@ -169,27 +169,25 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
    * Find existing filter for a column
    */
   const getExistingFilter = (field: string): FilterClause | undefined => {
-    return activeFilters.clauses.find(clause => clause.field === field);
+    return activeFilters.clauses.find((clause: FilterClause) => clause.field === field);
   };
   
   /**
    * Check if a column has an active filter
    */
-  const hasActiveFilter = (header: string) => {
-    return activeFilters.clauses.some((filter) => filter.field === header);
+  const hasActiveFilter = (header: string): boolean => {
+    return activeFilters.clauses.some((filter: FilterClause) => filter.field === header);
   };
 
   /**
    * Handle row click to select a document
    */
-  const handleRowClick = (doc: any) => {
-    if (editingCell) return; // Don't select row if we're editing a cell
+  const handleRowClick = (doc: TableDocument): void => {
+    if (editingCell) return;
     
     if (selectedDocument && selectedDocument._id === doc._id) {
-      // If clicking on already selected row, deselect it
       setSelectedDocument(null);
     } else {
-      // Otherwise select the row
       setSelectedDocument(doc);
     }
   };
@@ -197,8 +195,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
   /**
    * Handle double click on a cell to enter edit mode
    */
-  const handleCellDoubleClick = (doc: any, header: string) => {
-    // Don't allow editing _id fields, fields that end with Id, or fields that start with _
+  const handleCellDoubleClick = (doc: TableDocument, header: string): void => {
     if (header === '_id' || header === 'userId' || header.endsWith('Id') || header.startsWith('_')) {
       return;
     }
@@ -221,7 +218,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
     
     try {
       // Find the document and get the original value to determine its type
-      const document = documents.find(doc => doc._id === docId);
+      const document = documents.find((doc: TableDocument) => doc._id === docId);
       if (!document) {
         throw new Error(`Document with ID ${docId} not found`);
       }
