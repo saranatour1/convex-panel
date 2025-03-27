@@ -13,7 +13,23 @@ export type {
   LogDetailPanelProps,
   DataTableProps,
   NetworkPanelProps,
-  HealthContainerProps
+  HealthContainerProps,
+  ActiveFiltersProps,
+  FilterMenuProps,
+  FilterDebugProps,
+  DataTableSidebarProps,
+  DataTableContentProps,
+  StorageDebugProps,
+  FilterClause,
+  FilterExpression,
+  MenuPosition,
+  TableField,
+  TableSchema,
+  TableDefinition,
+  TableDocument,
+  RecentlyViewedTable,
+  SortConfig,
+  SortDirection
 } from './types';
 export { LogType } from './utils/constants';
 
