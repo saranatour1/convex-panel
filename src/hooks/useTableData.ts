@@ -870,7 +870,7 @@ export const useTableData = ({
       });
     });
     
-    const allFields = new Set([...schemaFields, ...documentFields]);
+    const allFields = new Set(Array.from(schemaFields).concat(Array.from(documentFields)));
     
     const fields = Array.from(allFields);
     const idIndex = fields.indexOf('_id');
