@@ -1,5 +1,5 @@
 import React, { useCallback, memo } from 'react';
-import { ActiveFiltersProps } from '../../types';
+import { ActiveFiltersProps, FilterClause } from '../../types';
 import FilterTag from './FilterTag';
 import { TrashIcon } from '../../components/icons';
 
@@ -67,7 +67,7 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = memo(({
 
   return (
     <div className="convex-panel-active-filters">
-      {filters.clauses.map((filter) => (
+      {filters.clauses.map((filter: FilterClause) => (
         <FilterTag
           key={`${filter.field}-${filter.op}-${JSON.stringify(filter.value)}`}
           filter={filter}
