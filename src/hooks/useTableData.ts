@@ -129,11 +129,11 @@ export const useTableData = ({
    */
   const cleanupCacheRef = useRef((cache: Map<string, number>) => {
     const now = Date.now();
-    for (const [key, timestamp] of cache.entries()) {
+    Array.from(cache.entries()).forEach(([key, timestamp]) => {
       if (now - timestamp > CACHE_EXPIRY_TIME) {
         cache.delete(key);
       }
-    }
+    });
   });
   
   /**
