@@ -536,7 +536,9 @@ export interface LogRowItemData {
   onLogRowMouseLeave?: () => void;
 }
 
-// NetworkTable props
+/**
+ * Network Panel Types
+ */
 export interface NetworkCall {
   id: string;
   url: string;
@@ -554,7 +556,7 @@ export interface NetworkCall {
   isError: boolean;
   request: {
     headers: Record<string, string>;
-    body?: any;
+    body?: string;
   };
   response: {
     headers: Record<string, string>;
@@ -589,7 +591,7 @@ export interface NetworkTableProps {
 
 export interface NetworkPanelProps {
   mergedTheme: ThemeClasses;
-  settings: ConvexPanelSettings;
+  settings?: ConvexPanelSettings;
   containerSize: { width: number; height: number };
 }
 
