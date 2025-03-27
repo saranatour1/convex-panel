@@ -1,5 +1,5 @@
 {
-  "name": "@robertalv/convex-panel",
+  "name": "convex-panel",
   "version": "0.2.7",
   "description": "A React component for monitoring and debugging Convex applications",
   "main": "dist/index.js",
@@ -92,7 +92,8 @@
     "url": "https://github.com/robertalv/convex-panel.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "bugs": {
     "url": "https://github.com/robertalv/convex-panel/issues"
