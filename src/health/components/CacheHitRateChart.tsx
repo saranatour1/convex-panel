@@ -173,7 +173,7 @@ const CacheHitRateChart: React.FC<CacheHitRateChartProps> = ({
           const timestamp = sortedTimestamps[transformedData.indexOf(dataPoint)];
           const value = timeValueMap.get(timestamp);
           if (value !== undefined) {
-            dataPoint.values[functionName] = value;
+            dataPoint.values[functionName] = typeof value === 'number' ? value : null;
           }
         });
       });
