@@ -4,7 +4,22 @@
 
 A development panel for Convex applications that provides real-time logs, data inspection, and more.
 
-![Convex Panel Data View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fconvex-panel1.png?alt=media&token=d4b6da5e-db91-4b94-9d7a-a716ebebdedf)
+![Convex Panel Data View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Flogs.png?alt=media&token=dd4bdff9-1e9a-41cc-a1da-aaae0f148517)
+
+## Performance Monitoring
+
+Monitor your function performance with detailed metrics and visualizations:
+
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0;">
+  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Flogs-details.png?alt=media&token=4f286cc1-0cfb-4e95-ad63-11b2b1d82c87" alt="Function Invocation Rate" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fhealth.png?alt=media&token=4d237dd8-65ab-44d3-ad47-09e7c765d16e" alt="Error Rate Monitoring" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fdata.png?alt=media&token=805a79b4-f2aa-44d5-a076-5423d79a0705" alt="Execution Time Analysis" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fdata-edit.png?alt=media&token=b2e7e686-7815-4f15-9265-b997adb7fe30" alt="Cache Hit Rate" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Ffunctions.png?alt=media&token=648a3a5f-154b-4435-8c52-7040f84f03dc" alt="Memory Usage" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Ffunctions-code.png?alt=media&token=b632836c-66ee-4152-b505-d4a27219aeb5" alt="System Latency" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+</div>
+
+
 
 ## Features
 
@@ -12,6 +27,10 @@ A development panel for Convex applications that provides real-time logs, data i
 - 📝 **Live Logs**: Monitor function calls, HTTP actions, and system events in real-time
 - 🔍 **Advanced Filtering**: Filter logs and data with query capabilities
 - 🔄 **Health Monitoring**: Track the health of your application with metrics for cache rates, scheduler health, database performance, and system latency
+- 📊 **Function Performance Monitoring**: Track invocation rates, error rates, execution times, and cache hit rates for your functions
+- 🔍 **Function Code Inspection**: View and analyze your function source code with syntax highlighting
+- 📈 **Performance Metrics Visualization**: See your function performance data with interactive charts and graphs
+- 🧪 **Function Testing**: Execute functions directly from the panel with custom inputs and view results
 - ✏️ **In-place Data Editing**: Directly edit your data values with double-click editing capability
 - 🎨 **Beautiful UI**: Sleek, developer-friendly interface that integrates with your app
 - 🔐 **Automatic Token Setup**: Automatically configures your Convex access token during installation
@@ -43,31 +62,62 @@ npx convex login
 
 ## Usage
 
-You can use the panel in two ways:
+### Next.js Setup (Recommended)
 
-1. **Automatic Token Setup** (Recommended):
-   The access token will be automatically loaded from your environment variables during installation.
+Create a provider component in your app (e.g., `app/providers.tsx`):
 
-2. **Manual Token Setup**:
-   If you prefer, you can manually provide the access token by running:
-   ```bash
-   cat ~/.convex/config.json
-   # or
-   more %USERPROFILE%\.convex\config.json
-   ```
-   And then using it in your component:
-   ```tsx
-   <ConvexPanel
-     accessToken="YOUR_ACCESS_TOKEN" // Required
-     deployKey={process.env.CONVEX_DEPLOYMENT} // Required
-     deployUrl={process.env.NEXT_PUBLIC_CONVEX_URL || REACT_APP_CONVEX_URL} // Optional
-     convex={convex}
-   />
-   ```
+```tsx
+"use client";
 
-Here's a complete example:
+import { ConvexReactClient } from "convex/react";
+import { ConvexAuthNextjsProvider } from "@convex-dev/auth/nextjs";
+import { ReactNode } from "react";
+import dynamic from 'next/dynamic';
+import type { ComponentProps } from 'react';
+
+import type ConvexPanelType from "convex-panel";
+
+// Use dynamic import to avoid SSR issues
+const ConvexPanel = dynamic<ComponentProps<typeof ConvexPanelType>>(() => import("convex-panel"), {
+  ssr: false
+});
+
+const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL! as string);
+
+export function ConvexClientProvider({ children }: { children: ReactNode }) {
+  return (
+    <ConvexAuthNextjsProvider client={convex}>
+      {children}
+      <ConvexPanel
+        accessToken={process.env.NEXT_PUBLIC_ACCESS_TOKEN!}
+        deployKey={process.env.NEXT_PUBLIC_DEPLOY_KEY!}
+      />
+    </ConvexAuthNextjsProvider>
+  )
+}
+```
+
+
+Make sure to set these environment variables in your `.env.local`:
+```bash
+NEXT_PUBLIC_CONVEX_URL="your_convex_url"
+NEXT_PUBLIC_ACCESS_TOKEN="your_access_token"
+NEXT_PUBLIC_DEPLOY_KEY="your_deploy_key"
+```
+
+To get your access token you can run
+
+```bash
+cat ~/.convex/config.json
+# or
+more %USERPROFILE%\.convex\config.json
+```
+
 > **Warning**: This component must be placed inside a `ConvexProvider` or `ConvexReactProvider` component.
 
+### React Setup (Alternative)
+
+For non-Next.js React applications, you can use the panel directly:
 
 ```tsx
 import { ConvexPanel } from 'convex-panel';
