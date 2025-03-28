@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LogEntry } from '../types';
-import { DEVTOOL_TABS, DevToolsTabTypes, LogType, STORAGE_KEYS, TabTypes } from '../utils/constants';
-import { ConvexPanelSettings } from '../settings/SettingsModal';
-import { ThemeClasses } from '../types';
+import { DEVTOOL_TABS, DevToolsTabTypes, STORAGE_KEYS, TabTypes } from '../utils/constants';
+import { ThemeClasses, ConvexPanelSettings } from '../types';
 import { JsonView } from './JsonView';
 import { ChevronDownIcon } from '../components/icons';
 import { CONSOLE_FILTER_TYPES } from '../utils/constants';

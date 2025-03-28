@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PlayIcon, ClipboardIcon } from '../components/icons';
+import { ClipboardIcon } from '../components/icons';
 import { ModuleFunction } from '../types';
 import { PerformanceGraphs } from './PerformanceGraphs';
 import { useFunctionsState } from './FunctionsProvider';

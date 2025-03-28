@@ -1,4 +1,4 @@
-import { ArrowPathIcon, MagnifyingGlassIcon, PanelCollapseIcon, PanelExpandIcon } from '../components/icons';
+import { ArrowPathIcon, PanelExpandIcon } from '../components/icons';
 import { FileTree } from './FileTree';
 import { useFunctionsState } from './FunctionsProvider';
 

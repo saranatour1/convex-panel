@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState, useRef } from 'react';
 import { PlayCircleIcon, PauseCircleIcon } from 'lucide-react';
 import { LogType } from '../../utils/constants';
-import { ConvexPanelSettings } from '../../settings/SettingsModal';
+import { ConvexPanelSettings } from '../../types';
 import { getStorageItem, setStorageItem } from '../../utils/storage';
 import { defaultSettings, STORAGE_KEYS } from '../../utils/constants';
 import { LogsToolbarProps } from '../../types';

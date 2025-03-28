@@ -1,4 +1,4 @@
-import { memo, useRef, useState, useEffect } from 'react';
+import { memo, useRef, useState } from 'react';
 import { InfoIcon } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { LogRowProps } from '../../types';

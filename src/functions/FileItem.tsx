@@ -1,4 +1,3 @@
-import React from 'react';
 import { CodeBracketIcon } from '../components/icons';
 import { File } from '../types';
 import { useFunctionsState } from './FunctionsProvider';

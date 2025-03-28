@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { DataTableContentProps, FilterClause, SortConfig, SortDirection, TableDocument } from '../../types';
 import FilterMenu from './FilterMenu';
 import { SortIcon, FilterIcon } from '../../components/icons';
+import ContextMenu from './ContextMenu';
+import { deleteDocuments } from '../../utils/functions';
 
 const FilterIconWithState = ({ isActive }: { isActive: boolean }) => {
   return (
@@ -142,7 +145,20 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
    * Called when a column header is clicked for sorting.
    * @param field The field to sort by
    */
-  onSort
+  onSort,
+
+  /**
+   * The admin client instance.
+   * Used to delete documents.
+   */
+  adminClient,
+
+  /**
+   * Callback function to update the documents array.
+   * Called when a document is updated.
+   * @param newDocs The new documents array
+   */
+  setDocuments
 }) => {
   const tableRef = useRef<HTMLTableElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -153,6 +169,14 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
   const [editValue, setEditValue] = useState<string>('');
   const [updatingCells, setUpdatingCells] = useState<{[key: string]: boolean}>({});
   
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    position: { x: number; y: number };
+    doc: TableDocument;
+    field: string;
+    value: any;
+  } | null>(null);
+
   /**
    * Focus the input element when editing starts
    */
@@ -308,9 +332,128 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
     }
   }, [observerTarget]);
 
+  // Handle right click on cell
+  const handleCellContextMenu = (e: React.MouseEvent, doc: TableDocument, field: string) => {
+    e.preventDefault();
+    setContextMenu({
+      position: { x: e.clientX, y: e.clientY },
+      doc,
+      field,
+      value: doc[field]
+    });
+  };
+
+  // Handle context menu close
+  const handleContextMenuClose = () => {
+    setContextMenu(null);
+  };
+
+  // Handle context menu view action
+  const handleContextMenuView = (doc: TableDocument, field: string) => {
+    setSelectedDocument(doc);
+    handleContextMenuClose();
+  };
+
+  // Handle context menu edit action
+  const handleContextMenuEdit = (doc: TableDocument, field: string) => {
+    if (field === '_id') {
+      // If editing the whole document, open detail panel and set it to edit mode
+      setSelectedDocument({...doc, _initialEditMode: true});
+    } else {
+      // For individual fields, use inline editing
+      handleCellDoubleClick(doc, field);
+    }
+    handleContextMenuClose();
+  };
+
+  // Handle context menu filter action
+  const handleContextMenuFilter = (field: string, filterConfig: { op: string; value: any }) => {
+    if (handleFilterApply) {
+      // Convert operation type to match FilterClause operation type
+      const opMap: { [key: string]: any } = {
+        'eq': 'eq',
+        'neq': 'neq',
+        'gt': 'gt',
+        'lt': 'lt',
+        'gte': 'gte',
+        'lte': 'lte',
+        'type': 'isType',
+        'notype': 'isNotType'
+      };
+
+      handleFilterApply({
+        field,
+        op: opMap[filterConfig.op] || 'eq',
+        value: filterConfig.value,
+        enabled: true
+      });
+    }
+    handleContextMenuClose();
+  };
+
+  // Handle document deletion
+  const handleDocumentDelete = async (doc: TableDocument) => {
+    try {
+      if (!doc._id || !tableName || !adminClient) {
+        console.error('Missing required data for deletion:', { docId: doc._id, tableName, hasAdminClient: !!adminClient });
+        return false;
+      }
+
+      const resp = await deleteDocuments(
+        tableName,
+        [doc._id],
+        adminClient,
+        null // componentId is optional
+      );
+
+      if (!resp?.success) {
+        console.error("Failed to delete document:", resp?.error);
+        return false;
+      }
+
+      // Only update local state after successful backend deletion
+      setDocuments((prevDocs: TableDocument[]) => 
+        prevDocs.filter(d => d._id !== doc._id)
+      );
+      
+      // Clear selected document if it was the deleted one
+      if (selectedDocument && selectedDocument._id === doc._id) {
+        setSelectedDocument(null);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error handling document deletion:', error);
+      return false;
+    }
+  };
+
   return (
     <>
       <div className="convex-panel-table-wrapper">
+        {/* Context Menu */}
+        {contextMenu && createPortal(
+          <ContextMenu
+            position={contextMenu.position}
+            onClose={handleContextMenuClose}
+            doc={contextMenu.doc}
+            field={contextMenu.field}
+            value={contextMenu.value}
+            onView={handleContextMenuView}
+            onEdit={handleContextMenuEdit}
+            onFilter={handleContextMenuFilter}
+            onDelete={handleDocumentDelete}
+            theme={{
+              menuContainer: {
+                zIndex: 3151422524
+              }
+            }}
+            tableName={tableName || ''}
+            adminClient={adminClient}
+          />,
+          document.body
+        )}
+
         {isLoading && documents.length === 0 ? (
           <div className="convex-panel-table-footer">
             <p className="convex-panel-loading-message">Loading data...</p>
@@ -427,6 +570,7 @@ const DataTableContent: React.FC<DataTableContentProps> = ({
                               e.stopPropagation(); // Prevent row selection on double click
                               handleCellDoubleClick(doc, header);
                             }}
+                            onContextMenu={(e) => handleCellContextMenu(e, doc, header)}
                           >
                             {isEditing ? (
                               <input

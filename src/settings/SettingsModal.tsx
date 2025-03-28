@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getStorageItem, setStorageItem } from '../utils/storage';
 import { XIcon } from '../components/icons';
+import { ConvexPanelSettings } from '../types';
 
 // Define storage keys for settings
 const SETTINGS_STORAGE_KEY = 'convex-panel:settings';
@@ -15,17 +16,6 @@ const defaultSettings = {
   showLimitInput: true,
   showSuccessCheckbox: true,
 };
-
-// Settings type
-export interface ConvexPanelSettings {
-  showDebugFilters: boolean;
-  showStorageDebug: boolean;
-  logLevel: 'debug' | 'info' | 'warn' | 'error';
-  healthCheckInterval: number;
-  showRequestIdInput: boolean;
-  showLimitInput: boolean;
-  showSuccessCheckbox: boolean;
-}
 
 interface SettingsModalProps {
   isOpen: boolean;

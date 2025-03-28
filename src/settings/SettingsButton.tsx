@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import SettingsModal, { ConvexPanelSettings } from './SettingsModal';
+import SettingsModal from './SettingsModal';
 import { SettingsIcon } from '../components/icons';
+import { ConvexPanelSettings } from '../types';
 
 interface SettingsButtonProps {
   onSettingsChange: (settings: ConvexPanelSettings) => void;

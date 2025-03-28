@@ -98,7 +98,7 @@ const ConvexPanel = ({
    * Convex React client instance.
    * Required for making API calls to your Convex backend.
    * Must be initialized and configured before passing.
-   * @required
+   * @optional
    */
   convex,
 
@@ -114,7 +114,7 @@ const ConvexPanel = ({
    * Optional deploy key for admin-level access.
    * Enables additional admin capabilities when provided.
    * Should be kept secure and only used in protected environments.
-   * @optional
+   * @required
    */
   deployKey,
 

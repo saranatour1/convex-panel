@@ -11,7 +11,6 @@ import {
 import { useFunctionsState } from './FunctionsProvider';
 import { 
   fetchPerformanceCacheHitRate, 
-  fetchPerformanceFailureRate, 
   fetchPerformanceInvocationRate,
   fetchPerformanceExecutionTime,
 } from '../utils/api';

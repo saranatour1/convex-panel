@@ -1,4 +1,3 @@
-import { useQuery } from "convex/react";
 import { Value } from "convex/values";
 import { useRouter } from "next/router";
 import { useMemo } from "react";

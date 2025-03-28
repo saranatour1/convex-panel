@@ -108,7 +108,7 @@ export const ROUTES = {
   NPM_CONVEX: 'https://registry.npmjs.org/convex/latest',
   CONVEX_CHANGELOG: 'https://github.com/get-convex/convex-js/blob/main/CHANGELOG.md',
   UDF_RATE: '/api/app_metrics/udf_rate',
-  LATENCY_PERCENTILES: '/api/app_metrics/latency_percentiles'
+  LATENCY_PERCENTILES: '/api/app_metrics/latency_percentiles',
 } as const;
 
 // Filter types

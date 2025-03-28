@@ -19,19 +19,20 @@ A development panel for Convex applications that provides real-time logs, data i
 - ✏️ **In-place Data Editing**: Directly edit your data values with double-click editing capability
 - 🎨 **Beautiful UI**: Sleek, developer-friendly interface that integrates with your app
 - 🔐 **Automatic Token Setup**: Automatically configures your Convex access token during installation
+- 💾 **State Persistence**: Automatically saves panel position, size, and preferences
 
 ![Convex Panel Logs View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2F683_1x_shots_so.png?alt=media&token=55f531d4-4fc9-4bc3-af9f-b1d4e01487dd)
 
 ## Installation
 
 ```bash
-bun add convex-panel
+bun add convex-panel --dev
 # or
-npm install convex-panel
+npm install convex-panel --save-dev
 # or
-yarn add convex-panel
+yarn add convex-panel --dev
 # or
-pnpm add convex-panel
+pnpm add convex-panel --save-dev
 ```
 
 During installation, the package will automatically:
@@ -43,6 +44,29 @@ During installation, the package will automatically:
 The package will guide you through the login process if needed. You can also manually log in at any time by running:
 ```bash
 npx convex login
+```
+
+## Environment Setup
+
+Create a `.env.local` file in your project root with the following variables:
+
+```bash
+# Nextjs
+NEXT_PUBLIC_CONVEX_URL="your_convex_url"
+NEXT_PUBLIC_ACCESS_TOKEN="your_access_token"
+NEXT_PUBLIC_DEPLOY_KEY="your_deploy_key"
+
+# React
+REACT_APP_CONVEX_URL="your_convex_url"
+REACT_APP_ACCESS_TOKEN="your_access_token"
+REACT_APP_DEPLOY_KEY="your_deploy_key"
+```
+
+To get your access token, run:
+```bash
+cat ~/.convex/config.json  # On Unix-based systems
+# or
+more %USERPROFILE%\.convex\config.json  # On Windows
 ```
 
 ## Usage
@@ -82,42 +106,23 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
 }
 ```
 
-
-Make sure to set these environment variables in your `.env.local`:
-```bash
-NEXT_PUBLIC_CONVEX_URL="your_convex_url"
-NEXT_PUBLIC_ACCESS_TOKEN="your_access_token"
-NEXT_PUBLIC_DEPLOY_KEY="your_deploy_key"
-```
-
-To get your access token you can run
-
-```bash
-cat ~/.convex/config.json
-# or
-more %USERPROFILE%\.convex\config.json
-```
-
-> **Warning**: This component must be placed inside a `ConvexProvider` or `ConvexReactProvider` component.
-
 ### React Setup (Alternative)
 
-For non-Next.js React applications, you can use the panel directly:
+For non-Next.js React applications:
 
 ```tsx
 import { ConvexPanel } from 'convex-panel';
 import { ConvexReactClient } from "convex/react";
 
 export default function YourComponent() {
-  const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL);
+  const convex = new ConvexReactClient(process.env.REACT_APP_CONVEX_URL);
 
   return (
     <>
       {/* Your app content */}
       <ConvexPanel
-        accessToken="YOUR_ACCESS_TOKEN"
-        deployUrl={process.env.CONVEX_DEPLOYMENT}
-        convex={convex}
+        accessToken={REACT_APP_ACCESS_TOKEN}
+        deployUrl={process.env.REACT_APP_CONVEX_DEPLOYMENT}
       />
     </>
   );
@@ -126,23 +131,87 @@ export default function YourComponent() {
 
 ## Configuration
 
-The Convex Panel accepts the following props:
+### Required Props
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `accessToken` | string | Yes | Your Convex access token (from `convex config`) |
-| `deployKey` | string | No | Your Convex deployment key for admin-level access |
-| `deployUrl` | string | No | Your Convex deployment URL (or use NEXT_PUBLIC_CONVEX_URL env var) |
-| `convex` | ConvexReactClient | Yes | Convex client instance |
-| `theme` | ThemeClasses | No | Custom theme options |
-| `initialLimit` | number | No | Initial log limit (default: 100) |
-| `initialShowSuccess` | boolean | No | Initially show success logs (default: true) |
-| `initialLogType` | LogType | No | Initial log type filter (default: ALL) |
-| `maxStoredLogs` | number | No | Maximum number of logs to store (default: 500) |
-| `onLogFetch` | (logs: LogEntry[]) => void | No | Callback function when logs are fetched |
-| `onError` | (error: string) => void | No | Callback function when an error occurs |
-| `buttonPosition` | 'bottom-left' \| 'bottom-center' \| 'bottom-right' \| 'right-center' \| 'top-right' | No | Position of the ConvexPanel button (default: 'bottom-right') |
-| `useMockData` | boolean | No | Whether to use mock data instead of real API data (default: false) |
+| Prop | Type | Description |
+|------|------|-------------|
+| `deployKey` | string | undefined | Convex deployment key for admin-level access. Enables additional admin capabilities. |
+| `accessToken` | string | Your Convex access token (from `~/.convex/config.json`). Required for API access. |
+
+### Optional Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `convex` | ConvexReactClient | Initialized Convex client instance for API communication. |
+| `deployUrl` | string | process.env.NEXT_PUBLIC_CONVEX_URL | Your Convex deployment URL. |
+| `theme` | ThemeClasses | {} | Custom theme options (see Theme Customization below). |
+| `initialLimit` | number | 100 | Initial number of logs to fetch and display. |
+| `initialShowSuccess` | boolean | true | Whether to show success logs in the initial view. |
+| `initialLogType` | LogType | 'ALL' | Initial log type filter. Options: 'ALL', 'SUCCESS', 'FAILURE', 'DEBUG', 'LOGINFO', 'WARNING', 'ERROR', 'HTTP' |
+| `maxStoredLogs` | number | 500 | Maximum number of logs to store in memory. |
+| `onLogFetch` | (logs: LogEntry[]) => void | undefined | Callback when logs are fetched. |
+| `onError` | (error: string) => void | undefined | Callback when an error occurs. |
+| `buttonPosition` | ButtonPosition | 'bottom-right' | Position of the panel button. Options: 'bottom-left', 'bottom-center', 'bottom-right', 'right-center', 'top-right' |
+| `useMockData` | boolean | false | Use mock data instead of real API data. |
+
+### Theme Customization
+
+The `theme` prop accepts a `ThemeClasses` object with the following structure:
+
+```typescript
+interface ThemeClasses {
+  colors?: {
+    primary?: string;
+    secondary?: string;
+    background?: string;
+    text?: string;
+    // ... other color options
+  };
+  spacing?: {
+    padding?: string;
+    margin?: string;
+    // ... other spacing options
+  };
+  components?: {
+    button?: {
+      backgroundColor?: string;
+      color?: string;
+      // ... other button styles
+    };
+    // ... other component styles
+  };
+}
+```
+
+Example theme usage:
+
+```tsx
+<ConvexPanel
+  theme={{
+    colors: {
+      primary: '#6366f1',
+      background: '#1f2937'
+    },
+    components: {
+      button: {
+        backgroundColor: '#4f46e5'
+      }
+    }
+  }}
+  // ... other props
+/>
+```
+
+### State Persistence
+
+The panel automatically persists several settings in localStorage:
+- Panel position on screen
+- Panel size (width/height)
+- Active tab selection
+- Log filter preferences
+- Table view configurations
+
+These settings are restored when the panel is reopened.
 
 ## Features Documentation
 
@@ -157,27 +226,55 @@ The health dashboard provides real-time insights into your Convex application's 
 
 ### Data Editing
 
-Convex Panel now supports in-place editing of table data:
+The panel supports in-place editing of table data:
 
 - **Double-click Editing**: Simply double-click on any editable cell to modify its value
 - **Smart Value Parsing**: Automatically converts edited values to the appropriate type (number, boolean, array, object)
 - **Real-time Updates**: Changes are immediately reflected in your Convex database
+- **Validation**: Basic type checking and format validation for edited values
+
+### Log Management
+
+Advanced log filtering and management capabilities:
+
+- **Type Filtering**: Filter by log types (SUCCESS, FAILURE, DEBUG, etc.)
+- **Search**: Full-text search across log messages
+- **Time Range**: Filter logs by time period
+- **Export**: Download logs in JSON format
+- **Auto-refresh**: Real-time log updates
+- **Memory Management**: Automatic cleanup of old logs based on `maxStoredLogs`
 
 ## Troubleshooting
 
 ### Common Errors
 
 1. **"Convex authentication required"**:
-   - Make sure you've provided a valid access token via the `accessToken` prop
-   - Get your access token by running `cat ~/.convex/config.json` or `more %USERPROFILE%\.convex\config.json`
+   - Ensure valid `accessToken` is provided
+   - Check `.env.local` file configuration
+   - Verify Convex login status
 
 2. **No logs appearing**:
-   - Verify that your `deployKey` prop or `CONVEX_DEPLOYMENT` environment variable is correctly set
-   - Check that you've passed the `convex` prop to the ConvexPanel component
-   - Verify that your access token is valid
+   - Verify `deployKey` and `CONVEX_DEPLOYMENT` settings
+   - Check `convex` prop initialization
+   - Confirm access token validity
+   - Check network connectivity
 
 3. **Build warnings about "use client" directive**:
-   - If you see warnings like `Module level directives cause errors when bundled, "use client" in "src/data/components/FilterMenu.tsx" was ignored`, this is expected and won't affect functionality. The package is designed to work in both client and server environments.
+   - Expected behavior for client components
+   - Won't affect functionality
+   - Use dynamic import as shown in setup examples
+
+4. **Panel not appearing**:
+   - Ensure component is mounted inside ConvexProvider
+   - Check z-index conflicts
+   - Verify styles are properly injected
+
+### Performance Optimization
+
+- Adjust `initialLimit` based on your needs
+- Set appropriate `maxStoredLogs` to prevent memory issues
+- Use `useMockData` for development/testing
+- Consider lazy loading for large datasets
 
 ## Development
 
@@ -186,15 +283,32 @@ To contribute to this package:
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Start the development server: `npm run dev`
+4. Run tests: `npm test`
+
+### Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test suite
+npm test -- --grep "feature-name"
+
+# Run tests in watch mode
+npm test -- --watch
+```
 
 ## Publishing Updates
 
-To publish a new version of the package:
+To publish a new version:
 
-1. Update the version in `package.json`
-2. Run `npm run build` to build the package
-3. Commit your changes and push to GitHub
-4. Run `npm publish` to publish to npm
+1. Update version in `package.json`
+2. Run tests: `npm test`
+3. Build the package: `npm run build`
+4. Commit changes
+5. Create a git tag: `git tag v1.x.x`
+6. Push changes and tags: `git push && git push --tags`
+7. Publish: `npm publish`
 
 ## License
 

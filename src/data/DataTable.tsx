@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import { FilterClause, DataTableProps, RecentlyViewedTable, TableDocument, SortConfig, SortDirection } from '../types';
+import { FilterClause, DataTableProps, RecentlyViewedTable, TableDocument, SortDirection } from '../types';
 import { useTableData } from '../hooks/useTableData';
 import { useFilters } from '../hooks/useFilters';
 import { 
@@ -378,6 +378,7 @@ const DataTable: React.FC<DataTableProps> = ({
           {selectedTable && (
             <DataTableContent
               documents={documents}
+              setDocuments={setDocuments}
               columnHeaders={columnHeaders}
               isLoading={isLoading}
               hasMore={hasMore}
@@ -396,7 +397,8 @@ const DataTable: React.FC<DataTableProps> = ({
               setSelectedDocument={setSelectedDocument}
               sortConfig={sortConfig}
               onSort={handleSort}
-            />
+              adminClient={adminClient}
+              />
           )}
         </div>
         

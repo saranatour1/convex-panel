@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { DataTableSidebarProps, RecentlyViewedTable } from '../../types';
 import { STORAGE_KEYS } from '../../utils/constants';
 import { ChevronDownIcon, ChevronRightIcon, PanelCollapseIcon, PanelExpandIcon } from '../../components/icons';
+import Tooltip from './Tooltip';
 
 const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
   /**
@@ -132,21 +133,23 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
       </div>
       
       <div className="convex-panel-sidebar-content">
-        {!isSidebarCollapsed && sortedRecentlyViewed.length > 0 && (
+        {sortedRecentlyViewed.length > 0 && (
           <div className="convex-panel-sidebar-recent-container">
-            <div 
-              className="convex-panel-sidebar-section-header"
-              onClick={() => setIsRecentCollapsed(!isRecentCollapsed)}
-              style={{ cursor: 'pointer' }}
-            >
-              <div className="convex-panel-sidebar-section-title">
-                <span className="section-collapse-icon">
-                  {isRecentCollapsed ? <ChevronRightIcon /> : <ChevronDownIcon />}
-                </span>
-                Recently Viewed
+            {!isSidebarCollapsed && (
+              <div 
+                className="convex-panel-sidebar-section-header"
+                onClick={() => setIsRecentCollapsed(!isRecentCollapsed)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="convex-panel-sidebar-section-title">
+                  <span className="section-collapse-icon">
+                    {isRecentCollapsed ? <ChevronRightIcon /> : <ChevronDownIcon />}
+                  </span>
+                  Recently Viewed
+                </div>
               </div>
-            </div>
-            {!isRecentCollapsed && (
+            )}
+            {(!isSidebarCollapsed && !isRecentCollapsed) && (
               <>
                 {sortedRecentlyViewed.map(table => (
                   <button
@@ -159,6 +162,26 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
                   >
                     {table.name}
                   </button>
+                ))}
+                <div className="convex-panel-sidebar-divider"></div>
+              </>
+            )}
+            {isSidebarCollapsed && (
+              <>
+                {sortedRecentlyViewed.map(table => (
+                  <Tooltip 
+                    key={`recent-${table.name}`} 
+                    content={`${table.name} (viewed ${new Date(table.timestamp).toLocaleString()})`}
+                  >
+                    <button
+                      className={`convex-panel-sidebar-table-button ${
+                        selectedTable === table.name ? 'convex-panel-sidebar-table-selected' : 'convex-panel-sidebar-table-unselected'
+                      } convex-panel-sidebar-table-collapsed`}
+                      onClick={() => onTableSelect(table.name)}
+                    >
+                      {table.name.charAt(0).toUpperCase()}
+                    </button>
+                  </Tooltip>
                 ))}
                 <div className="convex-panel-sidebar-divider"></div>
               </>
@@ -183,17 +206,29 @@ const DataTableSidebar: React.FC<DataTableSidebarProps> = ({
           </div>
         )}
         
-        {!isSidebarCollapsed && !isAllTablesCollapsed && filteredTables.sort().map(tableName => (
-          <button
-            key={tableName}
-            className={`convex-panel-sidebar-table-button ${
-              selectedTable === tableName ? 'convex-panel-sidebar-table-selected' : 'convex-panel-sidebar-table-unselected'
-            } ${isSidebarCollapsed ? 'convex-panel-sidebar-table-collapsed' : ''}`}
-            onClick={() => onTableSelect(tableName)}
-            title={tableName}
-          >
-            {isSidebarCollapsed ? tableName.charAt(0).toUpperCase() : tableName}
-          </button>
+        {(!isSidebarCollapsed ? !isAllTablesCollapsed : true) && filteredTables.sort().map(tableName => (
+          isSidebarCollapsed ? (
+            <Tooltip key={tableName} content={tableName}>
+              <button
+                className={`convex-panel-sidebar-table-button ${
+                  selectedTable === tableName ? 'convex-panel-sidebar-table-selected' : 'convex-panel-sidebar-table-unselected'
+                } convex-panel-sidebar-table-collapsed`}
+                onClick={() => onTableSelect(tableName)}
+              >
+                {tableName.charAt(0).toUpperCase()}
+              </button>
+            </Tooltip>
+          ) : (
+            <button
+              key={tableName}
+              className={`convex-panel-sidebar-table-button ${
+                selectedTable === tableName ? 'convex-panel-sidebar-table-selected' : 'convex-panel-sidebar-table-unselected'
+              }`}
+              onClick={() => onTableSelect(tableName)}
+            >
+              {tableName}
+            </button>
+          )
         ))}
       </div>
     </div>

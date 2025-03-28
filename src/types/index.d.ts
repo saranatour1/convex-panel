@@ -76,7 +76,7 @@ export type ButtonProps = {
   theme?: ThemeClasses | undefined;
   maxStoredLogs?: number;
   convex?: ConvexReactClient;
-  deployKey?: string;
+  deployKey: string;
   accessToken: string;
   deployUrl?: string;
   buttonPosition?: ButtonPosition;
@@ -251,6 +251,7 @@ export interface TableDefinition {
 export interface TableDocument {
   _id: string;
   [key: string]: any;
+  _initialEditMode?: boolean;
 }
 
 // Page Args Props
@@ -341,6 +342,16 @@ export interface DataTableSidebarProps {
   recentlyViewedTables?: RecentlyViewedTable[];
 }
 
+export interface ConvexPanelSettings {
+  showDebugFilters: boolean;
+  showStorageDebug: boolean;
+  logLevel: 'debug' | 'info' | 'warn' | 'error';
+  healthCheckInterval: number;
+  showRequestIdInput: boolean;
+  showLimitInput: boolean;
+  showSuccessCheckbox: boolean;
+}
+
 // Data Table Content Props
 export interface DataTableContentProps {
   documents: TableDocument[];
@@ -362,6 +373,12 @@ export interface DataTableContentProps {
   setSelectedDocument: (doc: TableDocument | null) => void;
   sortConfig?: SortConfig | null;
   onSort?: (field: string) => void;
+  adminClient?: ConvexClient | null;
+  /**
+   * Callback function to update the documents array.
+   * Called when a document is updated or deleted.
+   */
+  setDocuments: React.Dispatch<React.SetStateAction<TableDocument[]>>;
 }
 
 // Storage Debug Props
@@ -659,6 +676,20 @@ export interface Folder {
 }
 
 export type FileOrFolder = File | Folder; 
+
+export type FilterOperation = 
+  | 'equals' 
+  | 'not_equals' 
+  | 'contains' 
+  | 'not_contains' 
+  | 'starts_with' 
+  | 'ends_with' 
+  | 'greater_than' 
+  | 'less_than' 
+  | 'greater_than_equal' 
+  | 'less_than_equal' 
+  | 'is_empty' 
+  | 'is_not_empty';
 
 export const editorOptions: EditorProps["options"] &
   DiffEditorProps["options"] = {

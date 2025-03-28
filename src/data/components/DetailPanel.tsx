@@ -12,6 +12,7 @@ interface DetailPanelProps {
   formatValue: (value: any, fieldName?: string) => string;
   onUpdateDocument?: (params: { table: string, ids: string[], fields: Record<string, any> }) => Promise<void>;
   onDeleteDocument?: (params: { table: string, ids: string[] }) => Promise<void>;
+  selectedRows?: Set<string>;
 }
 
 interface DocumentEditorProps {
@@ -120,7 +121,12 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({
         <div className="convex-panel-detail-dropdown dropdown-content" style={{
           backgroundColor: '#333',
           border: 'none',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
+          color: '#E1E1E1',
+          borderRadius: '6px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
+          zIndex: 2147483647,
+          fontSize: '13px',
+          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
         }}>
           {hasUpdatePermission && (
             <div 
@@ -133,18 +139,21 @@ const HeaderMenu: React.FC<HeaderMenuProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                padding: '4px',
                 cursor: 'pointer',
                 borderRadius: '4px',
                 margin: '4px',
-                backgroundColor: hoverItem === 'edit' ? '#444' : 'transparent'
+                backgroundColor: hoverItem === 'edit' ? '#444' : 'transparent',
+                padding: '6px 12px',
+                fontSize: '13px',
+                color: '#E1E1E1',
+                position: 'relative',
               }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M11 4H4V20H20V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M18 2L22 6L12 16H8V12L18 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span>Edit as JSON</span>
+              <span>Edit Document</span>
             </div>
           )}
           
@@ -205,7 +214,8 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
   onClose,
   formatValue,
   onUpdateDocument,
-  onDeleteDocument
+  onDeleteDocument,
+  selectedRows = new Set()
 }) => {
   if (!document) return null;
 
@@ -264,11 +274,26 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
   
   // Get the document title from name, title or _id
   const documentTitle = document.name || document.title || document._id || 'Document Details';
+  const selectionCount = selectedRows.size;
+  const selectionTitle = selectionCount > 1 ? `${selectionCount} Documents Selected` : documentTitle;
+  
+  // Check for initial edit mode
+  useEffect(() => {
+    if (document._initialEditMode) {
+      // Remove the flag and start editing
+      delete document._initialEditMode;
+      setIsEditingFullDocument(true);
+    }
+  }, [document]);
   
   // Initialize full document JSON when editing mode is activated
   useEffect(() => {
     if (isEditingFullDocument) {
-      setFullDocumentValue(JSON.stringify(document, null, 2));
+      // Create a new object without underscore fields
+      const filteredDoc = Object.fromEntries(
+        Object.entries(document).filter(([key]) => !key.startsWith('_'))
+      );
+      setFullDocumentValue(JSON.stringify(filteredDoc, null, 2));
     }
   }, [isEditingFullDocument, document]);
   
@@ -350,21 +375,20 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
   };
   
   // Handle saving edited value
-  const handleSave = async () => {
-    if (!editingField || !onUpdateDocument) return;
+  const handleUpdateDocument = async (field: string, value: any) => {
+    if (!onUpdateDocument || !document._id) return;
     
     setIsSaving(true);
-    
     try {
       // Find the original value to determine its type
-      const originalValue = document[editingField];
-      const parsedValue = parseFieldValue(editValue, originalValue);
+      const originalValue = document[field];
+      const parsedValue = parseFieldValue(value, originalValue);
       
       // Call the API to update the document
       await onUpdateDocument({
         table: tableName,
-        ids: [document._id],
-        fields: { [editingField]: parsedValue }
+        ids: Array.from(selectedRows.size > 0 ? selectedRows : [document._id]),
+        fields: { [field]: parsedValue }
       });
       
       // Clear editing state after successful update
@@ -387,12 +411,12 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
       // Parse the JSON string to an object
       const updatedDoc = JSON.parse(fullDocumentValue);
       
-      // Extract only the fields that have changed
+      // Extract only the fields that have changed, excluding fields starting with _
       const changedFields: Record<string, any> = {};
       
       Object.keys(updatedDoc).forEach(key => {
-        // Skip _id field (can't be updated)
-        if (key === '_id') return;
+        // Skip fields starting with _
+        if (key.startsWith('_')) return;
         
         // Only include changed fields
         if (JSON.stringify(updatedDoc[key]) !== JSON.stringify(document[key])) {
@@ -404,7 +428,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
         // Call the API to update the document
         await onUpdateDocument({
           table: tableName,
-          ids: [document._id],
+          ids: Array.from(selectedRows.size > 0 ? selectedRows : [document._id]),
           fields: changedFields
         });
       }
@@ -421,27 +445,18 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
   };
   
   // Handle deleting the document
-  const handleDelete = async () => {
-    if (!onDeleteDocument) return;
-    
-    if (!deleteConfirmationActive) {
-      setDeleteConfirmationActive(true);
-      return;
-    }
-    
+  const handleDeleteDocument = async () => {
+    if (!onDeleteDocument || !document._id) return;
+
     setIsDeleting(true);
-    
     try {
       await onDeleteDocument({
         table: tableName,
-        ids: [document._id]
+        ids: Array.from(selectedRows.size > 0 ? selectedRows : [document._id])
       });
-      
-      // Close the panel after successful deletion
       onClose();
     } catch (error) {
       console.error('Failed to delete document:', error);
-      setDeleteConfirmationActive(false);
       setIsDeleting(false);
     }
   };
@@ -465,7 +480,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
   const handleInputKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleSave();
+      handleUpdateDocument(editingField!, editValue);
     } else if (e.key === 'Escape') {
       e.preventDefault();
       handleCancel();
@@ -532,7 +547,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
             </div>
             <div 
               className="convex-panel-live-button" 
-              onClick={handleSave}
+              onClick={() => handleUpdateDocument(field, editValue)}
               style={{ cursor: isSaving ? 'default' : 'pointer' }}
             >
               {isSaving ? 'Saving...' : 'Save'}
@@ -600,7 +615,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
           ) : (
             <span className="convex-panel-copy-icon">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 3H4V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 3H4V20H20V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M8 7H20V20H8V7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </span>
@@ -666,7 +681,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
         onMouseDown={initResize}
       />
       <div className="convex-panel-detail-header">
-        <h3>{documentTitle}</h3>
+        <h3>{selectionTitle}</h3>
         
         <div className="convex-panel-detail-header-actions">
           {/* Use HeaderMenu component */}
@@ -678,7 +693,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
                 setIsDropdownOpen(false);
                 setIsEditingFullDocument(true);
               }}
-              onDelete={handleDelete}
+              onDelete={handleDeleteDocument}
               isDeleting={isDeleting}
               deleteConfirmationActive={deleteConfirmationActive}
               hasUpdatePermission={!!onUpdateDocument}

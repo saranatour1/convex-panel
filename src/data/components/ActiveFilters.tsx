@@ -67,9 +67,9 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = memo(({
 
   return (
     <div className="convex-panel-active-filters">
-      {filters.clauses.map((filter: FilterClause) => (
+      {filters.clauses.map((filter: FilterClause, index: number) => (
         <FilterTag
-          key={`${filter.field}-${filter.op}-${JSON.stringify(filter.value)}`}
+          key={`${filter.field}-${filter.op}-${JSON.stringify(filter.value)}-${index}`}
           filter={filter}
           theme={theme}
           onRemove={onRemove}
