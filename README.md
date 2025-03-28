@@ -6,21 +6,6 @@ A development panel for Convex applications that provides real-time logs, data i
 
 ![Convex Panel Data View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Flogs.png?alt=media&token=dd4bdff9-1e9a-41cc-a1da-aaae0f148517)
 
-## Performance Monitoring
-
-Monitor your function performance with detailed metrics and visualizations:
-
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0;">
-  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Flogs-details.png?alt=media&token=4f286cc1-0cfb-4e95-ad63-11b2b1d82c87" alt="Function Invocation Rate" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fhealth.png?alt=media&token=4d237dd8-65ab-44d3-ad47-09e7c765d16e" alt="Error Rate Monitoring" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fdata.png?alt=media&token=805a79b4-f2aa-44d5-a076-5423d79a0705" alt="Execution Time Analysis" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fdata-edit.png?alt=media&token=b2e7e686-7815-4f15-9265-b997adb7fe30" alt="Cache Hit Rate" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Ffunctions.png?alt=media&token=648a3a5f-154b-4435-8c52-7040f84f03dc" alt="Memory Usage" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-  <img src="https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Ffunctions-code.png?alt=media&token=b632836c-66ee-4152-b505-d4a27219aeb5" alt="System Latency" style="width: 100%; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-</div>
-
-
-
 ## Features
 
 - 📊 **Real-time Data View**: Browse and filter your Convex tables with ease
@@ -35,7 +20,7 @@ Monitor your function performance with detailed metrics and visualizations:
 - 🎨 **Beautiful UI**: Sleek, developer-friendly interface that integrates with your app
 - 🔐 **Automatic Token Setup**: Automatically configures your Convex access token during installation
 
-![Convex Panel Logs View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2Fconvex-panel2.png?alt=media&token=685faba4-d9f8-4ca7-8112-2825cf3040ec)
+![Convex Panel Logs View](https://firebasestorage.googleapis.com/v0/b/relio-217bd.appspot.com/o/convex%2F683_1x_shots_so.png?alt=media&token=55f531d4-4fc9-4bc3-af9f-b1d4e01487dd)
 
 ## Installation
 
