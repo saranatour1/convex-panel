@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { TableDocument } from '../../types';
 import { deleteDocuments } from '../../utils/functions';
 import { ConvexClient } from 'convex/browser';
+import { useGlobalHotkeys, formatShortcut } from '../../hooks/useGlobalHotkeys';
 
 export interface ContextMenuProps {
   position: { x: number; y: number };
@@ -246,6 +247,30 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     };
   }, [onClose]);
 
+  // Copy handlers
+  const handleCopyValue = () => {
+    navigator.clipboard.writeText(typeof value === 'string' ? value : JSON.stringify(value));
+    onClose();
+  };
+
+  const handleCopyDocument = () => {
+    navigator.clipboard.writeText(JSON.stringify(doc, null, 2));
+    onClose();
+  };
+
+  // Setup global hotkeys
+  useGlobalHotkeys({
+    onView: onView,
+    onEdit: onEdit,
+    onCopy: handleCopyValue,
+    onViewDoc: (doc) => { onView(doc, '_id'); onClose(); },
+    onEditDoc: (doc) => { onEdit(doc, '_id'); onClose(); },
+    onCopyDoc: handleCopyDocument,
+    onClose,
+    currentDoc: doc,
+    currentField: field,
+  });
+
   const menuItemStyle: React.CSSProperties = {
     padding: '6px 12px',
     cursor: 'pointer',
@@ -302,7 +327,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
           ...menuItemStyle,
           backgroundColor: hoverItem === 'view' ? '#444' : 'transparent'
         }}
-        onClick={() => onView(doc, field)}
+        onClick={() => { onView(doc, field); onClose(); }}
         onMouseEnter={() => {
           setHoverItem('view');
           setShowFilterSubmenu(false);
@@ -311,7 +336,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
       >
         <span style={iconStyle}>⊡</span>
         View {field}
-        <span style={shortcutStyle}>Space</span>
+        <span style={shortcutStyle}>{formatShortcut('space')}</span>
       </div>
 
       {/* Copy option */}
@@ -320,10 +345,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
           ...menuItemStyle,
           backgroundColor: hoverItem === 'copy' ? '#444' : 'transparent'
         }}
-        onClick={() => {
-          navigator.clipboard.writeText(displayValue);
-          onClose();
-        }}
+        onClick={handleCopyValue}
         onMouseEnter={() => {
           setHoverItem('copy');
           setShowFilterSubmenu(false);
@@ -332,7 +354,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
       >
         <span style={iconStyle}>⎘</span>
         Copy {field}
-        <span style={shortcutStyle}>⌘C</span>
+        <span style={shortcutStyle}>{formatShortcut('meta+c')}</span>
       </div>
 
       {/* Edit option */}
@@ -342,7 +364,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
             ...menuItemStyle,
             backgroundColor: hoverItem === 'edit' ? '#444' : 'transparent'
           }}
-          onClick={() => onEdit(doc, field)}
+          onClick={() => { onEdit(doc, field); onClose(); }}
           onMouseEnter={() => {
             setHoverItem('edit');
             setShowFilterSubmenu(false);
@@ -351,7 +373,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
         >
           <span style={iconStyle}>✎</span>
           Edit {field}
-          <span style={shortcutStyle}>↵</span>
+          <span style={shortcutStyle}>{formatShortcut('return')}</span>
         </div>
       )}
 
@@ -422,7 +444,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
             ...menuItemStyle,
             backgroundColor: hoverItem === 'viewDoc' ? '#444' : 'transparent'
           }}
-          onClick={() => onView(doc, '_id')}
+          onClick={() => { onView(doc, '_id'); onClose(); }}
           onMouseEnter={() => {
             setHoverItem('viewDoc');
             setShowFilterSubmenu(false);
@@ -431,17 +453,14 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
         >
           <span style={iconStyle}>⊡</span>
           View Document
-          <span style={shortcutStyle}>⇧Space</span>
+          <span style={shortcutStyle}>{formatShortcut('shift+space')}</span>
         </div>
         <div 
           style={{
             ...menuItemStyle,
             backgroundColor: hoverItem === 'copyDoc' ? '#444' : 'transparent'
           }}
-          onClick={() => {
-            navigator.clipboard.writeText(JSON.stringify(doc, null, 2));
-            onClose();
-          }}
+          onClick={handleCopyDocument}
           onMouseEnter={() => {
             setHoverItem('copyDoc');
             setShowFilterSubmenu(false);
@@ -450,14 +469,14 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
         >
           <span style={iconStyle}>⎘</span>
           Copy Document
-          <span style={shortcutStyle}>⇧⌘C</span>
+          <span style={shortcutStyle}>{formatShortcut('shift+meta+c')}</span>
         </div>
         <div 
           style={{
             ...menuItemStyle,
             backgroundColor: hoverItem === 'editDoc' ? '#444' : 'transparent'
           }}
-          onClick={() => onEdit(doc, '_id')}
+          onClick={() => { onEdit(doc, '_id'); onClose(); }}
           onMouseEnter={() => {
             setHoverItem('editDoc');
             setShowFilterSubmenu(false);
@@ -466,7 +485,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
         >
           <span style={iconStyle}>✎</span>
           Edit Document
-          <span style={shortcutStyle}>⇧↵</span>
+          <span style={shortcutStyle}>{formatShortcut('shift+return')}</span>
         </div>
         <div 
           style={{
