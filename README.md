@@ -312,4 +312,26 @@ To publish a new version:
 
 ## License
 
-MIT 
+MIT
+
+## Using with Vite
+
+If you're using Vite, you'll need to configure it to properly handle Monaco Editor. The package provides a pre-configured Vite configuration that you can extend:
+
+1. First, install the required Vite plugin:
+```bash
+npm install vite-plugin-monaco-editor --save-dev
+```
+
+2. In your `vite.config.js`, import and use the provided configuration:
+```javascript
+import { defineConfig } from 'vite';
+import convexPanelViteConfig from 'convex-panel/vite';
+
+export default defineConfig({
+  ...convexPanelViteConfig,
+  // Your other Vite configurations...
+});
+```
+
+This will set up the necessary Monaco Editor configuration for Vite. 

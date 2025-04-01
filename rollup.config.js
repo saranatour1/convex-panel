@@ -38,6 +38,21 @@ const cssImport = () => ({
   }
 });
 
+// Custom plugin to handle Monaco Editor's this context
+const fixMonacoThis = () => ({
+  name: 'fix-monaco-this',
+  transform(code, id) {
+    if (id.includes('monaco-editor')) {
+      // Replace the problematic __decorate expression
+      return code.replace(
+        /var __decorate = \(this && this\.__decorate\) \|\|/g,
+        'var __decorate = (typeof window !== "undefined" ? window : global).__decorate ||'
+      );
+    }
+    return null;
+  }
+});
+
 module.exports = {
   input: 'src/index.ts',
   output: [
@@ -47,7 +62,13 @@ module.exports = {
       sourcemap: true,
       exports: 'named',
       entryFileNames: 'index.js',
-      chunkFileNames: 'chunks/[name]-[hash].js'
+      chunkFileNames: 'chunks/[name]-[hash].js',
+      strict: false,
+      freeze: false,
+      esModule: false,
+      globals: {
+        'monaco-editor': 'monaco'
+      }
     },
     {
       dir: 'dist',
@@ -55,7 +76,12 @@ module.exports = {
       sourcemap: true,
       exports: 'named',
       entryFileNames: 'index.esm.js',
-      chunkFileNames: 'chunks/[name]-[hash].esm.js'
+      chunkFileNames: 'chunks/[name]-[hash].esm.js',
+      strict: false,
+      freeze: false,
+      globals: {
+        'monaco-editor': 'monaco'
+      }
     }
   ],
   plugins: [
@@ -63,12 +89,14 @@ module.exports = {
     resolve({
       browser: true,
       preferBuiltins: false,
-      resolveOnly: [
-        /^(?!@monaco-editor\/react)/,
-        /^(?!monaco-editor)/
-      ]
+      mainFields: ['module', 'main', 'browser']
     }),
-    commonjs(),
+    fixMonacoThis(),
+    commonjs({
+      include: /node_modules/,
+      transformMixedEsModules: true,
+      ignoreDynamicRequires: true
+    }),
     cssImport(),
     url({
       include: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.svg', '**/*.gif'],
@@ -82,14 +110,29 @@ module.exports = {
       rootDir: 'src',
       outDir: './dist'
     }),
-    terser()
+    terser({
+      format: {
+        comments: false
+      },
+      mangle: {
+        keep_fnames: true,
+        keep_classnames: true
+      }
+    })
   ],
   external: [
     ...Object.keys(pkg.peerDependencies || {}),
     ...Object.keys(pkg.dependencies || {}),
-    'monaco-editor',
-    '@monaco-editor/react',
-    /^monaco-editor\/.*/,
-    /^@monaco-editor\/react\/.*/
+    /^monaco-editor/
   ],
+  onwarn(warning, warn) {
+    // Skip certain warnings
+    if (warning.code === 'THIS_IS_UNDEFINED' || 
+        warning.code === 'CIRCULAR_DEPENDENCY' ||
+        warning.code === 'EVAL') {
+      return;
+    }
+    // Use default for everything else
+    warn(warning);
+  }
 }; 

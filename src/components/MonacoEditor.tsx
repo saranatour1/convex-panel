@@ -1,6 +1,21 @@
-import Editor, { EditorProps, Monaco } from '@monaco-editor/react';
-import { editor, Range } from 'monaco-editor';
 import { useEffect, useRef } from 'react';
+import type { EditorProps, Monaco } from '@monaco-editor/react';
+import type { editor } from 'monaco-editor';
+
+// Import the editor directly but with a check for window
+let Editor: any = () => null;
+let Range: any;
+
+if (typeof window !== 'undefined') {
+  // Only import on client side
+  import('@monaco-editor/react').then((mod) => {
+    Editor = mod.default;
+  });
+  
+  import('monaco-editor/esm/vs/editor/editor.api').then((monaco) => {
+    Range = monaco.Range;
+  });
+}
 
 interface MonacoEditorProps extends Omit<EditorProps, 'onChange'> {
   value: string;
@@ -50,29 +65,26 @@ export function MonacoEditor({
         "editor.fontFamily": "Menlo, Monaco, 'Courier New', monospace",
         "editor.fontSize": "14px",
       },
-      
     });
 
     monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
       noSemanticValidation: true,
       noSyntaxValidation: true,
     });
-
   };
-  
 
   const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
     
     // Initial highlight if needed
-    if (highlightLines) {
+    if (highlightLines && Range) {
       highlightEditorLines(editor, highlightLines.startLine, highlightLines.endLine);
     }
   };
 
   // Update highlights when they change
   useEffect(() => {
-    if (editorRef.current && highlightLines) {
+    if (editorRef.current && highlightLines && Range) {
       highlightEditorLines(
         editorRef.current,
         highlightLines.startLine,
@@ -89,6 +101,8 @@ export function MonacoEditor({
     startLine: number,
     endLine: number
   ) => {
+    if (!Range) return;
+
     // Remove any existing decorations
     editor.deltaDecorations([], []);
     
@@ -104,6 +118,11 @@ export function MonacoEditor({
       }
     ]);
   };
+
+  // If we're in SSR, return a placeholder
+  if (typeof window === 'undefined') {
+    return <div style={{ height, width: '100%', background: '#1E1E1E' }} />;
+  }
 
   return (
     <Editor

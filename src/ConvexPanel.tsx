@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, ErrorInfo } from 'react';
 // @ts-ignore
-import { AnimatePresence, useDragControls } from 'framer-motion';
+import { AnimatePresence, useDragControls, DragControls } from 'framer-motion';
 // @ts-ignore
 import { motion } from 'framer-motion';
 // @ts-ignore
@@ -21,6 +21,8 @@ import ErrorBoundary from './ErrorBoundary';
  * Injects the CSS styles into the document head
  */
 const injectStyles = () => {
+  if (typeof window === 'undefined') return;
+
   // Check if the style element already exists
   const styleId = 'convex-panel-styles';
   if (document.getElementById(styleId)) {
@@ -33,6 +35,20 @@ const injectStyles = () => {
   
   // Append to head
   document.head.appendChild(styleElement);
+};
+
+/**
+ * Create a client-only version of useDragControls
+ */
+const useClientDragControls = () => {
+  const [isClient, setIsClient] = useState(false);
+  const controls = useDragControls();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  return isClient ? controls : null;
 };
 
 /**
@@ -141,44 +157,48 @@ const ConvexPanel = ({
    */
   useMockData = false,
 }: ButtonProps) => {
-  const dragControls = useDragControls();
-  const mergedTheme = useMemo(() => ({ ...defaultTheme, ...theme }), [theme]);
   const [isMounted, setIsMounted] = useState(false);
+  const dragControls = useClientDragControls();
+  const mergedTheme = useMemo(() => ({ ...defaultTheme, ...theme }), [theme]);
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [containerSize, setContainerSize] = useState({ width: 1000, height: 500 });
   const [initialTab, setInitialTab] = useState<TabTypes>('logs');
 
-  /**
-   * Create admin client
-   */
-  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
-  const adminClient = convexUrl && deployKey ? new ConvexClient(convexUrl) : null;
-  
-  /**
-   * Set admin auth
-   */
-  if (adminClient && deployKey) {
-    (adminClient as any).setAdminAuth(deployKey);
-  }
-
-  /**
-   * Set mounted state
-   */
+  // Set mounted state
   useEffect(() => {
     setIsMounted(true);
-    
-    // Inject styles when component mounts
-    if (typeof window !== 'undefined') {
-      injectStyles();
-    }
   }, []);
+
+  // Create admin client
+  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  const adminClient = useMemo(() => {
+    if (!isMounted) return null;
+    return convexUrl && deployKey ? new ConvexClient(convexUrl) : null;
+  }, [convexUrl, deployKey, isMounted]);
+
+  // Set admin auth
+  useEffect(() => {
+    if (!isMounted || !adminClient || !deployKey) return;
+    (adminClient as any).setAdminAuth(deployKey);
+  }, [adminClient, deployKey, isMounted]);
+
+  // Inject styles only after mounting
+  useEffect(() => {
+    if (!isMounted) return;
+    injectStyles();
+  }, [isMounted]);
+
+  // Don't render during SSR
+  if (typeof window === 'undefined') {
+    return null;
+  }
 
   /**
    * Load saved position and container size from localStorage on component mount
    */
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted || typeof window === 'undefined') return;
     
     const savedPosition = localStorage.getItem(STORAGE_KEYS.POSITION);
     const savedSize = localStorage.getItem(STORAGE_KEYS.SIZE);
@@ -204,7 +224,7 @@ const ConvexPanel = ({
    * Save position and container size to localStorage when they change
    */
   useEffect(() => {
-    if (!isMounted) return;
+    if (!isMounted || typeof window === 'undefined') return;
     
     localStorage.setItem(STORAGE_KEYS.POSITION, JSON.stringify(position));
     localStorage.setItem(STORAGE_KEYS.SIZE, JSON.stringify(containerSize));
@@ -275,16 +295,11 @@ const ConvexPanel = ({
     }
   };
 
-  // Don't render anything on the server
-  if (!isMounted) {
-    return null;
-  }
-
   // Render the button and container separately
   // The button should always be visible, even if there's an error with the Container
   return (
     <div className="convex-panel-container" style={{ zIndex: 99999 }}>
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isOpen && (
           <ErrorBoundary fallback={
             <div className="convex-panel-error-container" style={{
@@ -365,4 +380,16 @@ const ConvexPanel = ({
 
 ConvexPanel.displayName = 'ConvexPanel';
 
-export default ConvexPanel; 
+const ConvexPanelWithErrorBoundary = (props: ButtonProps) => {
+  const handleError = (error: Error, errorInfo: ErrorInfo) => {
+    console.error('ConvexPanel Error:', error, errorInfo);
+  };
+
+  return (
+    <ErrorBoundary onError={handleError}>
+      <ConvexPanel {...props} />
+    </ErrorBoundary>
+  );
+};
+
+export default ConvexPanelWithErrorBoundary; 

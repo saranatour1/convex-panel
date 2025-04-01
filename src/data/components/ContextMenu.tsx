@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { TableDocument } from '../../types';
 import { deleteDocuments } from '../../utils/functions';
 import { ConvexClient } from 'convex/browser';
-import { useGlobalHotkeys, formatShortcut } from '../../hooks/useGlobalHotkeys';
+import { useGlobalHotkeys, formatShortcut } from '../../hooks/useHotkeys';
 
 export interface ContextMenuProps {
   position: { x: number; y: number };
