@@ -2,7 +2,7 @@ import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 // @ts-ignore
 import { motion, PanInfo } from 'framer-motion';
 import debounce from 'debounce';
-import { ContainerProps, LogEntry } from "./types";
+import { ContainerProps, LogEntry } from "./types/index";
 import { cardVariants } from './theme';
 import { getLogId } from './utils';
 import DataTable from './data/DataTable';
@@ -975,7 +975,6 @@ const Container = ({
             initialModules={new Map()}
             convexClient={adminClient}
             baseUrl={deployUrl || ''}
-
           >
             <FunctionsView theme={mergedTheme} authToken={accessToken} baseUrl={baseUrl} />
           </FunctionsProvider>
@@ -1143,7 +1142,6 @@ const Container = ({
 
       {activeTab === 'functions' && (
         <FunctionsProvider
-          // initialEntries={[]}
           initialModules={new Map()}
           convexClient={adminClient}
           baseUrl={deployUrl || ''}
