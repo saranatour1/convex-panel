@@ -6,7 +6,7 @@ import "./index.css";
 import App from "./App.tsx";
 import ConvexPanel from "../../src/index.ts"
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL!);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -14,9 +14,10 @@ createRoot(document.getElementById("root")!).render(
       <App />
       <ConvexPanel
           accessToken={import.meta.env.VITE_ACCESS_TOKEN!}
-          deployKey={import.meta.env.CONVEX_DEPLOYMENT!} // CONVEX_DEPLOYMENT
+          deployKey={import.meta.env.VITE_CONVEX_DEPLOYMENT!} // CONVEX_DEPLOYMENT
           convex={convex} 
           useMockData={!import.meta.env.VITE_CONVEX_URL}
+          deployUrl={import.meta.env.VITE_CONVEX_URL}
         />
     </ConvexAuthProvider>
   </StrictMode>,

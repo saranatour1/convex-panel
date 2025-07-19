@@ -2,6 +2,7 @@
 /// <reference types="vite/types/importMeta.d.ts" />
 import ConvexPanel from './ConvexPanel';
 import './styles/context-menu.css';
+import "./styles/convex-panel.css"
 export { default as LogsToolbar } from './logs/components/LogsToolbar';
 export type {
   ButtonProps,

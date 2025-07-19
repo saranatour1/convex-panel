@@ -11,31 +11,10 @@ import Container from './Container';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexClient } from 'convex/browser';
 // @ts-ignore
-// import cssText from './styles/convex-panel.css';
 import { STORAGE_KEYS, TabTypes } from './utils/constants';
 import { getStorageItem } from './utils/storage';
 import { ConvexLogo } from './components/icons';
 import ErrorBoundary from './ErrorBoundary';
-
-/**
- * Injects the CSS styles into the document head
- */
-const injectStyles = () => {
-  if (typeof window === 'undefined') return;
-
-  // Check if the style element already exists
-  const styleId = 'convex-panel-styles';
-  if (document.getElementById(styleId)) {
-    return; // Already injected
-  }
-
-  const styleElement = document.createElement('style');
-  styleElement.id = styleId;
-  // styleElement.textContent = cssText;
-  
-  // Append to head
-  document.head.appendChild(styleElement);
-};
 
 /**
  * Create a client-only version of useDragControls
@@ -186,7 +165,7 @@ const ConvexPanel = ({
   // Inject styles only after mounting
   useEffect(() => {
     if (!isMounted) return;
-    injectStyles();
+
   }, [isMounted]);
 
   // Don't render during SSR
@@ -384,7 +363,6 @@ const ConvexPanelWithErrorBoundary = (props: ButtonProps) => {
   const handleError = (error: Error, errorInfo: ErrorInfo) => {
     console.error('ConvexPanel Error:', error, errorInfo);
   };
-
   return (
     <ErrorBoundary onError={handleError}>
       <ConvexPanel {...props} />

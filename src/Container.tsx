@@ -227,7 +227,7 @@ const Container = ({
    */
   useEffect(() => {
     if (!convexUrl && typeof window !== 'undefined') {
-      const envUrl = (window as any).ENV?.NEXT_PUBLIC_CONVEX_URL || deployUrl;
+      const envUrl = (window as any).ENV?.VITE_CONVEX_URL || deployUrl;
       
       if (envUrl) {
         setConvexUrl(envUrl);
