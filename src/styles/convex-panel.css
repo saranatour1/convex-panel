@@ -1,3 +1,4 @@
+@import "tailwindcss";
 /* Base styles for Convex Panel */
 .convex-panel-container {
   position: fixed;
@@ -77,13 +78,13 @@
   }
 
   .convex-panel-logo {
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 9999px !important;
-    overflow: hidden !important;
-    object-fit: contain !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    width: 36px ;
+    height: 36px ;
+    border-radius: 9999px ;
+    overflow: hidden ;
+    object-fit: contain ;
+    padding: 0 ;
+    margin: 0 ;
   }
 
   .convex-panel-card {
@@ -282,137 +283,137 @@
 
   /* Sidebar styles */
   .convex-panel-sidebar {
-    border-right: 1px solid #404040 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    background-color: #141414 !important;
-    transition: width 0.3s ease !important;
-    min-height: 420px !important;
-    border-bottom-left-radius: 0.375rem !important;
+    border-right: 1px solid #404040 ;
+    display: flex ;
+    flex-direction: column ;
+    background-color: #141414 ;
+    transition: width 0.3s ease ;
+    min-height: 420px ;
+    border-bottom-left-radius: 0.375rem ;
   }
 
   .convex-panel-sidebar-expanded {
-    width: 16rem !important;
+    width: 16rem ;
   }
 
   .convex-panel-sidebar-collapsed {
-    width: 3rem !important;
+    width: 3rem ;
   }
 
   .convex-panel-sidebar-header {
-    border-bottom: 1px solid #404040 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
+    border-bottom: 1px solid #404040 ;
+    display: flex ;
+    flex-direction: column ;
+    padding-top: 1rem ;
+    padding-bottom: 1rem ;
   }
 
   .convex-panel-sidebar-header-expanded {
-    padding: 1rem !important;
+    padding: 1rem ;
   }
 
   .convex-panel-sidebar-header-collapsed {
-    align-items: center !important;
+    align-items: center ;
   }
 
   .convex-panel-sidebar-title-container {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    margin-bottom: 0.5rem !important;
+    display: flex ;
+    align-items: center ;
+    justify-content: space-between ;
+    margin-bottom: 0.5rem ;
   }
 
   .convex-panel-sidebar-title-wrapper {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    width: 100% !important;
-    gap: 0.5rem !important;
+    display: flex ;
+    align-items: center ;
+    justify-content: space-between ;
+    width: 100% ;
+    gap: 0.5rem ;
   }
 
   .convex-panel-sidebar-title {
-    font-size: 0.875rem !important;
-    font-weight: 500 !important;
+    font-size: 0.875rem ;
+    font-weight: 500 ;
   }
 
   .convex-panel-sidebar-toggle-button {
-    padding: 0.25rem !important;
-    border-radius: 0.25rem !important;
+    padding: 0.25rem ;
+    border-radius: 0.25rem ;
   }
 
   .convex-panel-sidebar-toggle-button:hover {
-    background-color: #404040 !important;
+    background-color: #404040 ;
   }
 
   .convex-panel-sidebar-search {
-    width: 100% !important;
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    font-size: 0.75rem !important;
-    font-family: monospace !important;
+    width: 100% ;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    font-size: 0.75rem ;
+    font-family: monospace ;
   }
 
   .convex-panel-sidebar-search:focus {
-    outline: none !important;
+    outline: none ;
   }
 
   .convex-panel-sidebar-expand-button {
-    padding: 0.25rem !important;
-    border-radius: 0.25rem !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    padding: 0.25rem ;
+    border-radius: 0.25rem ;
+    margin-left: auto ;
+    margin-right: auto ;
   }
 
   .convex-panel-sidebar-expand-button:hover {
-    background-color: #404040 !important;
+    background-color: #404040 ;
   }
 
   .convex-panel-sidebar-content {
-    overflow-y: auto !important;
-    flex: 1 !important;
+    overflow-y: auto ;
+    flex: 1 ;
   }
 
   .convex-panel-sidebar-content::-webkit-scrollbar {
-    width: 4px !important;
+    width: 4px ;
   }
 
   .convex-panel-sidebar-content::-webkit-scrollbar-track {
-    background-color: #262626 !important;
+    background-color: #262626 ;
   }
 
   .convex-panel-sidebar-content::-webkit-scrollbar-thumb {
-    background-color: #525252 !important;
+    background-color: #525252 ;
   }
 
   .convex-panel-sidebar-content::-webkit-scrollbar-thumb:hover {
-    background-color: #737373 !important;
+    background-color: #737373 ;
   }
 
   .convex-panel-sidebar-table-button {
-    width: 100% !important;
-    text-align: left !important;
-    padding: 0.5rem 1rem !important;
-    font-size: 0.875rem !important;
+    width: 100% ;
+    text-align: left ;
+    padding: 0.5rem 1rem ;
+    font-size: 0.875rem ;
   }
 
   .convex-panel-sidebar-table-button:hover {
-    background-color: #262626 !important;
+    background-color: #262626 ;
   }
 
   .convex-panel-sidebar-table-selected {
-    background-color: #262626 !important;
-    color: white !important;
+    background-color: #262626 ;
+    color: white ;
   }
 
   .convex-panel-sidebar-table-unselected {
-    color: #a3a3a3 !important;
+    color: #a3a3a3 ;
   }
 
   .convex-panel-sidebar-table-collapsed {
-    text-align: center !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
+    text-align: center ;
+    overflow: hidden ;
+    text-overflow: ellipsis ;
+    white-space: nowrap ;
   }
 
   /* Utility classes */
@@ -809,375 +810,375 @@
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .convex-panel-card {
-      width: calc(100vw - 2rem) !important;
+      width: calc(100vw - 2rem) ;
       height: 640px;
     }
   }
 
   /* Additional utility classes for error display */
   .flex-col {
-    display: flex !important;
-    flex-direction: column !important;
+    display: flex ;
+    flex-direction: column ;
   }
 
   .items-center {
-    align-items: center !important;
+    align-items: center ;
   }
 
   .justify-center {
-    justify-content: center !important;
+    justify-content: center ;
   }
 
   .h-full {
-    height: 100% !important;
+    height: 100% ;
   }
 
   .p-4 {
-    padding: 1rem !important;
+    padding: 1rem ;
   }
 
   .mb-4 {
-    margin-bottom: 1rem !important;
+    margin-bottom: 1rem ;
   }
 
   .gap-2 {
-    gap: 0.5rem !important;
+    gap: 0.5rem ;
   }
 
   /* Theme-specific styles */
   .convex-panel-container-theme {
-    background-color: #1e1e1e !important;
-    border: 1px solid #333333 !important;
+    background-color: #1e1e1e ;
+    border: 1px solid #333333 ;
   }
 
   .convex-panel-header-theme {
-    background-color: #1e1e1e !important;
-    border-bottom: 1px solid #333333 !important;
+    background-color: #1e1e1e ;
+    border-bottom: 1px solid #333333 ;
   }
 
   .convex-panel-toolbar-theme {
-    background-color: #1e1e1e !important;
-    border-bottom: 1px solid #333333 !important;
+    background-color: #1e1e1e ;
+    border-bottom: 1px solid #333333 ;
   }
 
   .convex-panel-table-theme {
-    color: white !important;
+    color: white ;
   }
 
   .convex-panel-table-header-theme {
-    background-color: #2a2a2a !important;
-    font-size: 0.75rem !important;
-    text-transform: uppercase !important;
+    background-color: #2a2a2a ;
+    font-size: 0.75rem ;
+    text-transform: uppercase ;
   }
 
   .convex-panel-table-row-theme {
-    border-bottom: 1px solid #333333 !important;
+    border-bottom: 1px solid #333333 ;
   }
 
   .convex-panel-table-row-theme:hover {
-    background-color: #2a2a2a !important;
+    background-color: #2a2a2a ;
   }
 
   .convex-panel-text-theme {
-    color: white !important;
+    color: white ;
   }
 
   .convex-panel-button-theme {
-    background-color: #4a77e5 !important;
-    color: white !important;
+    background-color: #4a77e5 ;
+    color: white ;
   }
 
   .convex-panel-button-theme:hover {
-    opacity: 0.9 !important;
+    opacity: 0.9 ;
   }
 
   .convex-panel-input-theme {
-    background-color: #2a2a2a !important;
-    color: white !important;
-    border: 1px solid #333333 !important;
+    background-color: #2a2a2a ;
+    color: white ;
+    border: 1px solid #333333 ;
   }
 
   .convex-panel-success-text-theme {
-    color: #4ade80 !important;
+    color: #4ade80 ;
   }
 
   .convex-panel-error-text-theme {
-    color: #f87171 !important;
+    color: #f87171 ;
   }
 
   .convex-panel-warning-text-theme {
-    color: #facc15 !important;
+    color: #facc15 ;
   }
 
   /* Settings Button styles */
   .convex-panel-settings-button {
-    padding: 0.25rem !important;
-    border-radius: 0.375rem !important;
-    color: #a3a3a3 !important;
+    padding: 0.25rem ;
+    border-radius: 0.375rem ;
+    color: #a3a3a3 ;
     transition:
       color 0.2s,
-      background-color 0.2s !important;
+      background-color 0.2s ;
   }
 
   .convex-panel-settings-button:hover {
-    color: white !important;
-    background-color: #262626 !important;
+    color: white ;
+    background-color: #262626 ;
   }
 
   /* Modal styles */
   .convex-panel-modal-overlay {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 50 !important;
+    position: fixed ;
+    top: 0 ;
+    left: 0 ;
+    right: 0 ;
+    bottom: 0 ;
+    display: flex ;
+    align-items: center ;
+    justify-content: center ;
+    z-index: 50 ;
   }
 
   .convex-panel-modal-backdrop {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    background-color: rgba(0, 0, 0, 0.8) !important;
+    position: absolute ;
+    top: 0 ;
+    left: 0 ;
+    right: 0 ;
+    bottom: 0 ;
+    background-color: rgba(0, 0, 0, 0.8) ;
   }
 
   .convex-panel-modal-container {
-    position: relative !important;
-    z-index: 10 !important;
-    width: 600px !important;
-    max-width: 90% !important;
+    position: relative ;
+    z-index: 10 ;
+    width: 600px ;
+    max-width: 90% ;
   }
 
   /* Settings Modal styles */
   .convex-panel-settings-modal {
     box-shadow:
       0 10px 15px -3px rgba(0, 0, 0, 0.1),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-    background-color: #1e1e1e !important;
-    border-radius: 0.75rem !important;
-    border: 1px solid #333 !important;
-    margin-right: 1rem !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
+      0 4px 6px -2px rgba(0, 0, 0, 0.05) ;
+    background-color: #1e1e1e ;
+    border-radius: 0.75rem ;
+    border: 1px solid #333 ;
+    margin-right: 1rem ;
+    overflow: hidden ;
+    display: flex ;
+    flex-direction: column ;
     height: 13.6rem;
-    max-height: 40rem !important;
-    padding: 0.5rem !important;
-    position: relative !important;
+    max-height: 40rem ;
+    padding: 0.5rem ;
+    position: relative ;
   }
 
   .convex-panel-settings-backdrop {
-    position: fixed !important;
-    inset: 0 !important;
-    background-color: rgba(0, 0, 0, 0.5) !important;
+    position: fixed ;
+    inset: 0 ;
+    background-color: rgba(0, 0, 0, 0.5) ;
   }
 
   .convex-panel-settings-content {
-    background-color: #171717 !important;
-    border-radius: 0.5rem !important;
-    height: 200px !important;
-    min-height: 200px !important;
-    max-height: 200px !important;
+    background-color: #171717 ;
+    border-radius: 0.5rem ;
+    height: 200px ;
+    min-height: 200px ;
+    max-height: 200px ;
   }
 
   .convex-panel-settings-content-full {
-    width: 100% !important;
+    width: 100% ;
   }
 
   .convex-panel-settings-content-centered {
-    width: 100% !important;
-    max-width: 28rem !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    width: 100% ;
+    max-width: 28rem ;
+    margin-left: auto ;
+    margin-right: auto ;
   }
 
   .convex-panel-settings-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 0.5rem !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    border-bottom: 1px solid #333 !important;
+    display: flex ;
+    justify-content: space-between ;
+    align-items: center ;
+    padding: 0.5rem ;
+    padding-left: 1rem ;
+    padding-right: 1rem ;
+    border-bottom: 1px solid #333 ;
   }
 
   .convex-panel-settings-title {
-    font-size: 1.125rem !important;
-    font-weight: normal !important;
-    color: white !important;
+    font-size: 1.125rem ;
+    font-weight: normal ;
+    color: white ;
   }
 
   .convex-panel-settings-close-button {
-    color: #a3a3a3 !important;
+    color: #a3a3a3 ;
   }
 
   .convex-panel-settings-close-button:hover {
-    color: white !important;
+    color: white ;
   }
 
   .convex-panel-settings-body {
-    display: flex !important;
-    flex: 1 !important;
-    overflow: hidden !important;
-    height: 155px !important;
+    display: flex ;
+    flex: 1 ;
+    overflow: hidden ;
+    height: 155px ;
   }
 
   .convex-panel-settings-sidebar {
-    width: 12rem !important;
-    border-right: 1px solid #333 !important;
+    width: 12rem ;
+    border-right: 1px solid #333 ;
   }
 
   .convex-panel-settings-tab-button {
-    width: 100% !important;
-    text-align: left !important;
-    padding: 0.5rem !important;
+    width: 100% ;
+    text-align: left ;
+    padding: 0.5rem ;
   }
 
   .convex-panel-settings-tab-active {
-    background-color: #262626 !important;
-    color: white !important;
+    background-color: #262626 ;
+    color: white ;
   }
 
   .convex-panel-settings-tab-inactive {
-    color: #d4d4d4 !important;
+    color: #d4d4d4 ;
   }
 
   .convex-panel-settings-tab-inactive:hover {
-    background-color: #262626 !important;
+    background-color: #262626 ;
   }
 
   .convex-panel-settings-content-area {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    border-bottom-right-radius: 0.5rem !important;
+    flex: 1 ;
+    overflow-y: auto ;
+    border-bottom-right-radius: 0.5rem ;
   }
 
   .convex-panel-settings-content-area::-webkit-scrollbar {
-    width: 4px !important;
-    height: 4px !important;
+    width: 4px ;
+    height: 4px ;
   }
 
   .convex-panel-settings-content-area::-webkit-scrollbar-track {
-    background-color: #262626 !important;
+    background-color: #262626 ;
   }
 
   .convex-panel-settings-content-area::-webkit-scrollbar-thumb {
-    background-color: #525252 !important;
+    background-color: #525252 ;
   }
 
   .convex-panel-settings-content-area::-webkit-scrollbar-thumb:hover {
-    background-color: #737373 !important;
+    background-color: #737373 ;
   }
 
   .convex-panel-settings-section {
-    padding: 1rem !important;
+    padding: 1rem ;
   }
 
   .convex-panel-settings-option {
-    margin-bottom: 1rem !important;
+    margin-bottom: 1rem ;
   }
 
   .convex-panel-settings-label {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-    cursor: pointer !important;
+    display: flex ;
+    align-items: center ;
+    gap: 0.5rem ;
+    cursor: pointer ;
   }
 
   .convex-panel-settings-checkbox {
-    border-radius: 0.25rem !important;
-    color: #3b82f6 !important;
-    height: 1rem !important;
-    width: 1rem !important;
-    background-color: #404040 !important;
-    border: 1px solid #525252 !important;
+    border-radius: 0.25rem ;
+    color: #3b82f6 ;
+    height: 1rem ;
+    width: 1rem ;
+    background-color: #404040 ;
+    border: 1px solid #525252 ;
   }
 
   .convex-panel-settings-label-text {
-    color: #e5e5e5 !important;
+    color: #e5e5e5 ;
   }
 
   .convex-panel-settings-description {
-    color: #a3a3a3 !important;
-    font-size: 0.75rem !important;
-    margin-top: 0.25rem !important;
-    margin-left: 1.5rem !important;
+    color: #a3a3a3 ;
+    font-size: 0.75rem ;
+    margin-top: 0.25rem ;
+    margin-left: 1.5rem ;
   }
 
   .convex-panel-settings-health-text {
-    font-size: 0.75rem !important;
-    font-weight: 500 !important;
-    height: 100% !important;
-    width: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    color: white !important;
+    font-size: 0.75rem ;
+    font-weight: 500 ;
+    height: 100% ;
+    width: 100% ;
+    display: flex ;
+    align-items: center ;
+    justify-content: center ;
+    color: white ;
   }
 
   /* Log Row Styles */
   .convex-panel-log-row {
-    padding: 0.5rem 1rem !important;
-    display: flex !important;
-    flex-direction: column !important;
-    cursor: pointer !important;
-    border-bottom: 1px solid #222222 !important;
-    background-color: #121212 !important;
+    padding: 0.5rem 1rem ;
+    display: flex ;
+    flex-direction: column ;
+    cursor: pointer ;
+    border-bottom: 1px solid #222222 ;
+    background-color: #121212 ;
   }
 
   .convex-panel-log-row:hover {
-    background-color: #1e1e1e !important;
+    background-color: #1e1e1e ;
   }
 
   .convex-panel-log-row-simplified {
-    padding: 0.5rem 1rem !important;
-    cursor: pointer !important;
-    border-bottom: 1px solid #222222 !important;
-    background-color: #121212 !important;
+    padding: 0.5rem 1rem ;
+    cursor: pointer ;
+    border-bottom: 1px solid #222222 ;
+    background-color: #121212 ;
   }
 
   .convex-panel-log-row-simplified:hover {
-    background-color: #1e1e1e !important;
+    background-color: #1e1e1e ;
   }
 
   /* Error background for log rows */
   .convex-panel-error-background {
-    background-color: rgba(220, 38, 38, 0.15) !important;
+    background-color: rgba(220, 38, 38, 0.15) ;
   }
 
   .convex-panel-error-background:hover {
-    background-color: rgba(220, 38, 38, 0.25) !important;
+    background-color: rgba(220, 38, 38, 0.25) ;
   }
 
   .convex-panel-log-row-full-content {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-    width: 100% !important;
+    display: flex ;
+    align-items: center ;
+    gap: 0.5rem ;
+    width: 100% ;
   }
 
   .convex-panel-log-row-content {
-    display: flex !important;
-    align-items: center !important;
-    width: 100% !important;
+    display: flex ;
+    align-items: center ;
+    width: 100% ;
   }
 
   .convex-panel-log-network-row-content {
-    display: flex !important;
-    align-items: center !important;
-    width: 100% !important;
+    display: flex ;
+    align-items: center ;
+    width: 100% ;
   }
 
   .convex-panel-log-network-status {
-    font-size: 0.75rem !important;
-    width: 4rem !important;
-    text-align: center !important;
-    flex-shrink: 0 !important;
+    font-size: 0.75rem ;
+    width: 4rem ;
+    text-align: center ;
+    flex-shrink: 0 ;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1193,317 +1194,317 @@
   }
 
   .convex-panel-log-network-type {
-    font-size: 0.75rem !important;
-    width: 6rem !important;
-    text-align: center !important;
-    flex-shrink: 0 !important;
+    font-size: 0.75rem ;
+    width: 6rem ;
+    text-align: center ;
+    flex-shrink: 0 ;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .convex-panel-log-network-size {
-    font-size: 0.75rem !important;
-    width: 6rem !important;
-    text-align: center !important;
-    flex-shrink: 0 !important;
+    font-size: 0.75rem ;
+    width: 6rem ;
+    text-align: center ;
+    flex-shrink: 0 ;
   }
 
   .convex-panel-log-network-time {
-    font-size: 0.75rem !important;
-    width: 6rem !important;
-    text-align: center !important;
-    flex-shrink: 0 !important;
+    font-size: 0.75rem ;
+    width: 6rem ;
+    text-align: center ;
+    flex-shrink: 0 ;
   }
 
   .convex-panel-log-network-name {
-    font-size: 0.75rem !important;
-    color: #a0a0a0 !important;
-    width: 25rem !important;
-    font-family: monospace !important;
+    font-size: 0.75rem ;
+    color: #a0a0a0 ;
+    width: 25rem ;
+    font-family: monospace ;
   }
 
   .convex-panel-log-timestamp {
-    font-size: 0.75rem !important;
-    color: #a0a0a0 !important;
-    width: 12rem !important;
-    font-family: monospace !important;
+    font-size: 0.75rem ;
+    color: #a0a0a0 ;
+    width: 12rem ;
+    font-family: monospace ;
   }
 
   .convex-panel-log-request-id {
-    font-size: 0.75rem !important;
-    color: #60a5fa !important;
-    width: 6rem !important;
-    font-family: monospace !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
+    font-size: 0.75rem ;
+    color: #60a5fa ;
+    width: 6rem ;
+    font-family: monospace ;
+    overflow: hidden ;
+    text-overflow: ellipsis ;
+    white-space: nowrap ;
   }
 
   .convex-panel-log-status {
-    font-size: 0.75rem !important;
-    width: 4rem !important;
-    text-align: center !important;
-    flex-shrink: 0 !important;
+    font-size: 0.75rem ;
+    width: 4rem ;
+    text-align: center ;
+    flex-shrink: 0 ;
   }
 
   .convex-panel-success-text {
-    color: #4ade80 !important;
+    color: #4ade80 ;
   }
 
   .convex-panel-error-text {
-    color: #f87171 !important;
+    color: #f87171 ;
   }
 
   .convex-panel-gray-text {
-    color: #a0a0a0 !important;
+    color: #a0a0a0 ;
   }
 
   .convex-panel-cached-text {
-    color: #6b7280 !important;
+    color: #6b7280 ;
   }
 
   .convex-panel-log-execution-time {
-    font-size: 0.75rem !important;
-    color: #c084fc !important;
-    width: 6rem !important;
+    font-size: 0.75rem ;
+    color: #c084fc ;
+    width: 6rem ;
   }
 
   .convex-panel-log-type {
-    font-size: 0.75rem !important;
-    color: #60a5fa !important;
-    width: 3rem !important;
+    font-size: 0.75rem ;
+    color: #60a5fa ;
+    width: 3rem ;
   }
 
   .convex-panel-log-details-container {
-    font-size: 0.75rem !important;
-    color: white !important;
-    flex: 1 !important;
-    font-family: monospace !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
+    font-size: 0.75rem ;
+    color: white ;
+    flex: 1 ;
+    font-family: monospace ;
+    overflow: hidden ;
+    text-overflow: ellipsis ;
+    white-space: nowrap ;
+    display: flex ;
+    align-items: center ;
+    gap: 0.5rem ;
   }
 
   .convex-panel-log-details {
-    font-size: 0.75rem !important;
-    color: white !important;
-    flex: 1 !important;
-    font-family: monospace !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    font-size: 0.75rem ;
+    color: white ;
+    flex: 1 ;
+    font-family: monospace ;
+    overflow: hidden ;
+    text-overflow: ellipsis ;
   }
 
   .convex-panel-log-details-truncated {
-    max-width: 150px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    max-width: 150px ;
+    white-space: nowrap ;
+    overflow: hidden ;
+    text-overflow: ellipsis ;
   }
 
   /* Active Filters Styles */
   .convex-panel-active-filters {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 0.5rem !important;
-    width: 100% !important;
+    display: flex ;
+    flex-wrap: wrap ;
+    gap: 0.5rem ;
+    width: 100% ;
   }
 
   .convex-panel-filter-tag {
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    transition: background-color 0.2s !important;
-    font-size: 0.75rem !important;
-    display: flex !important;
-    align-items: center !important;
-    cursor: pointer !important;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    transition: background-color 0.2s ;
+    font-size: 0.75rem ;
+    display: flex ;
+    align-items: center ;
+    cursor: pointer ;
   }
 
   .convex-panel-filter-tag:hover {
-    background-color: rgba(58, 58, 58, 0.56) !important;
+    background-color: rgba(58, 58, 58, 0.56) ;
   }
 
   .convex-panel-filter-field {
-    font-weight: 600 !important;
-    border-right: 1px solid #404040 !important;
-    padding-right: 0.5rem !important;
+    font-weight: 600 ;
+    border-right: 1px solid #404040 ;
+    padding-right: 0.5rem ;
   }
 
   .convex-panel-filter-operator {
-    opacity: 0.8 !important;
-    font-family: monospace !important;
-    border-right: 1px solid #404040 !important;
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    opacity: 0.8 ;
+    font-family: monospace ;
+    border-right: 1px solid #404040 ;
+    padding-left: 0.5rem ;
+    padding-right: 0.5rem ;
   }
 
   .convex-panel-filter-value {
-    font-family: monospace !important;
-    padding-left: 0.5rem !important;
+    font-family: monospace ;
+    padding-left: 0.5rem ;
   }
 
   .convex-panel-filter-remove-button {
-    margin-left: 0.5rem !important;
-    color: #ef4444 !important;
-    background-color: #262626 !important;
-    border-radius: 0.375rem !important;
+    margin-left: 0.5rem ;
+    color: #ef4444 ;
+    background-color: #262626 ;
+    border-radius: 0.375rem ;
   }
 
   .convex-panel-filter-remove-button:hover {
-    color: #fca5a5 !important;
+    color: #fca5a5 ;
   }
 
   .convex-panel-filter-remove-icon {
-    height: 0.75rem !important;
-    width: 0.75rem !important;
+    height: 0.75rem ;
+    width: 0.75rem ;
   }
 
   .convex-panel-clear-filters-button {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.25rem !important;
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    transition: background-color 0.2s !important;
-    font-size: 0.75rem !important;
-    margin-left: auto !important;
+    display: flex ;
+    align-items: center ;
+    gap: 0.25rem ;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    transition: background-color 0.2s ;
+    font-size: 0.75rem ;
+    margin-left: auto ;
   }
 
   .convex-panel-clear-filters-button:hover {
-    background-color: rgba(58, 58, 58, 0.56) !important;
+    background-color: rgba(58, 58, 58, 0.56) ;
   }
 
   .convex-panel-clear-filters-icon {
-    height: 0.75rem !important;
-    width: 0.75rem !important;
+    height: 0.75rem ;
+    width: 0.75rem ;
   }
 
   /*   Content Styles */
   .convex-panel-table-wrapper {
-    width: 100% !important;
-    overflow: auto !important;
-    min-width: 0 !important; /* Allow table to shrink below content size */
+    width: 100% ;
+    overflow: auto ;
+    min-width: 0 ; /* Allow table to shrink below content size */
   }
 
   .convex-panel-data-table {
-    width: 100% !important;
-    font-size: 0.875rem !important;
-    border-collapse: collapse !important;
-    table-layout: auto !important; /* Use auto layout instead of fixed */
+    width: 100% ;
+    font-size: 0.875rem ;
+    border-collapse: collapse ;
+    table-layout: auto ; /* Use auto layout instead of fixed */
   }
 
   .convex-panel-table-header-row {
-    background-color: #262626 !important;
+    background-color: #262626 ;
   }
 
   .convex-panel-checkbox-header {
-    position: sticky !important;
-    left: 0 !important;
-    z-index: 10 !important;
-    background-color: #262626 !important;
-    width: 2rem !important;
-    padding: 0.5rem !important;
+    position: sticky ;
+    left: 0 ;
+    z-index: 10 ;
+    background-color: #262626 ;
+    width: 2rem ;
+    padding: 0.5rem ;
   }
 
   .convex-panel-column-header {
-    text-align: left !important;
-    padding: 0.5rem !important;
-    font-weight: 500 !important;
-    border-right: 1px solid #404040 !important;
-    min-width: 150px !important;
+    text-align: left ;
+    padding: 0.5rem ;
+    font-weight: 500 ;
+    border-right: 1px solid #404040 ;
+    min-width: 150px ;
   }
 
   .convex-panel-header-content {
-    display: flex !important;
-    align-items: center !important;
+    display: flex ;
+    align-items: center ;
     justify-content: start;
   }
 
   .convex-panel-filter-button {
-    padding: 0.25rem !important;
-    border-radius: 0.25rem !important;
+    padding: 0.25rem ;
+    border-radius: 0.25rem ;
   }
 
   .convex-panel-filter-active {
-    background-color: #3f5295 !important;
+    background-color: #3f5295 ;
   }
 
   .convex-panel-filter-active:hover {
-    background-color: rgba(63, 82, 149, 0.6) !important;
+    background-color: rgba(63, 82, 149, 0.6) ;
   }
 
   .convex-panel-filter-hovered {
-    background-color: #404040 !important;
+    background-color: #404040 ;
   }
 
   .convex-panel-filter-hovered:hover {
-    background-color: #525252 !important;
+    background-color: #525252 ;
   }
 
   .convex-panel-filter-hidden {
-    opacity: 0 !important;
+    opacity: 0 ;
   }
 
   .convex-panel-filter-hidden:hover {
-    background-color: #404040 !important;
+    background-color: #404040 ;
   }
 
   tr:hover .convex-panel-filter-hidden {
-    opacity: 1 !important;
+    opacity: 1 ;
   }
 
   .convex-panel-table-row {
-    border-bottom: 1px solid #404040 !important;
+    border-bottom: 1px solid #404040 ;
   }
 
   .convex-panel-table-row:hover {
-    background-color: #262626 !important;
+    background-color: #262626 ;
   }
 
   .convex-panel-checkbox-cell {
-    position: sticky !important;
-    left: 0 !important;
-    z-index: 10 !important;
-    background-color: #262626 !important;
-    padding: 0.5rem !important;
-    text-align: center !important;
+    position: sticky ;
+    left: 0 ;
+    z-index: 10 ;
+    background-color: #262626 ;
+    padding: 0.5rem ;
+    text-align: center ;
   }
 
   .convex-panel-checkbox {
-    border-radius: 0.25rem !important;
+    border-radius: 0.25rem ;
   }
 
   .convex-panel-table-cell {
-    cursor: pointer !important;
-    padding: 0.5rem !important;
-    border-right: 1px solid #404040 !important;
+    cursor: pointer ;
+    padding: 0.5rem ;
+    border-right: 1px solid #404040 ;
     font-size: 0.75rem;
   }
 
   .convex-panel-header-content-main {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    display: flex ;
+    align-items: center ;
+    justify-content: center ;
   }
 
   .convex-panel-id-value {
-    color: #60a5fa !important;
-    cursor: pointer !important;
-    font-family: monospace !important;
+    color: #60a5fa ;
+    cursor: pointer ;
+    font-family: monospace ;
   }
 
   .convex-panel-empty-value {
-    color: #737373 !important;
-    font-style: italic !important;
+    color: #737373 ;
+    font-style: italic ;
   }
 
   .convex-panel-table-footer {
-    padding: 1rem 0 !important;
-    text-align: center !important;
-    font-size: 0.875rem !important;
+    padding: 1rem 0 ;
+    text-align: center ;
+    font-size: 0.875rem ;
   }
 
   .convex-panel-loading-message,
@@ -1511,72 +1512,72 @@
   .convex-panel-loading-more-message,
   .convex-panel-scroll-message,
   .convex-panel-end-message {
-    color: #a3a3a3 !important;
+    color: #a3a3a3 ;
   }
 
   .convex-panel-observer-target {
-    height: 2rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    height: 2rem ;
+    display: flex ;
+    align-items: center ;
+    justify-content: center ;
   }
 
   /* Live button styles */
   .convex-panel-live-button {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 0.25rem !important;
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    transition: background-color 0.2s !important;
-    font-size: 0.75rem !important;
-    background-color: #3f5295 !important;
-    border: 1px solid rgba(63, 82, 149, 0.25) !important;
-    color: white !important;
+    display: flex ;
+    flex-direction: row ;
+    align-items: center ;
+    gap: 0.25rem ;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    transition: background-color 0.2s ;
+    font-size: 0.75rem ;
+    background-color: #3f5295 ;
+    border: 1px solid rgba(63, 82, 149, 0.25) ;
+    color: white ;
   }
 
   .convex-panel-live-button:hover {
-    background-color: rgba(63, 82, 149, 0.6) !important;
+    background-color: rgba(63, 82, 149, 0.6) ;
   }
 
   .convex-panel-button-icon {
-    width: 0.75rem !important;
-    height: 0.75rem !important;
+    width: 0.75rem ;
+    height: 0.75rem ;
   }
 
   .convex-panel-toolbar-button-container {
-    height: 2rem !important; /* This matches your !h-8 class */
+    height: 2rem ; /* This matches your !h-8 class */
   }
 
   /* Live button styles */
   .convex-panel-live-button {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 0.25rem !important;
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    transition: background-color 0.2s !important;
-    font-size: 0.75rem !important;
-    background-color: #3f5295 !important;
-    border: 1px solid rgba(63, 82, 149, 0.25) !important;
-    color: white !important;
+    display: flex ;
+    flex-direction: row ;
+    align-items: center ;
+    gap: 0.25rem ;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    transition: background-color 0.2s ;
+    font-size: 0.75rem ;
+    background-color: #3f5295 ;
+    border: 1px solid rgba(63, 82, 149, 0.25) ;
+    color: white ;
   }
 
   .convex-panel-live-button:hover {
-    background-color: rgba(63, 82, 149, 0.6) !important;
+    background-color: rgba(63, 82, 149, 0.6) ;
   }
 
   /* Clear button styles */
   .convex-panel-clear-button {
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    transition: background-color 0.2s !important;
-    font-size: 0.75rem !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.25rem !important;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    transition: background-color 0.2s ;
+    font-size: 0.75rem ;
+    display: flex ;
+    align-items: center ;
+    gap: 0.25rem ;
   }
 
   .convex-panel-clear-button:hover {
@@ -1585,24 +1586,24 @@
       58,
       58,
       0.56
-    ) !important; /* This matches your hover:bg-[#3a3a3a90] */
+    ) ; /* This matches your hover:bg-[#3a3a3a90] */
   }
 
   /* Button icon styles */
   .convex-panel-button-icon {
-    width: 0.75rem !important;
-    height: 0.75rem !important;
+    width: 0.75rem ;
+    height: 0.75rem ;
   }
 
   /* Refresh button styles */
   .convex-panel-refresh-button {
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    transition: background-color 0.2s !important;
-    font-size: 0.75rem !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.25rem !important;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    transition: background-color 0.2s ;
+    font-size: 0.75rem ;
+    display: flex ;
+    align-items: center ;
+    gap: 0.25rem ;
   }
 
   .convex-panel-refresh-button:hover {
@@ -1615,32 +1616,32 @@
       58,
       58,
       0.56
-    ) !important; /* This matches your bg-[#3a3a3a90] */
+    ) ; /* This matches your bg-[#3a3a3a90] */
   }
 
   /* Loading spinner styles */
   .convex-panel-loading-spinner {
-    animation: spin 1s linear infinite !important;
-    margin-left: -0.25rem !important;
-    margin-right: 0.25rem !important;
-    height: 0.75rem !important;
-    width: 0.75rem !important;
-    color: white !important;
+    animation: spin 1s linear infinite ;
+    margin-left: -0.25rem ;
+    margin-right: 0.25rem ;
+    height: 0.75rem ;
+    width: 0.75rem ;
+    color: white ;
   }
 
   .convex-panel-spinner-track {
-    opacity: 0.25 !important;
+    opacity: 0.25 ;
   }
 
   .convex-panel-spinner-path {
-    opacity: 0.75 !important;
+    opacity: 0.75 ;
   }
 
   /* Refresh icon styles */
   .convex-panel-refresh-icon {
-    height: 0.75rem !important;
-    width: 0.75rem !important;
-    margin-right: 0.25rem !important;
+    height: 0.75rem ;
+    width: 0.75rem ;
+    margin-right: 0.25rem ;
   }
 
   @keyframes spin {
@@ -1662,65 +1663,65 @@
 
   /* Inline elements */
   .convex-inline {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.25rem !important;
+    display: flex ;
+    align-items: center ;
+    gap: 0.25rem ;
   }
 
   /* Filter container styles */
   .convex-panel-filter-container {
-    flex: 1 !important;
+    flex: 1 ;
   }
 
   /* Input styles for filter, request ID, and limit */
   .convex-panel-filter-input,
   .convex-panel-request-id-input,
   .convex-panel-limit-input {
-    width: 100% !important;
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    font-size: 0.75rem !important;
+    width: 100% ;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    font-size: 0.75rem ;
   }
 
   .convex-panel-filter-input:focus,
   .convex-panel-request-id-input:focus,
   .convex-panel-limit-input:focus {
-    outline: none !important;
+    outline: none ;
   }
 
   /* Checkbox container styles */
   .convex-panel-checkbox-container {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
+    display: flex ;
+    align-items: center ;
+    gap: 0.5rem ;
   }
 
   .convex-panel-checkbox {
-    cursor: pointer !important;
+    cursor: pointer ;
   }
 
   .convex-panel-checkbox-label {
-    font-size: 0.75rem !important;
-    cursor: pointer !important;
+    font-size: 0.75rem ;
+    cursor: pointer ;
   }
 
   /* Retry button styles */
   .convex-panel-retry-button {
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    transition: background-color 0.2s !important;
-    font-size: 0.75rem !important;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    transition: background-color 0.2s ;
+    font-size: 0.75rem ;
   }
 
   .convex-panel-retry-button:hover {
-    background-color: rgba(58, 58, 58, 0.56) !important;
+    background-color: rgba(58, 58, 58, 0.56) ;
   }
 
   /* Log type select styles */
   .convex-panel-log-type-select {
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    font-size: 0.75rem !important;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    font-size: 0.75rem ;
   }
 
   @keyframes spin {
@@ -1734,8 +1735,8 @@
 
   /* Button icon styles */
   .convex-panel-button-icon {
-    width: 0.75rem !important;
-    height: 0.75rem !important;
+    width: 0.75rem ;
+    height: 0.75rem ;
   }
 
   /* Header styling */
@@ -1776,7 +1777,7 @@
     font-size: 0.75rem;
     font-weight: 600;
     color: #9ca3af;
-    font-family: monospace !important;
+    font-family: monospace ;
   }
 
   .convex-panel-header-network-name {
@@ -1806,7 +1807,7 @@
   .convex-panel-header-time,
   .convex-panel-header-type,
   .convex-panel-header-details {
-    font-family: monospace !important;
+    font-family: monospace ;
     font-size: 0.75rem;
     font-weight: 600;
     color: #9ca3af; /* text-gray-400 equivalent */
@@ -1922,7 +1923,7 @@
   }
 
   .convex-panel-data-detail-content {
-    padding: 0rem !important;
+    padding: 0rem ;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -2338,46 +2339,46 @@
 
   /* Info icon and tooltip styles */
   .convex-panel-info-icon {
-    width: 14px !important;
-    height: 14px !important;
-    color: #60a5fa !important;
-    cursor: pointer !important;
-    margin-left: 4px !important;
+    width: 14px ;
+    height: 14px ;
+    color: #60a5fa ;
+    cursor: pointer ;
+    margin-left: 4px ;
   }
 
   .convex-panel-log-info-tooltip {
-    position: relative !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    z-index: 9999 !important;
+    position: relative ;
+    display: inline-flex ;
+    align-items: center ;
+    z-index: 9999 ;
   }
 
   .convex-panel-tooltip-content {
-    position: fixed !important;
-    background-color: #1a1a1a !important;
-    border: 1px solid #333 !important;
-    border-radius: 4px !important;
-    padding: 12px !important;
-    z-index: 99999 !important;
-    min-width: 300px !important;
-    max-width: 500px !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    pointer-events: auto !important;
+    position: fixed ;
+    background-color: #1a1a1a ;
+    border: 1px solid #333 ;
+    border-radius: 4px ;
+    padding: 12px ;
+    z-index: 99999 ;
+    min-width: 300px ;
+    max-width: 500px ;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) ;
+    white-space: normal ;
+    overflow: visible ;
+    pointer-events: auto ;
   }
 
   .convex-panel-tooltip-line {
-    font-size: 0.75rem !important;
-    color: #d0d0d0 !important;
-    font-family: monospace !important;
-    white-space: pre-wrap !important;
-    margin-bottom: 4px !important;
-    line-height: 1.4 !important;
+    font-size: 0.75rem ;
+    color: #d0d0d0 ;
+    font-family: monospace ;
+    white-space: pre-wrap ;
+    margin-bottom: 4px ;
+    line-height: 1.4 ;
   }
 
   .convex-panel-tooltip-line:last-child {
-    margin-bottom: 0 !important;
+    margin-bottom: 0 ;
   }
 
   .convex-panel-health-container {
@@ -2385,7 +2386,7 @@
   }
 
   .convex-panel-health-header {
-    padding: 0.5rem 1rem !important;
+    padding: 0.5rem 1rem ;
     border-bottom: 1px solid #333333;
     top: 0;
     background-color: #1a1a1a;
@@ -2395,59 +2396,59 @@
 
   /* Editable cell styles */
   .convex-panel-editable-cell {
-    cursor: pointer !important;
-    position: relative !important;
-    transition: background-color 0.2s ease !important;
+    cursor: pointer ;
+    position: relative ;
+    transition: background-color 0.2s ease ;
   }
 
   .convex-panel-editable-cell:hover {
-    background-color: transparent !important;
+    background-color: transparent ;
   }
 
   .convex-panel-table-cell.editing {
-    padding: 0 !important;
-    border: 2px solid #3f5295 !important;
+    padding: 0 ;
+    border: 2px solid #3f5295 ;
   }
 
   .convex-panel-table-cell.updating {
-    opacity: 0.7 !important;
-    background-color: rgba(63, 82, 149, 0.2) !important;
+    opacity: 0.7 ;
+    background-color: rgba(63, 82, 149, 0.2) ;
   }
 
   .convex-panel-cell-edit-input {
-    width: 100% !important;
-    height: 100% !important;
-    padding: 0.5rem !important;
-    background-color: #1a1a1a !important;
-    border: none !important;
-    color: white !important;
-    font-size: 0.75rem !important;
-    box-sizing: border-box !important;
+    width: 100% ;
+    height: 100% ;
+    padding: 0.5rem ;
+    background-color: #1a1a1a ;
+    border: none ;
+    color: white ;
+    font-size: 0.75rem ;
+    box-sizing: border-box ;
   }
 
   .convex-panel-cell-edit-input:focus {
-    outline: none !important;
+    outline: none ;
   }
 
   .convex-panel-column-header:hover {
-    background-color: #333 !important;
+    background-color: #333 ;
   }
 
   .convex-panel-log-details-text {
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    max-width: 100% !important;
+    overflow: hidden ;
+    text-overflow: ellipsis ;
+    white-space: nowrap ;
+    max-width: 100% ;
   }
 
   /* Add a new style for the paused live button */
   .convex-panel-live-button-paused {
-    background-color: #953f3f !important; /* Red background for paused state */
-    border: 1px solid rgba(149, 63, 63, 0.25) !important;
+    background-color: #953f3f ; /* Red background for paused state */
+    border: 1px solid rgba(149, 63, 63, 0.25) ;
   }
 
   .convex-panel-live-button-paused:hover {
-    background-color: rgba(149, 63, 63, 0.6) !important;
+    background-color: rgba(149, 63, 63, 0.6) ;
   }
 
   /* Update checker styles */
@@ -3057,11 +3058,11 @@
 
   /* Selected row styles */
   .convex-panel-selected-row {
-    background-color: #264f78 !important;
+    background-color: #264f78 ;
   }
 
   .convex-panel-selected-row:hover {
-    background-color: #1c3a59 !important;
+    background-color: #1c3a59 ;
   }
 
   .convex-panel-table-cell {
@@ -3242,7 +3243,7 @@
   }
 
   .convex-panel-detail-header h3 {
-    font-family: monospace !important;
+    font-family: monospace ;
     font-size: 0.75rem;
     font-weight: 600;
     color: #9ca3af;
@@ -3318,7 +3319,7 @@
     padding: 6px 8px;
     border-radius: 0.375rem;
     margin-bottom: 8px;
-    transition: background-color 0.2s !important;
+    transition: background-color 0.2s ;
   }
 
   .convex-panel-detail-field-input:focus {
@@ -3333,17 +3334,17 @@
 
   .convex-panel-detail-cancel-btn,
   .convex-panel-detail-save-btn {
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    transition: background-color 0.2s !important;
-    font-size: 0.75rem !important;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    transition: background-color 0.2s ;
+    font-size: 0.75rem ;
     cursor: pointer;
     border: none;
     outline: none;
     font-weight: 500;
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.25rem !important;
+    display: flex ;
+    align-items: center ;
+    gap: 0.25rem ;
   }
 
   .convex-panel-detail-cancel-btn {
@@ -3433,7 +3434,7 @@
   }
 
   .convex-panel-detail-field-copy:hover {
-    opacity: 1 !important;
+    opacity: 1 ;
     background-color: rgba(255, 255, 255, 0.1);
   }
 
@@ -3719,46 +3720,46 @@
 
   /* Info icon and tooltip styles */
   .convex-panel-info-icon {
-    width: 14px !important;
-    height: 14px !important;
-    color: #60a5fa !important;
-    cursor: pointer !important;
-    margin-left: 4px !important;
+    width: 14px ;
+    height: 14px ;
+    color: #60a5fa ;
+    cursor: pointer ;
+    margin-left: 4px ;
   }
 
   .convex-panel-log-info-tooltip {
-    position: relative !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    z-index: 9999 !important;
+    position: relative ;
+    display: inline-flex ;
+    align-items: center ;
+    z-index: 9999 ;
   }
 
   .convex-panel-tooltip-content {
-    position: fixed !important;
-    background-color: #1a1a1a !important;
-    border: 1px solid #333 !important;
-    border-radius: 4px !important;
-    padding: 12px !important;
-    z-index: 99999 !important;
-    min-width: 300px !important;
-    max-width: 500px !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    pointer-events: auto !important;
+    position: fixed ;
+    background-color: #1a1a1a ;
+    border: 1px solid #333 ;
+    border-radius: 4px ;
+    padding: 12px ;
+    z-index: 99999 ;
+    min-width: 300px ;
+    max-width: 500px ;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) ;
+    white-space: normal ;
+    overflow: visible ;
+    pointer-events: auto ;
   }
 
   .convex-panel-tooltip-line {
-    font-size: 0.75rem !important;
-    color: #d0d0d0 !important;
-    font-family: monospace !important;
-    white-space: pre-wrap !important;
-    margin-bottom: 4px !important;
-    line-height: 1.4 !important;
+    font-size: 0.75rem ;
+    color: #d0d0d0 ;
+    font-family: monospace ;
+    white-space: pre-wrap ;
+    margin-bottom: 4px ;
+    line-height: 1.4 ;
   }
 
   .convex-panel-tooltip-line:last-child {
-    margin-bottom: 0 !important;
+    margin-bottom: 0 ;
   }
 
   .convex-panel-health-container {
@@ -3766,7 +3767,7 @@
   }
 
   .convex-panel-health-header {
-    padding: 0.5rem 1rem !important;
+    padding: 0.5rem 1rem ;
     border-bottom: 1px solid #333333;
     top: 0;
     background-color: #1a1a1a;
@@ -3776,59 +3777,59 @@
 
   /* Editable cell styles */
   .convex-panel-editable-cell {
-    cursor: pointer !important;
-    position: relative !important;
-    transition: background-color 0.2s ease !important;
+    cursor: pointer ;
+    position: relative ;
+    transition: background-color 0.2s ease ;
   }
 
   .convex-panel-editable-cell:hover {
-    background-color: transparent !important;
+    background-color: transparent ;
   }
 
   .convex-panel-table-cell.editing {
-    padding: 0 !important;
-    border: 2px solid #3f5295 !important;
+    padding: 0 ;
+    border: 2px solid #3f5295 ;
   }
 
   .convex-panel-table-cell.updating {
-    opacity: 0.7 !important;
-    background-color: rgba(63, 82, 149, 0.2) !important;
+    opacity: 0.7 ;
+    background-color: rgba(63, 82, 149, 0.2) ;
   }
 
   .convex-panel-cell-edit-input {
-    width: 100% !important;
-    height: 100% !important;
-    padding: 0.5rem !important;
-    background-color: #1a1a1a !important;
-    border: none !important;
-    color: white !important;
-    font-size: 0.75rem !important;
-    box-sizing: border-box !important;
+    width: 100% ;
+    height: 100% ;
+    padding: 0.5rem ;
+    background-color: #1a1a1a ;
+    border: none ;
+    color: white ;
+    font-size: 0.75rem ;
+    box-sizing: border-box ;
   }
 
   .convex-panel-cell-edit-input:focus {
-    outline: none !important;
+    outline: none ;
   }
 
   .convex-panel-column-header:hover {
-    background-color: #333 !important;
+    background-color: #333 ;
   }
 
   .convex-panel-log-details-text {
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    max-width: 100% !important;
+    overflow: hidden ;
+    text-overflow: ellipsis ;
+    white-space: nowrap ;
+    max-width: 100% ;
   }
 
   /* Add a new style for the paused live button */
   .convex-panel-live-button-paused {
-    background-color: #953f3f !important; /* Red background for paused state */
-    border: 1px solid rgba(149, 63, 63, 0.25) !important;
+    background-color: #953f3f ; /* Red background for paused state */
+    border: 1px solid rgba(149, 63, 63, 0.25) ;
   }
 
   .convex-panel-live-button-paused:hover {
-    background-color: rgba(149, 63, 63, 0.6) !important;
+    background-color: rgba(149, 63, 63, 0.6) ;
   }
 
   /* Update checker styles */
@@ -4438,11 +4439,11 @@
 
   /* Selected row styles */
   .convex-panel-selected-row {
-    background-color: #264f78 !important;
+    background-color: #264f78 ;
   }
 
   .convex-panel-selected-row:hover {
-    background-color: #1c3a59 !important;
+    background-color: #1c3a59 ;
   }
 
   .convex-panel-table-cell {
@@ -4623,7 +4624,7 @@
   }
 
   .convex-panel-detail-header h3 {
-    font-family: monospace !important;
+    font-family: monospace ;
     font-size: 0.75rem;
     font-weight: 600;
     color: #9ca3af;
@@ -4699,7 +4700,7 @@
     padding: 6px 8px;
     border-radius: 0.375rem;
     margin-bottom: 8px;
-    transition: background-color 0.2s !important;
+    transition: background-color 0.2s ;
   }
 
   .convex-panel-detail-field-input:focus {
@@ -4714,17 +4715,17 @@
 
   .convex-panel-detail-cancel-btn,
   .convex-panel-detail-save-btn {
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    transition: background-color 0.2s !important;
-    font-size: 0.75rem !important;
+    padding: 0.375rem 0.75rem ;
+    border-radius: 0.375rem ;
+    transition: background-color 0.2s ;
+    font-size: 0.75rem ;
     cursor: pointer;
     border: none;
     outline: none;
     font-weight: 500;
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.25rem !important;
+    display: flex ;
+    align-items: center ;
+    gap: 0.25rem ;
   }
 
   .convex-panel-detail-cancel-btn {
@@ -4814,7 +4815,7 @@
   }
 
   .convex-panel-detail-field-copy:hover {
-    opacity: 1 !important;
+    opacity: 1 ;
     background-color: rgba(255, 255, 255, 0.1);
   }
 
@@ -4923,7 +4924,7 @@
   }
 
   .convex-panel-full-document-editor-container {
-    height: 460px !important;
+    height: 460px ;
   }
 
   .convex-panel-functions-container {
@@ -4981,9 +4982,9 @@
   .convex-panel-function-text {
     font-family: monospace;
     font-size: 12px;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    white-space: nowrap ;
+    overflow: hidden ;
+    text-overflow: ellipsis ;
   }
 
   .convex-panel-tree-item {
@@ -5002,7 +5003,7 @@
   }
 
   .convex-panel-tree-item.active {
-    background-color: #262626 !important;
+    background-color: #262626 ;
   }
 
   .convex-panel-tree-function-type {
@@ -5048,43 +5049,43 @@
 
   /* Monaco Editor Highlighting */
   .convex-panel-highlighted-line {
-    background-color: rgba(243, 176, 28, 0.2) !important;
-    border-left: 2px solid rgb(243, 176, 28, 0.2) !important;
+    background-color: rgba(243, 176, 28, 0.2) ;
+    border-left: 2px solid rgb(243, 176, 28, 0.2) ;
   }
 
   .convex-panel-highlighted-line-margin {
-    border-left: 2px solid rgb(243, 176, 28, 0.2) !important;
+    border-left: 2px solid rgb(243, 176, 28, 0.2) ;
   }
 
   /* readOnlyEditor styles */
   .readonlyEditor .monaco-editor .cursors-layer .cursor {
-    display: none !important;
+    display: none ;
   }
   .readonlyEditor .monacoLineHighlight {
     background-color: rgb(243, 176, 28, 0.3);
     padding: 2px 0px;
   }
 
-  .monaco-editor .monaco-editor-background,
+  /* .monaco-editor .monaco-editor-background,
   .margin {
-    @apply bg-background-secondary !important;
-  }
+    @apply bg-background-secondary ;
+  } */
 
-  .monaco-editor,
+  /* .monaco-editor,
   .margin,
   .monaco-scrollable-element {
-    @apply bg-background-secondary !important;
-  }
+    @apply bg-background-secondary ;
+  } */
 
   /* Makes spans in hovers not take up too much vertical space */
   .monaco-hover-content span {
-    margin-bottom: 0px !important;
+    margin-bottom: 0px ;
   }
 
   /* Makes icon rendering in monaco work */
   [class^="codicon-"],
   [class*="codicon-"] {
-    font-family: "codicon" !important;
+    font-family: "codicon" ;
   }
   [class^="codicon-"].hover-decoration,
   [class*="codicon-"].hover-decoration {
@@ -5095,9 +5096,9 @@
   }
 
   /* Recharts style */
-  .recharts-tooltip-cursor {
+  /* .recharts-tooltip-cursor {
     @apply fill-background-tertiary;
-  }
+  } */
 
   .recharts-tooltip-wrapper {
     outline: none;

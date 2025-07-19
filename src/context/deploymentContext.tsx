@@ -80,12 +80,12 @@ export type DeploymentInfo = (
   useHasProjectAdminPermissions(projectId: number | undefined): boolean;
   useIsDeploymentPaused(): boolean | undefined;
   useLogDeploymentEvent(): (msg: string, props?: object | null) => void;
-  CloudImport(props: { sourceCloudBackupId: number }): JSX.Element;
+  CloudImport(props: { sourceCloudBackupId: number }): ReactNode;
   TeamMemberLink(props: {
     memberId?: number | null;
     name: string;
-  }): JSX.Element;
-  ErrorBoundary(props: { children: ReactNode }): JSX.Element;
+  }): ReactNode;
+  ErrorBoundary(props: { children: ReactNode }): ReactNode;
   teamsURI: string;
   projectsURI: string;
   deploymentsURI: string;

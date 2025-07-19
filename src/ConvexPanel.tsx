@@ -11,7 +11,7 @@ import Container from './Container';
 import { ConvexReactClient } from 'convex/react';
 import { ConvexClient } from 'convex/browser';
 // @ts-ignore
-import cssText from './styles/convex-panel.css';
+// import cssText from './styles/convex-panel.css';
 import { STORAGE_KEYS, TabTypes } from './utils/constants';
 import { getStorageItem } from './utils/storage';
 import { ConvexLogo } from './components/icons';
@@ -31,7 +31,7 @@ const injectStyles = () => {
 
   const styleElement = document.createElement('style');
   styleElement.id = styleId;
-  styleElement.textContent = cssText;
+  // styleElement.textContent = cssText;
   
   // Append to head
   document.head.appendChild(styleElement);
@@ -171,7 +171,7 @@ const ConvexPanel = ({
   }, []);
 
   // Create admin client
-  const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+  const convexUrl = import.meta.env.NEXT_PUBLIC_CONVEX_URL;
   const adminClient = useMemo(() => {
     if (!isMounted) return null;
     return convexUrl && deployKey ? new ConvexClient(convexUrl) : null;

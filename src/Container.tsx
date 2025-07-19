@@ -170,7 +170,7 @@ const Container = ({
    */
   useMockData = false
 }: ContainerProps) => {
-  let baseUrl = process.env.NEXT_PUBLIC_CONVEX_URL! || deployUrl!;
+  let baseUrl =  deployUrl!;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFetchTime = useRef<number>(0);
@@ -199,7 +199,7 @@ const Container = ({
   const resizeStartSize = useRef({ width: 0, height: 0 });
   const [cursor, setCursor] = useState<number | string>(0);
   const [excludeViewerQueries, setExcludeViewerQueries] = useState(true);
-  const [convexUrl, setConvexUrl] = useState<string>(process.env.NEXT_PUBLIC_CONVEX_URL! || deployUrl!);
+  const [convexUrl, setConvexUrl] = useState<string>(deployUrl!);
   const unregisterConsoleHandler = useRef<(() => void) | null>(null);
   
   /**

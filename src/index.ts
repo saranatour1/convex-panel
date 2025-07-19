@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+/// <reference types="vite/types/importMeta.d.ts" />
 import ConvexPanel from './ConvexPanel';
 import './styles/context-menu.css';
 export { default as LogsToolbar } from './logs/components/LogsToolbar';
