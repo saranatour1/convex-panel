@@ -1,9 +1,9 @@
-import { defineConfig } from 'vite';
+import { defineConfig, PluginOption, UserConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  plugins: [react()],
   server: {
     fs: {
       // Allow serving files from one level up to the project root
@@ -23,4 +23,5 @@ export default defineConfig({
       include: [/monaco-editor/],
     },
   },
-}); 
+  plugins: [ react(), tailwindcss()] as PluginOption[],
+}) satisfies UserConfig
