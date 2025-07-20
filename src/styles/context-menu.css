@@ -1,15 +1,11 @@
+/*
+  Based on TailwindCSS recommendations,
+  consider using classes instead of the `@apply` directive
+  @see https://tailwindcss.com/docs/reusing-styles#avoiding-premature-abstraction
+*/
 .convex-panel-context-menu {
-  user-select: none;
+  @apply select-none;
 }
-
 .convex-panel-context-menu-item {
-  transition: background-color 0.2s;
+  @apply transition-[background-color] duration-[0.2s] hover:bg-[#444] active:bg-[#555];
 }
-
-.convex-panel-context-menu-item:hover {
-  background-color: #444;
-}
-
-.convex-panel-context-menu-item:active {
-  background-color: #555;
-} 

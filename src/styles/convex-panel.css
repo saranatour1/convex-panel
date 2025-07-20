@@ -1,1308 +1,1861 @@
 @import "tailwindcss";
-
-@theme {
-  /*
-   * =============================================================================================
-   * Colors
-   *
-   * We define all your custom colors as CSS variables.
-   * This makes them available as utility classes like `bg-cp-accent`, `text-cp-accent`, etc.
-   * =============================================================================================
-   */
-  --color-cp-accent: rgb(243, 176, 28);
-  --color-cp-purple: rgb(141, 38, 118);
-  --color-cp-purple-50: rgba(141, 38, 118, 0.5);
-  --color-cp-yellow: rgb(243, 176, 28);
-  --color-cp-yellow-50: rgba(243, 176, 28, 0.5);
-
-  /*
-   * =============================================================================================
-   * Spacing
-   *
-   * We can add custom spacing values here.
-   * =============================================================================================
-   */
-  --spacing-10: 2.5rem; /* 40px */
-
-  /*
-   * =============================================================================================
-   * Border Radius
-   * =============================================================================================
-   */
-   --border-radius-xl: 0.75rem; /* 12px */
-
-}
-
-@layer base {
-  /*
-   * =============================================================================================
-   * Base Styles
-   *
-   * You can add any base styles for your elements here.
-   * For example, you can set a default font family.
-   * =============================================================================================
-   */
-  body {
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  }
-}
-
-@layer components {
-  /*
-   * =============================================================================================
-   * Component Styles
-   *
-   * We'll place all your custom component classes here. This keeps them organized and
-   * ensures they work correctly with Tailwind's utility classes.
-   * =============================================================================================
-   */
-  .convex-panel-container {
-    @apply fixed bottom-5 right-3 z-50 flex items-end;
-  }
-
-  .convex-panel-button {
-    @apply flex items-center justify-center w-10 h-10 rounded-full bg-[#1e1e1e] border-none cursor-pointer p-2 shadow-md transition-all duration-200 ease-in-out;
-  }
-
-  .convex-panel-button:hover {
-    @apply bg-[#2d2d2d] shadow-lg transform scale-105;
-  }
-
-  .convex-panel-button:active {
-    @apply transform scale-95;
-  }
-
-  .convex-panel-button svg {
-    @apply w-6 h-6 text-white;
-  }
-
-  .convex-panel-logo {
-    @apply w-9 h-9 rounded-full overflow-hidden object-contain p-0 m-0;
-  }
-
-  .convex-panel-card {
-    @apply shadow-lg bg-[#1e1e1e] rounded-xl border border-solid border-[#333] overflow-hidden flex flex-col h-[640px] max-h-[640px] p-2 relative mr-4;
-  }
-
-  .convex-panel-header {
-    @apply rounded-t-md px-3 h-8 shrink-0 flex w-full relative border-b border-solid border-[#444] bg-[#38383a] select-none;
-  }
-
-  .convex-panel-tabs {
-    @apply flex w-full select-none items-center justify-between gap-1 border-b border-solid border-[#444] bg-[#141414] text-xs;
-  }
-
-  .convex-panel-tab {
-    @apply px-3 h-9 flex items-center gap-1 border-b-4 border-solid border-transparent text-white;
-  }
-
-  .convex-panel-tab[data-state="active"] {
-    @apply border-b-cp-purple bg-cp-purple-50;
-  }
-
-  .convex-panel-devtools-tabs {
-    @apply flex w-full select-none items-center justify-between gap-1 border-b border-solid border-[#444] bg-[#141414] text-xs;
-  }
-
-  .convex-panel-devtools-tab {
-    @apply px-3 h-9 flex items-center gap-1 border-b-4 border-solid border-transparent text-white;
-  }
-
-  .convex-panel-devtools-tab[data-state="active"] {
-    @apply border-b-cp-yellow bg-cp-yellow-50;
-  }
-
-  .convex-panel-tab[data-state="inactive"] {
-    @apply bg-[#141414];
-  }
-
-  .convex-panel-content {
-    @apply flex-1 overflow-auto;
-  }
-
-  .convex-panel-table {
-    @apply w-full border-collapse;
-  }
-
-  .convex-panel-table th {
-    @apply bg-[#2a2a2a] p-2 text-left font-medium border-b border-solid border-[#444];
-  }
-
-  .convex-panel-table td {
-    @apply p-2 border-b border-solid border-[#333];
-  }
-
-  .convex-panel-table tr:hover {
-    @apply bg-white/5;
-  }
-
-  .convex-panel-toolbar {
-    @apply flex items-center p-2 gap-2 border-b border-solid border-[#444] bg-[#1a1a1a];
-  }
-
-  .convex-panel-input {
-    @apply bg-[#2a2a2a] border border-solid border-[#444] rounded p-1 text-white text-sm;
-  }
-
-  .convex-panel-button-sm {
-    @apply bg-[#3f5295] rounded p-1 text-white cursor-pointer;
-  }
-
-  .convex-panel-button-sm:hover {
-    @apply opacity-60;
-  }
-
-  .convex-panel-window-control {
-    @apply w-2.5 h-2.5 rounded-full cursor-pointer relative flex items-center justify-center;
-  }
-
-  .convex-panel-close {
-    @apply bg-[#ff5f57];
-  }
-
-  .convex-panel-close:hover {
-    @apply bg-[#b33e3a];
-  }
-
-  .convex-panel-minimize {
-    @apply bg-[#ffbd2e];
-  }
-
-  .convex-panel-minimize:hover {
-    @apply bg-[#b38420];
-  }
-
-  .convex-panel-maximize {
-    @apply bg-[#28c840];
-  }
-
-  .convex-panel-maximize:hover {
-    @apply bg-[#1a8f2a];
-  }
-
-  .convex-panel-success {
-    @apply text-[#4caf50];
-  }
-
-  .convex-panel-error {
-    @apply text-[#f44336];
-  }
-
-  .convex-panel-warning {
-    @apply text-[#ff9800];
-  }
-
-  /* Sidebar styles */
-  .convex-panel-sidebar {
-    @apply border-r border-solid border-[#404040] flex flex-col bg-[#141414] transition-transform duration-300 ease-in-out min-h-[420px] rounded-bl-md;
-  }
-
-  .convex-panel-sidebar-expanded {
-    @apply w-64;
-  }
-
-  .convex-panel-sidebar-collapsed {
-    @apply w-12;
-  }
-
-  .convex-panel-sidebar-header {
-    @apply border-b border-solid border-[#404040] flex flex-col pt-4 pb-4;
-  }
-
-  .convex-panel-sidebar-header-expanded {
-    @apply p-4;
-  }
-
-  .convex-panel-sidebar-header-collapsed {
-    @apply items-center;
-  }
-
-  .convex-panel-sidebar-title-container {
-    @apply flex items-center justify-between mb-2;
-  }
-
-  .convex-panel-sidebar-title-wrapper {
-    @apply flex items-center justify-between w-full gap-2;
-  }
-
-  .convex-panel-sidebar-title {
-    @apply text-sm font-medium;
-  }
-
-  .convex-panel-sidebar-toggle-button {
-    @apply p-1 rounded;
-  }
-
-  .convex-panel-sidebar-toggle-button:hover {
-    @apply bg-[#404040];
-  }
-
-  .convex-panel-sidebar-search {
-    @apply w-full py-1.5 px-3 rounded-md text-xs font-mono;
-  }
-
-  .convex-panel-sidebar-search:focus {
-    @apply outline-none;
-  }
-
-  .convex-panel-sidebar-expand-button {
-    @apply p-1 rounded ml-auto mr-auto;
-  }
-
-  .convex-panel-sidebar-expand-button:hover {
-    @apply bg-[#404040];
-  }
-
-  .convex-panel-sidebar-content {
-    @apply overflow-y-auto flex-1;
-  }
-
-  .convex-panel-sidebar-content::-webkit-scrollbar {
-    @apply w-1;
-  }
-
-  .convex-panel-sidebar-content::-webkit-scrollbar-track {
-    @apply bg-[#262626];
-  }
-
-  .convex-panel-sidebar-content::-webkit-scrollbar-thumb {
-    @apply bg-[#525252];
-  }
-
-  .convex-panel-sidebar-content::-webkit-scrollbar-thumb:hover {
-    @apply bg-[#737373];
-  }
-
-  .convex-panel-sidebar-table-button {
-    @apply w-full text-left py-2 px-4 text-sm;
-  }
-.convex-panel-sidebar-table-button:hover {
-    @apply bg-[#262626];
-  }
-
-  .convex-panel-sidebar-table-selected {
-    @apply bg-[#262626] text-white;
-  }
-
-  .convex-panel-sidebar-table-unselected {
-    @apply text-neutral-400;
-  }
-
-  .convex-panel-sidebar-table-collapsed {
-    @apply text-center overflow-hidden text-ellipsis whitespace-nowrap;
-  }
-
-  /* Utility classes from the original file - these can often be replaced by direct utility usage in HTML */
-  .flex {
-    @apply flex;
-  }
-
-  .flex-col {
-    @apply flex-col;
-  }
-
-  .items-center {
-    @apply items-center;
-  }
-
-  .justify-center {
-    @apply justify-center;
-  }
-
-  .justify-between {
-    @apply justify-between;
-  }
-
-  .gap-1 {
-    @apply gap-1;
-  }
-
-  .gap-1\.5 {
-    @apply gap-1.5;
-  }
-
-  .gap-2 {
-    @apply gap-2;
-  }
-
-  .h-full {
-    @apply h-full;
-  }
-
-  .w-full {
-    @apply w-full;
-  }
-
-  .max-w-72 {
-    @apply max-w-72;
-  }
-
-  .grow {
-    @apply grow;
-  }
-
-  .shrink-0 {
-    @apply shrink-0;
-  }
-  
-  /* ... many other utility classes follow ... */
-
-  /* Container component specific styles */
-  .convex-panel-header-content {
-    @apply w-full flex items-center justify-center relative text-xs;
-  }
-
-  .convex-panel-window-controls {
-    @apply absolute top-0 left-0 h-full flex items-center gap-1.5 z-10;
-  }
-
-  .convex-panel-window-control-icon {
-    @apply absolute opacity-0 text-[8px] font-bold;
-  }
-
-  .convex-panel-window-control-icon:hover {
-    @apply opacity-100;
-  }
-
-  .convex-panel-close-icon {
-    @apply text-[#4a1917];
-  }
-
-  .convex-panel-minimize-icon {
-    @apply text-[#4a3917];
-  }
-
-  .convex-panel-maximize-icon {
-    @apply text-[#1a4a1e];
-  }
-  
-  .convex-panel-url-container {
-    @apply flex items-center justify-center border border-zinc-800 text-xs text-zinc-400 text-center rounded-sm bg-zinc-900 w-full max-w-72 py-0.5 overflow-hidden text-ellipsis whitespace-nowrap;
-  }
-
-  .convex-panel-url-link {
-    @apply flex items-center w-full text-inherit no-underline cursor-pointer;
-  }
-
-  .convex-panel-url-link:hover {
-    @apply text-white;
-  }
-
-  .convex-panel-url-icon {
-    @apply inline-block size-3 mr-2;
-  }
-
-  .convex-panel-url-text {
-    @apply grow min-w-0 text-center;
-  }
-
-    /* Tab styles */
-  .convex-panel-tab-list {
-    @apply flex overflow-x-auto cursor-pointer outline-none;
-  }
-
-  .convex-panel-tab-button {
-    @apply px-3 h-[2.25rem] flex items-center gap-1 border-b-4 border-transparent;
-  }
-
-  .convex-panel-tab-button[data-state="inactive"] {
-    @apply bg-[#141414];
-  }
-
-  .convex-panel-tab-button[data-state="active"] {
-    @apply border-b-[rgb(141,38,118)] bg-[rgba(141,38,118,0.5)];
-  }
-
-  .convex-panel-devtools-tab-button {
-    @apply px-3 h-[2.25rem] flex items-center gap-1 border-b-4 border-transparent;
-  }
-
-  .convex-panel-devtools-tab-button[data-state="active"] {
-    @apply border-b-[rgb(243,176,28)] bg-[rgba(243,176,28,0.5)];
-  }
-
-  .convex-panel-devtools-tab-button[data-state="inactive"] {
-    @apply bg-[#141414];
-  }
-
-  .convex-panel-tab-icon {
-    @apply size-[1.125rem] shrink-0 text-neutral-400 mt-[-4px];
-  }
-
-  .convex-panel-tab-data-icon {
-    @apply size-3 shrink-0 text-neutral-400;
-  }
-
-  .convex-panel-tab-health-icon {
-    @apply size-[1.125rem] shrink-0 text-neutral-400;
-  }
-
-  .convex-panel-tab-text {
-    @apply text-neutral-100;
-  }
-
-  .convex-panel-settings-container {
-    @apply pr-2;
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .convex-panel-card {
-      @apply w-[calc(100vw-2rem)] h-[640px];
-    }
-  }
-
-  /* Additional utility classes for error display - Can be replaced by direct utilities */
-  .flex-col {
-    @apply flex flex-col;
-  }
-
-  .items-center {
-    @apply items-center;
-  }
-
-  .justify-center {
-    @apply justify-center;
-  }
-
-  .h-full {
-    @apply h-full;
-  }
-
-  .p-4 {
-    @apply p-4;
-  }
-
-  .mb-4 {
-    @apply mb-4;
-  }
-
-  .gap-2 {
-    @apply gap-2;
-  }
-
-  /* Theme-specific styles */
-  .convex-panel-container-theme {
-    @apply bg-[#1e1e1e] border border-[#333333];
-  }
-
-  .convex-panel-header-theme {
-    @apply bg-[#1e1e1e] border-b border-[#333333];
-  }
-
-  .convex-panel-toolbar-theme {
-    @apply bg-[#1e1e1e] border-b border-[#333333];
-  }
-
-  .convex-panel-table-theme {
-    @apply text-white;
-  }
-
-  .convex-panel-table-header-theme {
-    @apply bg-[#2a2a2a] text-xs uppercase;
-  }
-
-  .convex-panel-table-row-theme {
-    @apply border-b border-[#333333];
-  }
-
-  .convex-panel-table-row-theme:hover {
-    @apply bg-[#2a2a2a];
-  }
-
-  .convex-panel-text-theme {
-    @apply text-white;
-  }
-
-  .convex-panel-button-theme {
-    @apply bg-[#4a77e5] text-white;
-  }
-
-  .convex-panel-button-theme:hover {
-    @apply opacity-90;
-  }
-
-  .convex-panel-input-theme {
-    @apply bg-[#2a2a2a] text-white border border-[#333333];
-  }
-
-  .convex-panel-success-text-theme {
-    @apply text-green-400;
-  }
-
-  .convex-panel-error-text-theme {
-    @apply text-red-400;
-  }
-
-  .convex-panel-warning-text-theme {
-    @apply text-yellow-400;
-  }
-
-    /* Settings Button styles */
-  .convex-panel-settings-button {
-    @apply p-1 rounded-md text-neutral-400 transition-colors duration-200;
-  }
-
-  .convex-panel-settings-button:hover {
-    @apply text-white bg-neutral-800;
-  }
-
-  /* Modal styles */
-  .convex-panel-modal-overlay {
-    @apply fixed inset-0 flex items-center justify-center z-50;
-  }
-
-  .convex-panel-modal-backdrop {
-    @apply absolute inset-0 bg-black/80;
-  }
-
-  .convex-panel-modal-container {
-    @apply relative z-10 w-[600px] max-w-[90%];
-  }
-
-  /* Settings Modal styles */
-  .convex-panel-settings-modal {
-    @apply shadow-lg bg-[#1e1e1e] rounded-xl border border-[#333] mr-4 overflow-hidden flex flex-col h-[13.6rem] max-h-[40rem] p-2 relative;
-  }
-
-  .convex-panel-settings-backdrop {
-    @apply fixed inset-0 bg-black/50;
-  }
-
-  .convex-panel-settings-content {
-    @apply bg-[#171717] rounded-lg h-[200px] min-h-[200px] max-h-[200px];
-  }
-
-  .convex-panel-settings-content-full {
-    @apply w-full;
-  }
-
-  .convex-panel-settings-content-centered {
-    @apply w-full max-w-md mx-auto;
-  }
-
-  .convex-panel-settings-header {
-    @apply flex justify-between items-center p-2 px-4 border-b border-[#333];
-  }
-
-  .convex-panel-settings-title {
-    @apply text-lg font-normal text-white;
-  }
-
-  .convex-panel-settings-close-button {
-    @apply text-neutral-400;
-  }
-
-  .convex-panel-settings-close-button:hover {
-    @apply text-white;
-  }
-
-  .convex-panel-settings-body {
-    @apply flex flex-1 overflow-hidden h-[155px];
-  }
-
-  .convex-panel-settings-sidebar {
-    @apply w-48 border-r border-[#333];
-  }
-
-  .convex-panel-settings-tab-button {
-    @apply w-full text-left p-2;
-  }
-
-  .convex-panel-settings-tab-active {
-    @apply bg-neutral-800 text-white;
-  }
-
-  .convex-panel-settings-tab-inactive {
-    @apply text-neutral-300;
-  }
-
-  .convex-panel-settings-tab-inactive:hover {
-    @apply bg-neutral-800;
-  }
-
-  .convex-panel-settings-content-area {
-    @apply flex-1 overflow-y-auto rounded-br-lg;
-  }
-
-  .convex-panel-settings-content-area::-webkit-scrollbar {
-    @apply w-1 h-1;
-  }
-
-  .convex-panel-settings-content-area::-webkit-scrollbar-track {
-    @apply bg-neutral-800;
-  }
-
-  .convex-panel-settings-content-area::-webkit-scrollbar-thumb {
-    @apply bg-neutral-600;
-  }
-
-  .convex-panel-settings-content-area::-webkit-scrollbar-thumb:hover {
-    @apply bg-neutral-500;
-  }
-
-  .convex-panel-settings-section {
-    @apply p-4;
-  }
-
-  .convex-panel-settings-option {
-    @apply mb-4;
-  }
-
-  .convex-panel-settings-label {
-    @apply flex items-center gap-2 cursor-pointer;
-  }
-
-  .convex-panel-settings-checkbox {
-    @apply rounded text-blue-500 h-4 w-4 bg-neutral-700 border border-neutral-600;
-  }
-
-  .convex-panel-settings-label-text {
-    @apply text-neutral-200;
-  }
-
-  .convex-panel-settings-description {
-    @apply text-neutral-400 text-xs mt-1 ml-6;
-  }
-
-  .convex-panel-settings-health-text {
-    @apply text-xs font-medium h-full w-full flex items-center justify-center text-white;
-  }
-
-    /* Log Row Styles */
-  .convex-panel-log-row {
-    @apply p-2 px-4 flex flex-col cursor-pointer border-b border-[#222222] bg-[#121212];
-  }
-
-  .convex-panel-log-row:hover {
-    @apply bg-[#1e1e1e];
-  }
-
-  .convex-panel-log-row-simplified {
-    @apply p-2 px-4 cursor-pointer border-b border-[#222222] bg-[#121212];
-  }
-
-  .convex-panel-log-row-simplified:hover {
-    @apply bg-[#1e1e1e];
-  }
-
-  /* Error background for log rows */
-  .convex-panel-error-background {
-    @apply bg-[rgba(220,38,38,0.15)];
-  }
-
-  .convex-panel-error-background:hover {
-    @apply bg-[rgba(220,38,38,0.25)];
-  }
-
-  .convex-panel-log-row-full-content {
-    @apply flex items-center gap-2 w-full;
-  }
-
-  .convex-panel-log-row-content {
-    @apply flex items-center w-full;
-  }
-
-  .convex-panel-log-network-row-content {
-    @apply flex items-center w-full;
-  }
-
-  .convex-panel-log-network-status {
-    @apply text-xs w-16 text-center shrink-0 overflow-hidden text-ellipsis whitespace-nowrap;
-  }
-
-  .convex-panel-log-network-method {
-    @apply border border-[#333] rounded-[15%] p-1 text-[11px] mr-1 bg-[#222];
-  }
-
-  .convex-panel-log-network-type {
-    @apply text-xs w-24 text-center shrink-0 overflow-hidden text-ellipsis whitespace-nowrap;
-  }
-
-  .convex-panel-log-network-size {
-    @apply text-xs w-24 text-center shrink-0;
-  }
-
-  .convex-panel-log-network-time {
-    @apply text-xs w-24 text-center shrink-0;
-  }
-
-  .convex-panel-log-network-name {
-    @apply text-xs text-neutral-400 w-96 font-mono;
-  }
-
-  .convex-panel-log-timestamp {
-    @apply text-xs text-neutral-400 w-48 font-mono;
-  }
-
-  .convex-panel-log-request-id {
-    @apply text-xs text-blue-400 w-24 font-mono overflow-hidden text-ellipsis whitespace-nowrap;
-  }
-
-  .convex-panel-log-status {
-    @apply text-xs w-16 text-center shrink-0;
-  }
-
-  .convex-panel-success-text {
-    @apply text-green-400;
-  }
-
-  .convex-panel-error-text {
-    @apply text-red-400;
-  }
-
-  .convex-panel-gray-text {
-    @apply text-neutral-400;
-  }
-
-  .convex-panel-cached-text {
-    @apply text-neutral-500;
-  }
-
-  .convex-panel-log-execution-time {
-    @apply text-xs text-purple-400 w-24;
-  }
-
-  .convex-panel-log-type {
-    @apply text-xs text-blue-400 w-12;
-  }
-
-  .convex-panel-log-details-container {
-    @apply text-xs text-white flex-1 font-mono overflow-hidden text-ellipsis whitespace-nowrap flex items-center gap-2;
-  }
-
-  .convex-panel-log-details {
-    @apply text-xs text-white flex-1 font-mono overflow-hidden text-ellipsis;
-  }
-
-  .convex-panel-log-details-truncated {
-    @apply max-w-[150px] whitespace-nowrap overflow-hidden text-ellipsis;
-  }
-
-    /* Active Filters Styles */
-  .convex-panel-active-filters {
-    @apply flex flex-wrap gap-2 w-full;
-  }
-
-  .convex-panel-filter-tag {
-    @apply py-1.5 px-3 rounded-md transition-colors duration-200 text-xs flex items-center cursor-pointer;
-  }
-
-  .convex-panel-filter-tag:hover {
-    @apply bg-[rgba(58,58,58,0.56)];
-  }
-
-  .convex-panel-filter-field {
-    @apply font-semibold border-r border-neutral-700 pr-2;
-  }
-
-  .convex-panel-filter-operator {
-    @apply opacity-80 font-mono border-r border-neutral-700 px-2;
-  }
-
-  .convex-panel-filter-value {
-    @apply font-mono pl-2;
-  }
-
-  .convex-panel-filter-remove-button {
-    @apply ml-2 text-red-500 bg-neutral-800 rounded-md;
-  }
-
-  .convex-panel-filter-remove-button:hover {
-    @apply text-red-300;
-  }
-
-  .convex-panel-filter-remove-icon {
-    @apply size-3;
-  }
-
-  .convex-panel-clear-filters-button {
-    @apply flex items-center gap-1 py-1.5 px-3 rounded-md transition-colors duration-200 text-xs ml-auto;
-  }
-
-  .convex-panel-clear-filters-button:hover {
-    @apply bg-[rgba(58,58,58,0.56)];
-  }
-
-  .convex-panel-clear-filters-icon {
-    @apply size-3;
-  }
-
-  /* Content Styles */
-  .convex-panel-table-wrapper {
-    @apply w-full overflow-auto min-w-0; /* Allows table to shrink */
-  }
-
-  .convex-panel-data-table {
-    @apply w-full text-sm border-collapse table-auto;
-  }
-
-  .convex-panel-table-header-row {
-    @apply bg-neutral-800;
-  }
-
-  .convex-panel-checkbox-header {
-    @apply sticky left-0 z-10 bg-neutral-800 w-8 p-2;
-  }
-
-  .convex-panel-column-header {
-    @apply text-left p-2 font-medium border-r border-neutral-700 min-w-[150px];
-  }
-
-  .convex-panel-header-content {
-    @apply flex items-center justify-start;
-  }
-
-  .convex-panel-filter-button {
-    @apply p-1 rounded;
-  }
-
-  .convex-panel-filter-active {
-    @apply bg-[#3f5295];
-  }
-
-  .convex-panel-filter-active:hover {
-    @apply bg-[rgba(63,82,149,0.6)];
-  }
-
-  .convex-panel-filter-hovered {
-    @apply bg-neutral-700;
-  }
-
-  .convex-panel-filter-hovered:hover {
-    @apply bg-neutral-600;
-  }
-
-  .convex-panel-filter-hidden {
-    @apply opacity-0;
-  }
-  
-  tr:hover .convex-panel-filter-hidden,
-  .convex-panel-filter-hidden:hover {
-    @apply opacity-100 bg-neutral-700;
-  }
-
-  .convex-panel-table-row {
-    @apply border-b border-neutral-700;
-  }
-
-  .convex-panel-table-row:hover {
-    @apply bg-neutral-800;
-  }
-
-  .convex-panel-checkbox-cell {
-    @apply sticky left-0 z-10 bg-neutral-800 p-2 text-center;
-  }
-
-  .convex-panel-checkbox {
-    @apply rounded;
-  }
-
-  .convex-panel-table-cell {
-    @apply cursor-pointer p-2 border-r border-neutral-700 text-xs;
-  }
-
-  .convex-panel-header-content-main {
-    @apply flex items-center justify-center;
-  }
-
-  .convex-panel-id-value {
-    @apply text-blue-400 cursor-pointer font-mono;
-  }
-
-  .convex-panel-empty-value {
-    @apply text-neutral-500 italic;
-  }
-
-  .convex-panel-table-footer {
-    @apply py-4 text-center text-sm;
-  }
-
-  .convex-panel-loading-message,
-  .convex-panel-empty-message,
-  .convex-panel-loading-more-message,
-  .convex-panel-scroll-message,
-  .convex-panel-end-message {
-    @apply text-neutral-400;
-  }
-
-  .convex-panel-observer-target {
-    @apply h-8 flex items-center justify-center;
-  }
-    /* Live button styles */
-  .convex-panel-live-button {
-    @apply flex flex-row items-center gap-1 py-1.5 px-3 rounded-md transition-colors duration-200 text-xs bg-[#3f5295] border border-[rgba(63,82,149,0.25)] text-white;
-  }
-
-  .convex-panel-live-button:hover {
-    @apply bg-[rgba(63,82,149,0.6)];
-  }
-
-  /* Paused live button style */
-  .convex-panel-live-button-paused {
-    @apply bg-[#953f3f] border-[rgba(149,63,63,0.25)];
-  }
-
-  .convex-panel-live-button-paused:hover {
-    @apply bg-[rgba(149,63,63,0.6)];
-  }
-
-  .convex-panel-button-icon {
-    @apply size-3;
-  }
-
-  .convex-panel-toolbar-button-container {
-    @apply h-8; /* Matches !h-8 */
-  }
-
-  /* Clear button styles */
-  .convex-panel-clear-button {
-    @apply py-1.5 px-3 rounded-md transition-colors duration-200 text-xs flex items-center gap-1;
-  }
-
-  .convex-panel-clear-button:hover {
-    @apply bg-[rgba(58,58,58,0.56)]; /* Matches hover:bg-[#3a3a3a90] */
-  }
-
-  /* Refresh button styles */
-  .convex-panel-refresh-button {
-    @apply py-1.5 px-3 rounded-md transition-colors duration-200 text-xs flex items-center gap-1;
-  }
-
-  .convex-panel-refresh-button:hover {
-    @apply text-white/30; /* Equivalent to #fefefe30 */
-  }
-
-  .convex-panel-button-loading {
-    @apply bg-[rgba(58,58,58,0.56)]; /* Matches bg-[#3a3a3a90] */
-  }
-
-  /* Loading spinner styles */
-  .convex-panel-loading-spinner {
-    @apply animate-spin -ml-1 mr-1 size-3 text-white;
-  }
-
-  .convex-panel-spinner-track {
-    @apply opacity-25;
-  }
-
-  .convex-panel-spinner-path {
-    @apply opacity-75;
-  }
-
+@import "./data-table-sorting.css";
+@import "./context-menu.css";
+
+/*
+  Based on TailwindCSS recommendations,
+  consider using classes instead of the `@apply` directive
+  @see https://tailwindcss.com/docs/reusing-styles#avoiding-premature-abstraction
+*/
+@theme{
+  --animate-spin: spin360 1s linear infinite;
+
+  /* define the @keyframes */
   @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
   }
+}
 
-  /* Refresh icon styles */
-  .convex-panel-refresh-icon {
-    @apply size-3 mr-1;
+/* Base styles for Convex Panel */
+.convex-panel-container {
+  @apply fixed z-50 flex items-end right-3 bottom-5;
+}
+/* Scoped utility classes */
+.convex-panel-container .flex {
+  @apply flex flex;
+}
+.convex-panel-container .flex-col {
+  @apply flex-col flex-col flex flex-col;
+}
+.convex-panel-container .items-center {
+  @apply items-center items-center items-center;
+}
+.convex-panel-container .justify-between {
+  @apply justify-between justify-between;
+}
+.convex-panel-container .gap-2 {
+  @apply gap-2 gap-2 gap-2;
+}
+.convex-panel-container .mb-4 {
+  @apply mb-4 mb-4 mb-4;
+}
+.convex-panel-container .mt-4 {
+  @apply mt-4;
+}
+.convex-panel-container .h-full {
+  @apply h-full h-full h-full;
+}
+.convex-panel-container .w-full {
+  @apply w-full w-full;
+}
+.convex-panel-container .h-4 {
+  @apply h-4;
+}
+.convex-panel-container .w-4 {
+  @apply w-4;
+}
+.convex-panel-container .overflow-hidden {
+  @apply overflow-hidden;
+}
+.convex-panel-container .rounded {
+  @apply rounded-md rounded;
+}
+.convex-panel-container .text-sm {
+  @apply text-sm;
+}
+.convex-panel-container .text-xs {
+  @apply text-xs text-xs;
+}
+.convex-panel-container .font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+.convex-panel-container .font-medium {
+  @apply font-medium;
+}
+.convex-panel-container .text-gray-200 {
+  @apply text-gray-200;
+}
+.convex-panel-container .text-gray-300 {
+  @apply text-gray-300;
+}
+.convex-panel-container .text-red-500 {
+  @apply text-red-500 text-[#f44336];
+}
+.convex-panel-container .bg-gray-700 {
+  @apply bg-gray-700;
+}
+.convex-panel-container .bg-gray-800 {
+  @apply bg-gray-800;
+}
+.convex-panel-container .bg-blue-600 {
+  @apply bg-blue-600 bg-blue-600;
+}
+.convex-panel-container .hover\:bg-blue-700:hover {
+  @apply bg-blue-700;
+}
+.convex-panel-container .bg-red-900\/20 {
+  @apply bg-[rgba(127,29,29,0.2)];
+}
+.convex-panel-container .border-gray-700 {
+  @apply border-gray-700;
+}
+.convex-panel-container .px-2 {
+  @apply px-2;
+}
+.convex-panel-container .px-4 {
+  @apply px-4 px-4;
+}
+.convex-panel-container .py-0\.5 {
+  @apply py-0.5 py-0.5;
+}
+.convex-panel-container .py-2 {
+  @apply py-2 py-2;
+}
+.convex-panel-container .p-4 {
+  @apply p-4 p-4 p-4;
+}
+.convex-panel-container .flex-1 {
+  @apply flex-1;
+}
+.convex-panel-container .border-none {
+  @apply border-[none];
+}
+.convex-panel-container .overflow-auto {
+  @apply overflow-auto;
+}
+.convex-panel-container .text-cp-accent {
+  @apply text-[rgb(243,176,28)];
+}
+.convex-panel-container .border-cp-accent {
+  @apply border-[rgb(243,176,28)];
+}
+.convex-panel-container .convex-panel-button {
+  @apply flex items-center justify-center w-10 h-10 bg-[#1e1e1e] cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.2)] transition-all duration-[0.2s] ease-[ease-in-out] p-2 rounded-[50%] border-[none] hover:bg-[#2d2d2d] hover:shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95;
+}
+.convex-panel-container .convex-panel-button svg {
+  @apply w-6 h-6 text-white;
+}
+.convex-panel-container .convex-panel-logo {
+  @apply w-9 h-9 overflow-hidden object-contain m-0 p-0 rounded-full;
+}
+.convex-panel-container .convex-panel-card {
+  @apply shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)] bg-[#1e1e1e] border overflow-hidden flex flex-col h-[640px] max-h-[640px] relative mr-4 p-2 rounded-xl border-solid border-[#333];
+}
+.convex-panel-container .convex-panel-header-container {
+  @apply rounded-lg;
+}
+.convex-panel-container .convex-panel-header {
+  @apply h-8 shrink-0 flex w-full relative bg-[#38383a] select-none px-3 py-0 rounded-[0.375rem_0.375rem_0_0] border-b-[#444] border-b border-solid;
+}
+.convex-panel-container .convex-panel-tabs {
+  @apply flex w-full select-none items-center justify-between gap-1 bg-[#141414] text-xs border-b-[#444] border-b border-solid;
+}
+.convex-panel-container .convex-panel-tab {
+  @apply h-9 flex items-center gap-1 text-white px-3 py-0 border-b-4 border-b-transparent border-solid;
+}
+.convex-panel-container .convex-panel-tab[data-state="active"] {
+  @apply bg-[rgba(141,38,118,0.5)] border-b-[rgb(141,38,118)];
+}
+.convex-panel-container .convex-panel-devtools-tabs {
+  @apply flex w-full select-none items-center justify-between gap-1 bg-[#141414] text-xs border-b-[#444] border-b border-solid;
+}
+.convex-panel-container .convex-panel-devtools-tab {
+  @apply h-9 flex items-center gap-1 text-white px-3 py-0 border-b-4 border-b-transparent border-solid;
+}
+.convex-panel-container .convex-panel-tab[data-state="inactive"] {
+  @apply bg-[#141414];
+}
+.convex-panel-container .convex-panel-content {
+  @apply flex-1 overflow-auto;
+}
+.convex-panel-container .convex-panel-table {
+  @apply w-full border-collapse;
+}
+.convex-panel-container .convex-panel-table th {
+  @apply bg-[#2a2a2a] text-left font-medium p-2 border-b-[#444] border-b border-solid;
+}
+.convex-panel-container .convex-panel-table td {
+  @apply p-2 border-b-[#333] border-b border-solid;
+}
+.convex-panel-container .convex-panel-table tr:hover {
+  @apply bg-[rgba(255,255,255,0.05)];
+}
+/* Toolbar styles */
+.convex-panel-container .convex-panel-toolbar {
+  @apply flex items-center gap-2 bg-[#1a1a1a] p-2 border-b-[#444] border-b border-solid;
+}
+.convex-panel-container .convex-panel-input {
+  @apply bg-[#2a2a2a] border rounded text-white text-sm px-2 py-1 border-solid border-[#444];
+}
+.convex-panel-container .convex-panel-button-sm {
+  @apply bg-[#3f5295] rounded text-[white] cursor-pointer px-2 py-1 hover:bg-[rgba(63,82,149,0.6)];
+}
+/* Window controls */
+.convex-panel-container .convex-panel-window-control {
+  @apply w-2.5 h-2.5 cursor-pointer relative flex items-center justify-center rounded-[50%];
+}
+.convex-panel-container .convex-panel-close {
+  @apply bg-[#ff5f57] hover:bg-[#b33e3a];
+}
+.convex-panel-container .convex-panel-minimize {
+  @apply bg-[#ffbd2e] hover:bg-[#b38420];
+}
+.convex-panel-container .convex-panel-maximize {
+  @apply bg-[#28c840] hover:bg-[#1a8f2a];
+}
+/* Success/Error states */
+.convex-panel-container .convex-panel-success {
+  @apply text-[#4caf50];
+}
+.convex-panel-container .convex-panel-error {
+  @apply text-[#f44336];
+}
+.convex-panel-container .convex-panel-warning {
+  @apply text-[#ff9800];
+}
+/* Sidebar styles */
+.convex-panel-container .convex-panel-sidebar {
+  @apply border-r-neutral-700 flex flex-col bg-[#141414] transition-[width] duration-[0.3s] ease-[ease] min-h-[420px] rounded-bl-md border-r border-solid;
+}
+.convex-panel-container .convex-panel-sidebar-expanded {
+  @apply w-64;
+}
+.convex-panel-container .convex-panel-sidebar-collapsed {
+  @apply w-12;
+}
+.convex-panel-container .convex-panel-sidebar-header {
+  @apply border-b-neutral-700 flex flex-col py-4 border-b border-solid;
+}
+.convex-panel-container .convex-panel-sidebar-header-expanded {
+  @apply p-4;
+}
+.convex-panel-container .convex-panel-sidebar-header-collapsed {
+  @apply items-center;
+}
+.convex-panel-container .convex-panel-sidebar-title-container {
+  @apply flex items-center justify-between mb-2;
+}
+.convex-panel-container .convex-panel-sidebar-title-wrapper {
+  @apply flex items-center justify-between w-full gap-2;
+}
+.convex-panel-container .convex-panel-sidebar-title {
+  @apply text-sm font-medium;
+}
+.convex-panel-container .convex-panel-sidebar-toggle-button {
+  @apply rounded p-1 hover:bg-neutral-700;
+}
+.convex-panel-container .convex-panel-sidebar-search {
+  @apply w-full text-xs px-3 py-1.5 rounded-md;
+  font-family: monospace;
+}
+.convex-panel-container .convex-panel-sidebar-search:focus {
+  outline: none;
+}
+.convex-panel-container .convex-panel-sidebar-expand-button {
+  @apply rounded mx-auto p-1 hover:bg-neutral-700;
+}
+.convex-panel-container .convex-panel-sidebar-content {
+  @apply overflow-y-auto flex-1;
+}
+.convex-panel-container .convex-panel-sidebar-content::-webkit-scrollbar {
+  @apply w-1;
+}
+.convex-panel-container .convex-panel-sidebar-content::-webkit-scrollbar-track {
+  @apply bg-neutral-800;
+}
+.convex-panel-container .convex-panel-sidebar-content::-webkit-scrollbar-thumb {
+  @apply bg-neutral-600 hover:bg-neutral-500;
+}
+.convex-panel-container .convex-panel-sidebar-table-button {
+  @apply w-full text-left text-sm px-4 py-2 hover:bg-neutral-800;
+}
+.convex-panel-container .convex-panel-sidebar-table-selected {
+  @apply bg-neutral-800 text-[white];
+}
+.convex-panel-container .convex-panel-sidebar-table-unselected {
+  @apply text-neutral-400;
+}
+.convex-panel-container .convex-panel-sidebar-table-collapsed {
+  @apply text-center overflow-hidden text-ellipsis whitespace-nowrap;
+}
+/* Utility classes */
+.convex-panel-container .justify-center {
+  @apply justify-center justify-center;
+}
+.convex-panel-container .gap-1 {
+  @apply gap-1;
+}
+.convex-panel-container .gap-1\.5 {
+  @apply gap-1.5;
+}
+.convex-panel-container .max-w-72 {
+  @apply max-w-[18rem];
+}
+.convex-panel-container .grow {
+  @apply grow;
+}
+.convex-panel-container .shrink-0 {
+  @apply shrink-0;
+}
+.convex-panel-container .min-w-0 {
+  @apply min-w-0;
+}
+.convex-panel-container .px-14 {
+  @apply px-14;
+}
+.convex-panel-container .px-3 {
+  @apply px-3;
+}
+.convex-panel-container .pr-2 {
+  @apply pr-2;
+}
+.convex-panel-container .text-center {
+  @apply text-center;
+}
+.convex-panel-container .text-neutral-100 {
+  @apply text-neutral-100;
+}
+.convex-panel-container .text-neutral-n1 {
+  @apply text-neutral-100;
+}
+.convex-panel-container .text-neutral-n7 {
+  @apply text-zinc-400;
+}
+.convex-panel-container .rounded-full {
+  @apply rounded-full;
+}
+.convex-panel-container .rounded-sm {
+  @apply rounded-sm;
+}
+.convex-panel-container .border {
+  @apply border border-solid;
+}
+.convex-panel-container .border-neutral-n13 {
+  @apply border-zinc-800;
+}
+.convex-panel-container .bg-neutral-n12 {
+  @apply bg-zinc-900;
+}
+.convex-panel-container .bg-\[\#3f5295\] {
+  @apply bg-[#3f5295];
+}
+.convex-panel-container .truncate {
+  @apply overflow-hidden text-ellipsis whitespace-nowrap;
+}
+.convex-panel-container .cursor-pointer {
+  @apply cursor-pointer;
+}
+.convex-panel-container .absolute {
+  @apply absolute;
+}
+.convex-panel-container .relative {
+  @apply relative;
+}
+.convex-panel-container .top-0 {
+  @apply top-0;
+}
+.convex-panel-container .left-0 {
+  @apply left-0;
+}
+.convex-panel-container .size-3 {
+  @apply w-3 h-3;
+}
+.convex-panel-container .size-\[10px\] {
+  @apply w-2.5 h-2.5;
+}
+.convex-panel-container .inline-block {
+  @apply inline-block;
+}
+.convex-panel-container .w-6 {
+  @apply w-6;
+}
+.convex-panel-container .overflow-x-auto {
+  @apply overflow-x-auto;
+}
+.convex-panel-container .opacity-0 {
+  @apply opacity-0;
+}
+.convex-panel-container .hover\:opacity-100:hover {
+  @apply opacity-100;
+}
+.convex-panel-container .text-\[8px\] {
+  @apply text-[8px];
+}
+.convex-panel-container .font-bold {
+  @apply font-bold;
+}
+.convex-panel-container .text-\[\#4a1917\] {
+  @apply text-[#4a1917];
+}
+.convex-panel-container .text-\[\#4a3917\] {
+  @apply text-[#4a3917];
+}
+.convex-panel-container .text-\[\#1a4a1e\] {
+  @apply text-[#1a4a1e];
+}
+/* Container component specific styles */
+.convex-panel-container .convex-panel-header-content {
+  @apply w-full flex items-center justify-center relative text-xs flex items-center flex items-center gap-2 flex items-center gap-2;
+}
+.convex-panel-container .convex-panel-window-controls {
+  @apply absolute h-full flex items-center gap-1.5 z-10 left-0 top-0;
+}
+.convex-panel-container .convex-panel-window-control-icon {
+  @apply absolute opacity-0 text-[8px] font-bold hover:opacity-100;
+}
+.convex-panel-container .convex-panel-close-icon {
+  @apply text-[#4a1917];
+}
+.convex-panel-container .convex-panel-minimize-icon {
+  @apply text-[#4a3917];
+}
+.convex-panel-container .convex-panel-maximize-icon {
+  @apply text-[#1a4a1e];
+}
+.convex-panel-container .convex-panel-url-container {
+  @apply flex items-center justify-center border border-zinc-800 text-xs text-zinc-400 text-center bg-zinc-900 w-full max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap py-0.5 rounded-sm border-solid;
+}
+.convex-panel-container .convex-panel-url-link {
+  @apply flex items-center w-full text-inherit no-underline cursor-pointer hover:text-[white];
+}
+.convex-panel-container .convex-panel-url-icon {
+  @apply inline-block w-3 h-3 mr-2;
+}
+.convex-panel-container .convex-panel-url-text {
+  @apply grow min-w-0 text-center;
+}
+/* Tab styles */
+.convex-panel-container .convex-panel-tab-list {
+  @apply flex overflow-x-auto cursor-pointer;
+  outline: none;
+}
+.convex-panel-container .convex-panel-tab-button {
+  @apply h-9 flex items-center gap-1 px-3 border-b-4 border-b-transparent border-solid;
+}
+.convex-panel-container .convex-panel-tab-button[data-state="inactive"] {
+  @apply bg-[#141414];
+}
+.convex-panel-container .convex-panel-tab-button[data-state="active"] {
+  @apply bg-[rgba(141,38,118,0.5)] border-b-[rgb(141,38,118)];
+}
+.convex-panel-container .convex-panel-devtools-tab-button {
+  @apply h-9 flex items-center gap-1 px-3 border-b-4 border-b-transparent border-solid;
+}
+.convex-panel-container .convex-panel-devtools-tab-button[data-state="active"] {
+  @apply bg-[rgba(243,176,28,0.5)] border-b-[rgb(243,176,28)];
+}
+.convex-panel-container
+  .convex-panel-devtools-tab-button[data-state="inactive"] {
+  @apply bg-[#141414];
+}
+.convex-panel-container .convex-panel-tab-icon {
+  @apply w-[1.125rem] h-[1.125rem] shrink-0 text-zinc-400 -mt-1;
+}
+.convex-panel-container .convex-panel-tab-data-icon {
+  @apply w-3 h-3 shrink-0 text-zinc-400;
+}
+.convex-panel-container .convex-panel-tab-health-icon {
+  @apply w-[1.125rem] h-[1.125rem] shrink-0 text-zinc-400;
+}
+.convex-panel-container .convex-panel-tab-text {
+  @apply text-neutral-100;
+}
+.convex-panel-container .convex-panel-settings-container {
+  @apply pr-2;
+}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .convex-panel-container .convex-panel-card {
+    @apply w-[calc(100vw_-_2rem)] h-[640px];
   }
+}
+/* Additional utility classes for error display */
+/* Theme-specific styles */
+.convex-panel-container .convex-panel-container-theme {
+  @apply bg-[#1e1e1e] border border-solid border-[#333333];
+}
+.convex-panel-container .convex-panel-header-theme {
+  @apply bg-[#1e1e1e] border-b-[#333333] border-b border-solid;
+}
+.convex-panel-container .convex-panel-toolbar-theme {
+  @apply bg-[#1e1e1e] border-b-[#333333] border-b border-solid;
+}
+.convex-panel-container .convex-panel-table-theme {
+  @apply text-[white];
+}
+.convex-panel-container .convex-panel-table-header-theme {
+  @apply bg-[#2a2a2a] text-xs uppercase;
+}
+.convex-panel-container .convex-panel-table-row-theme {
+  @apply border-b-[#333333] border-b border-solid hover:bg-[#2a2a2a];
+}
+.convex-panel-container .convex-panel-text-theme {
+  @apply text-[white];
+}
+.convex-panel-container .convex-panel-button-theme {
+  @apply bg-[#4a77e5] text-[white] hover:opacity-90;
+}
+.convex-panel-container .convex-panel-input-theme {
+  @apply bg-[#2a2a2a] text-[white] border border-solid border-[#333333];
+}
+.convex-panel-container .convex-panel-success-text-theme {
+  @apply text-green-400;
+}
+.convex-panel-container .convex-panel-error-text-theme {
+  @apply text-red-400;
+}
+.convex-panel-container .convex-panel-warning-text-theme {
+  @apply text-yellow-400;
+}
+/* Settings Button styles */
+.convex-panel-container .convex-panel-settings-button {
+  @apply text-neutral-400 transition-[color] duration-[0.2s,background-color] delay-[0.2s] p-1 rounded-md hover:text-[white] hover:bg-neutral-800;
+}
+/* Modal styles */
+.convex-panel-container .convex-panel-modal-overlay {
+  @apply fixed flex items-center justify-center z-50 inset-0;
+}
+.convex-panel-container .convex-panel-modal-backdrop {
+  @apply absolute bg-[rgba(0,0,0,0.8)] inset-0;
+}
+.convex-panel-container .convex-panel-modal-container {
+  @apply relative z-10 w-[600px] max-w-[90%];
+}
+/* Settings Modal styles */
+.convex-panel-container .convex-panel-settings-modal {
+  @apply shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)] bg-[#1e1e1e] border overflow-hidden flex flex-col h-[13.6rem] max-h-[40rem] relative mr-4 p-2 rounded-xl border-solid border-[#333];
+}
+.convex-panel-container .convex-panel-settings-backdrop {
+  @apply fixed bg-[rgba(0,0,0,0.5)] inset-0;
+}
+.convex-panel-container .convex-panel-settings-content {
+  @apply bg-neutral-900 h-[200px] min-h-[200px] max-h-[200px] rounded-lg;
+}
+.convex-panel-container .convex-panel-settings-content-full {
+  @apply w-full;
+}
+.convex-panel-container .convex-panel-settings-content-centered {
+  @apply w-full max-w-md mx-auto;
+}
+.convex-panel-container .convex-panel-settings-header {
+  @apply flex justify-between items-center px-4 p-2 border-b-[#333] border-b border-solid;
+}
+.convex-panel-container .convex-panel-settings-title {
+  @apply text-lg font-[normal] text-[white];
+}
+.convex-panel-container .convex-panel-settings-close-button {
+  @apply text-neutral-400 hover:text-[white];
+}
+.convex-panel-container .convex-panel-settings-body {
+  @apply flex flex-1 overflow-hidden h-[155px];
+}
+.convex-panel-container .convex-panel-settings-sidebar {
+  @apply w-48 border-r-[#333] border-r border-solid;
+}
+.convex-panel-container .convex-panel-settings-tab-button {
+  @apply w-full text-left p-2;
+}
+.convex-panel-container .convex-panel-settings-tab-active {
+  @apply bg-neutral-800 text-[white];
+}
+.convex-panel-container .convex-panel-settings-tab-inactive {
+  @apply text-neutral-300 hover:bg-neutral-800;
+}
+.convex-panel-container .convex-panel-settings-content-area {
+  @apply flex-1 overflow-y-auto rounded-br-lg;
+}
+.convex-panel-container .convex-panel-settings-content-area::-webkit-scrollbar {
+  @apply w-1 h-1;
+}
+.convex-panel-container
+  .convex-panel-settings-content-area::-webkit-scrollbar-track {
+  @apply bg-neutral-800;
+}
+.convex-panel-container
+  .convex-panel-settings-content-area::-webkit-scrollbar-thumb {
+  @apply bg-neutral-600 hover:bg-neutral-500;
+}
+.convex-panel-container .convex-panel-settings-section {
+  @apply p-4;
+}
+.convex-panel-container .convex-panel-settings-option {
+  @apply mb-4;
+}
+.convex-panel-container .convex-panel-settings-label {
+  @apply flex items-center gap-2 cursor-pointer;
+}
+.convex-panel-container .convex-panel-settings-checkbox {
+  @apply rounded text-blue-500 h-4 w-4 bg-neutral-700 border border-neutral-600 border-solid;
+}
+.convex-panel-container .convex-panel-settings-label-text {
+  @apply text-neutral-200;
+}
+.convex-panel-container .convex-panel-settings-description {
+  @apply text-neutral-400 text-xs ml-6 mt-1;
+}
+.convex-panel-container .convex-panel-settings-health-text {
+  @apply text-xs font-medium h-full w-full flex items-center justify-center text-[white];
+}
+/* Log Row Styles */
+.convex-panel-container .convex-panel-log-row {
+  @apply flex flex-col cursor-pointer bg-[#121212] px-4 py-2 border-b-[#222222] border-b border-solid hover:bg-[#1e1e1e];
+}
+.convex-panel-container .convex-panel-log-row-simplified {
+  @apply cursor-pointer bg-[#121212] px-4 py-2 border-b-[#222222] border-b border-solid hover:bg-[#1e1e1e];
+}
+/* Error background for log rows */
+.convex-panel-container .convex-panel-error-background {
+  @apply bg-[rgba(220,38,38,0.15)] hover:bg-[rgba(220,38,38,0.25)];
+}
+.convex-panel-container .convex-panel-log-row-full-content {
+  @apply flex items-center gap-2 w-full;
+}
+.convex-panel-container .convex-panel-log-row-content {
+  @apply flex items-center w-full;
+}
+.convex-panel-container .convex-panel-log-network-row-content {
+  @apply flex items-center w-full;
+}
+.convex-panel-container .convex-panel-log-network-status {
+  @apply text-xs w-16 text-center shrink-0 overflow-hidden text-ellipsis whitespace-nowrap;
+}
+.convex-panel-container .convex-panel-log-network-method {
+  @apply border text-[11px] bg-[#222] mr-1 p-1 rounded-[15%] border-solid border-[#333];
+}
+.convex-panel-container .convex-panel-log-network-type {
+  @apply text-xs w-24 text-center shrink-0 overflow-hidden text-ellipsis whitespace-nowrap;
+}
+.convex-panel-container .convex-panel-log-network-size {
+  @apply text-xs w-24 text-center shrink-0;
+}
+.convex-panel-container .convex-panel-log-network-time {
+  @apply text-xs w-24 text-center shrink-0;
+}
+.convex-panel-container .convex-panel-log-network-name {
+  @apply text-xs text-[#a0a0a0] w-[25rem];
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-log-timestamp {
+  @apply text-xs text-[#a0a0a0] w-48;
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-log-request-id {
+  @apply text-xs text-blue-400 w-24 overflow-hidden text-ellipsis whitespace-nowrap;
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-log-status {
+  @apply text-xs w-16 text-center shrink-0;
+}
+.convex-panel-container .convex-panel-success-text {
+  @apply text-green-400 text-[#4caf50] text-[#4caf50];
+}
+.convex-panel-container .convex-panel-error-text {
+  @apply text-red-400 text-[#f44336] text-[#f44336];
+}
+.convex-panel-container .convex-panel-gray-text {
+  @apply text-[#a0a0a0];
+}
+.convex-panel-container .convex-panel-cached-text {
+  @apply text-gray-500;
+}
+.convex-panel-container .convex-panel-log-execution-time {
+  @apply text-xs text-purple-400 w-24;
+}
+.convex-panel-container .convex-panel-log-type {
+  @apply text-xs text-blue-400 w-12;
+}
+.convex-panel-container .convex-panel-log-details-container {
+  @apply text-xs text-[white] flex-1 overflow-hidden text-ellipsis whitespace-nowrap flex items-center gap-2;
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-log-details {
+  @apply text-xs text-[white] flex-1 overflow-hidden text-ellipsis;
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-log-details-truncated {
+  @apply max-w-[150px] whitespace-nowrap overflow-hidden text-ellipsis;
+}
+/* Active Filters Styles */
+.convex-panel-container .convex-panel-active-filters {
+  @apply flex flex-wrap gap-2 w-full;
+}
+.convex-panel-container .convex-panel-filter-tag {
+  @apply transition-[background-color] duration-[0.2s] text-xs flex items-center cursor-pointer px-3 py-1.5 rounded-md hover:bg-[rgba(58,58,58,0.56)];
+}
+.convex-panel-container .convex-panel-filter-field {
+  @apply font-semibold border-r-neutral-700 pr-2 border-r border-solid;
+}
+.convex-panel-container .convex-panel-filter-operator {
+  @apply opacity-80 border-r-neutral-700 px-2 border-r border-solid;
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-filter-value {
+  @apply pl-2;
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-filter-remove-button {
+  @apply text-red-500 bg-neutral-800 ml-2 rounded-md hover:text-red-300;
+}
+.convex-panel-container .convex-panel-filter-remove-icon {
+  @apply h-3 w-3;
+}
+.convex-panel-container .convex-panel-clear-filters-button {
+  @apply flex items-center gap-1 transition-[background-color] duration-[0.2s] text-xs ml-auto px-3 py-1.5 rounded-md hover:bg-[rgba(58,58,58,0.56)];
+}
+.convex-panel-container .convex-panel-clear-filters-icon {
+  @apply h-3 w-3;
+}
+/*   Content Styles */
+.convex-panel-container .convex-panel-table-wrapper {
+  @apply w-full overflow-auto min-w-0 w-full overflow-auto flex-1 flex flex-col w-full overflow-auto flex-1 flex flex-col; /* Allow table to shrink below content size */
+}
+.convex-panel-container .convex-panel-data-table {
+  @apply w-full text-sm table-auto border-collapse w-full text-sm text-neutral-300 border-collapse w-full text-sm text-neutral-300 border-collapse; /* Use auto layout instead of fixed */
+}
+.convex-panel-container .convex-panel-table-header-row {
+  @apply bg-neutral-800 bg-[#252525] sticky z-[5] top-0 bg-[#252525] sticky z-[5] top-0;
+}
+.convex-panel-container .convex-panel-checkbox-header {
+  @apply sticky z-10 bg-neutral-800 w-8 p-2 left-0;
+}
+.convex-panel-container .convex-panel-column-header {
+  @apply text-left font-medium border-r-neutral-700 min-w-[150px] p-2 border-r border-solid hover:bg-[#333] text-left font-semibold whitespace-nowrap px-4 py-3 border-b-[#333] border-b border-solid hover:bg-[#333] text-left font-semibold whitespace-nowrap px-4 py-3 border-b-[#333] border-b border-solid;
+}
+.convex-panel-container .convex-panel-header-content {
+  justify-content: start;
+}
+.convex-panel-container .convex-panel-filter-button {
+  @apply rounded p-1 cursor-pointer text-neutral-300 flex items-center justify-center p-1 rounded-[3px] border-[none] hover:bg-[#333] hover:text-white cursor-pointer text-neutral-300 flex items-center justify-center p-1 rounded-[3px] border-[none] hover:bg-[#333] hover:text-white;
+}
+.convex-panel-container .convex-panel-filter-active {
+  @apply bg-[#3f5295] hover:bg-[rgba(63,82,149,0.6)];
+}
+.convex-panel-container .convex-panel-filter-hovered {
+  @apply bg-neutral-700 hover:bg-neutral-600;
+}
+.convex-panel-container .convex-panel-filter-hidden {
+  @apply opacity-0 hover:bg-neutral-700;
+}
+.convex-panel-container tr:hover .convex-panel-filter-hidden {
+  @apply opacity-100;
+}
+.convex-panel-container .convex-panel-table-row {
+  @apply border-b-neutral-700 border-b border-solid hover:bg-neutral-800 cursor-pointer border-b-[#333] border-b border-solid hover:bg-[#2a2a2a] cursor-pointer border-b-[#333] border-b border-solid hover:bg-[#2a2a2a];
+}
+.convex-panel-container .convex-panel-checkbox-cell {
+  @apply sticky z-10 bg-neutral-800 text-center p-2 left-0;
+}
+.convex-panel-container .convex-panel-checkbox {
+  @apply rounded cursor-pointer cursor-pointer cursor-pointer;
+}
+.convex-panel-container .convex-panel-table-cell {
+  @apply cursor-pointer border-r-neutral-700 text-xs p-2 border-r border-solid text-left relative whitespace-nowrap max-w-[300px] overflow-hidden text-ellipsis px-4 py-2.5 text-left relative whitespace-nowrap max-w-[300px] overflow-hidden text-ellipsis px-4 py-2.5;
+}
+.convex-panel-container .convex-panel-header-content-main {
+  @apply flex items-center justify-center;
+}
+.convex-panel-container .convex-panel-id-value {
+  @apply text-blue-400 cursor-pointer text-[#569cd6] text-[#569cd6];
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-empty-value {
+  @apply text-neutral-500 italic text-[#888] italic text-[#888] italic text-[#888] italic text-[#888] italic;
+}
+.convex-panel-container .convex-panel-table-footer {
+  @apply text-center text-sm px-0 py-4 text-center text-[#888] mt-auto p-4 text-center text-[#888] mt-auto p-4;
+}
+.convex-panel-container .convex-panel-loading-message,
+.convex-panel-container .convex-panel-empty-message,
+.convex-panel-container .convex-panel-loading-more-message,
+.convex-panel-container .convex-panel-scroll-message,
+.convex-panel-container .convex-panel-end-message {
+  @apply text-neutral-400;
+}
+.convex-panel-container .convex-panel-observer-target {
+  @apply h-8 flex items-center justify-center h-10 flex items-center justify-center w-full mt-2 h-10 flex items-center justify-center w-full mt-2;
+}
+/* Live button styles */
+.convex-panel-container .convex-panel-live-button {
+  @apply flex flex-row items-center gap-1 transition-[background-color] duration-[0.2s] text-xs bg-[#3f5295] border text-[white] px-3 py-1.5 rounded-md border-solid border-[rgba(63,82,149,0.25)] hover:bg-[rgba(63,82,149,0.6)] flex flex-row items-center gap-1 transition-[background-color] duration-[0.2s] text-xs bg-[#3f5295] border text-[white] px-3 py-1.5 rounded-md border-solid border-[rgba(63,82,149,0.25)] hover:bg-[rgba(63,82,149,0.6)];
+}
+.convex-panel-container .convex-panel-button-icon {
+  @apply w-3 h-3 w-3 h-3 w-3 h-3;
+}
+.convex-panel-container .convex-panel-toolbar-button-container {
+  @apply h-8 mr-2 mr-2; /* This matches your !h-8 class */
+}
+/* Live button styles */
+/* Clear button styles */
+.convex-panel-container .convex-panel-clear-button {
+  @apply transition-[background-color] duration-[0.2s] text-xs flex items-center gap-1 px-3 py-1.5 rounded-md hover:bg-[rgba(_58,58,58,0.56_)];
+}
+.convex-panel-container .convex-panel-clear-button:hover {
+  /* This matches your hover:bg-[#3a3a3a90] */
+}
+/* Button icon styles */
+/* Refresh button styles */
+.convex-panel-container .convex-panel-refresh-button {
+  @apply transition-[background-color] duration-[0.2s] text-xs flex items-center gap-1 px-3 py-1.5 rounded-md hover:text-[#fefefe30];
+}
+.convex-panel-container .convex-panel-button-loading {
+  @apply bg-[rgba(_58,58,58,0.56_)]; /* This matches your bg-[#3a3a3a90] */
+}
+/* Loading spinner styles */
+.convex-panel-container .convex-panel-loading-spinner {
+  @apply animate-spin ml-[-0.25rem] h-3 w-3 text-[white] mr-1;
+}
+.convex-panel-container .convex-panel-spinner-track {
+  @apply opacity-25;
+}
+.convex-panel-container .convex-panel-spinner-path {
+  @apply opacity-75;
+}
+/* Refresh icon styles */
+.convex-panel-container .convex-panel-refresh-icon {
+  @apply h-3 w-3 mr-1;
+}
 
-  .convex-inline {
-    @apply flex items-center gap-1 flex-row w-max;
-  }
-
-  /* Filter container styles */
-  .convex-panel-filter-container {
-    @apply flex-1;
-  }
-
-  /* Input styles for filter, request ID, and limit */
-  .convex-panel-filter-input,
-  .convex-panel-request-id-input,
-  .convex-panel-limit-input {
-    @apply w-full py-1.5 px-3 rounded-md text-xs;
-  }
-
-  .convex-panel-filter-input:focus,
-  .convex-panel-request-id-input:focus,
-  .convex-panel-limit-input:focus {
-    @apply outline-none;
-  }
-
-  /* Checkbox container styles */
-  .convex-panel-checkbox-container {
-    @apply flex items-center gap-2;
-  }
-
-  .convex-panel-checkbox {
-    @apply cursor-pointer;
-  }
-
-  .convex-panel-checkbox-label {
-    @apply text-xs cursor-pointer;
-  }
-
-  /* Retry button styles */
-  .convex-panel-retry-button {
-    @apply py-1.5 px-3 rounded-md transition-colors duration-200 text-xs;
-  }
-
-  .convex-panel-retry-button:hover {
-    @apply bg-[rgba(58,58,58,0.56)];
-  }
-
-  /* Log type select styles */
-  .convex-panel-log-type-select {
-    @apply py-1.5 px-3 rounded-md text-xs;
-  }
-
-    /* Header styling */
-  .convex-panel-table-header {
-    @apply p-2 px-4 border-b border-[#333333] sticky top-0 bg-[#1a1a1a] uppercase;
-  }
-
-  .convex-panel-header-row {
-    @apply flex items-center;
-  }
-
-  .convex-panel-table-network-header {
-    @apply p-2 px-4 border-b border-[#333333] sticky top-0 bg-[#1a1a1a] uppercase;
-  }
-
-  .convex-panel-header-network-row {
-    @apply flex items-center;
-  }
-
-  /* Network Table Header Styles */
-  .convex-panel-header-network-name,
-  .convex-panel-header-network-status,
-  .convex-panel-header-network-type,
-  .convex-panel-header-network-size,
-  .convex-panel-header-network-time {
-    @apply text-xs font-semibold text-gray-400 font-mono;
-  }
-
-  .convex-panel-header-network-name {
-    @apply w-96;
-  }
-
-  .convex-panel-header-network-status {
-    @apply w-16;
-  }
-
-  .convex-panel-header-network-type {
-    @apply w-24;
-  }
-  
-  .convex-panel-header-network-size {
-    @apply w-24;
-  }
-
-  .convex-panel-header-network-time {
-    @apply w-24;
-  }
-
-  /* Common header cell styles */
-  .convex-panel-header-timestamp,
-  .convex-panel-header-id,
-  .convex-panel-header-status,
-  .convex-panel-header-time,
-  .convex-panel-header-type,
-  .convex-panel-header-details {
-    @apply font-mono text-xs font-semibold text-gray-400;
-  }
-
-  /* Specific widths for each column */
-  .convex-panel-header-timestamp {
-    @apply w-48;
-  }
-
-  .convex-panel-header-id,
-  .convex-panel-header-status,
-  .convex-panel-header-time {
-    @apply w-24;
-  }
-
-  .convex-panel-header-type {
-    @apply w-12;
-  }
-
-  .convex-panel-header-details {
-    @apply flex-1;
-  }
-
-  /* Empty state styling */
-  .convex-panel-empty-logs {
-    @apply flex-1 flex items-center justify-center bg-[#121212] text-neutral-400;
-  }
-
-  .convex-panel-empty-message {
-    @apply text-center p-8;
-  }
-
-  /* Log list container */
-  .convex-panel-logs-list-container {
-    @apply flex-1 overflow-hidden h-full;
-  }
-
-  .convex-panel-logs-list {
-    @apply bg-[#121212];
-  }
-
-  /* Logs container layout */
-  .convex-panel-logs-container {
-    @apply flex-1 flex flex-row overflow-hidden relative h-full w-full;
-  }
-
-  .convex-panel-logs-main {
-    @apply flex flex-col overflow-hidden h-full;
-  }
-
-  .convex-panel-logs-with-detail {
-    @apply w-1/2 shrink-0; /* Set width to 50% when detail panel is open */
-  }
-
-  .convex-panel-logs-full {
-    @apply w-full; /* Set width to 100% when detail panel is closed */
-  }
-
-  .convex-panel-live-indicator {
-    @apply p-1 px-4 bg-green-900/20 text-green-400 text-xs border-b border-green-800 flex items-center;
-  }
-
-  .convex-panel-live-icon {
-    @apply mr-1 size-3;
-  }
-
-  .convex-panel-detail-title {
-    @apply text-xs font-semibold text-neutral-400;
-  }
-
-  .convex-panel-detail-close-button {
-    @apply text-neutral-400;
-  }
-
-  .convex-panel-detail-close-button:hover {
-    @apply text-white;
-  }
-
-    .convex-panel-detail-content {
-    @apply p-4 flex flex-col overflow-y-auto;
-  }
-
-  .convex-panel-data-detail-content {
-    @apply p-0 flex flex-col overflow-y-auto;
-  }
-
-  .convex-panel-data-fields-container {
-    @apply bg-[#1e1e1e];
-  }
-
-  .convex-panel-detail-section {
-    @apply mb-4;
-  }
-
-  .convex-panel-detail-section-title {
-    @apply text-sm font-semibold text-neutral-400 mb-2 uppercase;
-  }
-
-  .convex-panel-detail-error-title {
-    @apply text-sm font-semibold text-red-500 mb-2 uppercase;
-  }
-
-  .convex-panel-detail-fields {
-    @apply flex flex-col gap-1;
-  }
-
-  .convex-panel-detail-label {
-    @apply text-xs text-neutral-400 w-24;
-  }
-
-  .convex-panel-detail-timestamp {
-    @apply text-xs text-white font-mono;
-  }
-
-  .convex-panel-detail-request-id {
-    @apply text-xs text-cyan-400 font-mono;
-  }
-
-  .convex-panel-detail-status {
-    @apply text-xs;
-  }
-
-  .convex-panel-detail-execution-time {
-    @apply text-xs text-purple-300;
-  }
-
-  .convex-panel-detail-function-type {
-    @apply text-xs text-white;
-  }
-
-  .convex-panel-detail-function-path {
-    @apply text-xs text-cyan-400 font-mono;
-  }
-
-  .convex-panel-detail-function-cached {
-    @apply text-xs text-white;
-  }
-
-  .convex-panel-detail-log-output {
-    @apply bg-[#1a1a1a] p-2 rounded;
-  }
-
-  .convex-panel-detail-log-line {
-    @apply text-xs text-neutral-300 font-mono whitespace-pre-wrap;
-  }
-
-  .convex-panel-detail-error-container {
-    @apply bg-[#1a1a1a] p-2 rounded;
-  }
-
-  .convex-panel-detail-error-message {
-    @apply text-xs text-red-500 font-mono whitespace-pre-wrap;
-  }
-
-  .convex-panel-detail-raw-container {
-    @apply bg-[#1a1a1a] p-2 rounded overflow-x-auto relative;
-  }
-
+.convex-panel-container .convex-inline {
+  @apply flex items-center gap-1 flex-row w-max flex items-center gap-1;
+}
+/* Inline elements */
+/* Filter container styles */
+.convex-panel-container .convex-panel-filter-container {
+  @apply flex-1 flex-1 max-w-[300px] flex-1 max-w-[300px];
+}
+/* Input styles for filter, request ID, and limit */
+.convex-panel-container .convex-panel-filter-input,
+.convex-panel-container .convex-panel-request-id-input,
+.convex-panel-container .convex-panel-limit-input {
+  @apply w-full text-xs px-3 py-1.5 rounded-md;
+}
+.convex-panel-container .convex-panel-filter-input:focus,
+.convex-panel-container .convex-panel-request-id-input:focus,
+.convex-panel-container .convex-panel-limit-input:focus {
+  outline: none ;
+}
+/* Checkbox container styles */
+.convex-panel-container .convex-panel-checkbox-container {
+  @apply flex items-center gap-2;
+}
+.convex-panel-container .convex-panel-checkbox-label {
+  @apply text-xs cursor-pointer;
+}
+/* Retry button styles */
+.convex-panel-container .convex-panel-retry-button {
+  @apply transition-[background-color] duration-[0.2s] text-xs px-3 py-1.5 rounded-md hover:bg-[rgba(58,58,58,0.56)];
+}
+/* Log type select styles */
+.convex-panel-container .convex-panel-log-type-select {
+  @apply text-xs px-3 py-1.5 rounded-md;
+}
+/* Button icon styles */
+/* Header styling */
+.convex-panel-container .convex-panel-table-header {
+  @apply sticky bg-[#1a1a1a] uppercase px-4 py-2 border-b-[#333333] border-b border-solid top-0;
+}
+.convex-panel-container .convex-panel-header-row {
+  @apply flex items-center;
+}
+.convex-panel-container .convex-panel-table-network-header {
+  @apply sticky bg-[#1a1a1a] uppercase px-4 py-2 border-b-[#333333] border-b border-solid top-0;
+}
+.convex-panel-container .convex-panel-header-network-row {
+  @apply flex items-center;
+}
+/** Network Table Header Styles */
+.convex-panel-container .convex-panel-header-network-name,
+.convex-panel-container .convex-panel-header-network-status,
+.convex-panel-container .convex-panel-header-network-type,
+.convex-panel-container .convex-panel-header-network-size,
+.convex-panel-container .convex-panel-header-network-time {
+  @apply text-xs font-semibold text-gray-400;
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-header-network-name {
+  @apply w-[25rem];
+}
+.convex-panel-container .convex-panel-header-network-status {
+  @apply w-16;
+}
+.convex-panel-container .convex-panel-header-network-type {
+  @apply w-24;
+}
+.convex-panel-container .convex-panel-header-network-size {
+  @apply w-24;
+}
+.convex-panel-container .convex-panel-header-network-time {
+  @apply w-24;
+}
+/* Common header cell styles */
+.convex-panel-container .convex-panel-header-timestamp,
+.convex-panel-container .convex-panel-header-id,
+.convex-panel-container .convex-panel-header-status,
+.convex-panel-container .convex-panel-header-time,
+.convex-panel-container .convex-panel-header-type,
+.convex-panel-container .convex-panel-header-details {
+  @apply text-xs font-semibold text-gray-400;
+  font-family: monospace ; /* text-gray-400 equivalent */
+}
+/* Specific widths for each column */
+.convex-panel-container .convex-panel-header-timestamp {
+  @apply w-48; /* w-48 equivalent */
+}
+.convex-panel-container .convex-panel-header-id,
+.convex-panel-container .convex-panel-header-status,
+.convex-panel-container .convex-panel-header-time {
+  @apply w-24; /* w-24 equivalent */
+}
+.convex-panel-container .convex-panel-header-type {
+  @apply w-12; /* w-12 equivalent */
+}
+.convex-panel-container .convex-panel-header-details {
+  @apply flex-1; /* flex-1 equivalent */
+}
+/* Empty state styling */
+.convex-panel-container .convex-panel-empty-logs {
+  @apply flex-1 flex items-center justify-center bg-[#121212] text-neutral-400; /* text-neutral-400 equivalent */
+}
+.convex-panel-container .convex-panel-empty-message {
+  @apply text-center p-8;
+}
+/* Log list container */
+.convex-panel-container .convex-panel-logs-list-container {
+  @apply flex-1 overflow-hidden h-full;
+}
+.convex-panel-container .convex-panel-logs-list {
+  @apply bg-[#121212];
+}
+/* Logs container layout */
+.convex-panel-container .convex-panel-logs-container {
+  @apply flex-1 flex flex-row overflow-hidden relative h-full w-full; /* Ensure horizontal layout */ /* Establish positioning context */ /* Ensure full height */ /* Ensure full width */
+}
+.convex-panel-container .convex-panel-logs-main {
+  @apply flex flex-col overflow-hidden h-full; /* Ensure full height */
+}
+.convex-panel-container .convex-panel-logs-with-detail {
+  @apply w-6/12 shrink-0; /* Set width to 50% when detail panel is open */ /* Prevent shrinking */
+}
+.convex-panel-container .convex-panel-logs-full {
+  @apply w-full; /* Set width to 100% when detail panel is closed */
+}
+.convex-panel-container .convex-panel-live-indicator {
+  @apply bg-[rgba(22,101,52,0.2)] text-green-400 text-xs border-b-green-800 flex items-center px-4 py-1 border-b border-solid;
+}
+.convex-panel-container .convex-panel-live-icon {
+  @apply h-3 w-3 mr-1;
+}
+.convex-panel-container .convex-panel-detail-title {
+  @apply text-xs font-semibold text-[#a0a0a0];
+}
+.convex-panel-container .convex-panel-detail-close-button {
+  @apply text-[#a0a0a0] hover:text-white;
+}
+.convex-panel-container .convex-panel-detail-content {
+  @apply flex flex-col overflow-y-auto p-4;
+}
+.convex-panel-container .convex-panel-data-detail-content {
+  @apply flex flex-col overflow-y-auto p-0;
+}
+.convex-panel-container .convex-panel-data-fields-container {
+  @apply bg-[#1e1e1e];
+}
+.convex-panel-container .convex-panel-detail-section {
+  @apply mb-4;
+}
+.convex-panel-container .convex-panel-detail-section-title {
+  @apply text-sm font-semibold text-[#a0a0a0] uppercase mb-2;
+}
+.convex-panel-container .convex-panel-detail-error-title {
+  @apply text-sm font-semibold text-[#f44336] uppercase mb-2;
+}
+.convex-panel-container .convex-panel-detail-fields {
+  @apply flex flex-col gap-1;
+}
+.convex-panel-container .convex-panel-detail-label {
+  @apply text-xs text-[#a0a0a0] w-24;
+}
+.convex-panel-container .convex-panel-detail-timestamp {
+  @apply text-xs text-white;
+  font-family: monospace;
+}
+.convex-panel-container .convex-panel-detail-request-id {
+  @apply text-xs text-[#66b2ff];
+  font-family: monospace;
+}
+.convex-panel-container .convex-panel-detail-status {
+  @apply text-xs;
+}
+.convex-panel-container .convex-panel-detail-execution-time {
+  @apply text-xs text-[#bb86fc];
+}
+.convex-panel-container .convex-panel-detail-function-type {
+  @apply text-xs text-white;
+}
+.convex-panel-container .convex-panel-detail-function-path {
+  @apply text-xs text-[#66b2ff];
+  font-family: monospace;
+}
+.convex-panel-container .convex-panel-detail-function-cached {
+  @apply text-xs text-white;
+}
+.convex-panel-container .convex-panel-detail-log-output {
+  @apply bg-[#1a1a1a] rounded p-2;
+}
+.convex-panel-container .convex-panel-detail-log-line {
+  @apply text-xs text-[#d0d0d0] whitespace-pre-wrap;
+  font-family: monospace;
+}
+.convex-panel-container .convex-panel-detail-error-container {
+  @apply bg-[#1a1a1a] rounded p-2;
+}
+.convex-panel-container .convex-panel-detail-error-message {
+  @apply text-xs text-[#f44336] whitespace-pre-wrap;
+  font-family: monospace;
+}
+.convex-panel-container .convex-panel-detail-raw-container {
+  @apply bg-[#1a1a1a] rounded overflow-x-auto relative p-2;
+}
+.convex-panel-container .convex-panel-detail-copy-button {
+  @apply absolute text-[#a0a0a0] cursor-pointer opacity-0 transition-opacity duration-[0.2s] border-[none] right-2 top-2 hover:text-white;
+  background: transparent;
+}
+.convex-panel-container
+  .convex-panel-detail-raw-container:hover
   .convex-panel-detail-copy-button {
-    @apply absolute top-2 right-2 text-neutral-400 bg-transparent border-none cursor-pointer opacity-0 transition-opacity duration-200;
+  @apply opacity-100;
+}
+.convex-panel-container .convex-panel-copy-icon {
+  @apply w-4 h-4 text-[#aaa] text-[#aaa];
+}
+.convex-panel-container .convex-panel-detail-raw-json {
+  @apply text-xs text-[#d0d0d0] text-xs text-[#d0d0d0];
+  font-family: monospace;
+}
+/* Success/Error text styles */
+/* Animation container */
+.convex-panel-container
+  .convex-panel-logs-container
+  .framer-motion-presence-container {
+  @apply flex flex-1 flex flex-1;
+}
+/* Debug Filter styles */
+.convex-panel-container .convex-panel-filter-debug {
+  @apply border-t-neutral-700 text-xs p-2 border-t border-solid border-t-neutral-700 text-xs p-2 border-t border-solid;
+  font-family: monospace;
+}
+.convex-panel-container .convex-panel-debug-summary {
+  @apply cursor-pointer text-[#a0a0a0] cursor-pointer text-[#a0a0a0];
+}
+.convex-panel-container .convex-panel-debug-pre {
+  @apply text-[#d0d0d0] whitespace-pre-wrap overflow-x-auto max-h-40 text-xs mt-2 text-[#d0d0d0] whitespace-pre-wrap overflow-x-auto max-h-40 text-xs mt-2;
+}
+/* Storage Debug styles */
+.convex-panel-container .convex-panel-storage-debug {
+  @apply border-t-neutral-700 text-xs p-2 border-t border-solid border-t-neutral-700 text-xs p-2 border-t border-solid;
+  font-family: monospace;
+}
+.convex-panel-container .convex-panel-debug-content {
+  @apply text-[#d0d0d0] mt-2 text-[#d0d0d0] mt-2;
+}
+.convex-panel-container .convex-panel-debug-section {
+  @apply mt-1 mt-1;
+}
+.convex-panel-container .convex-panel-debug-current-table {
+  @apply border border-blue-600 rounded bg-[rgba(37,99,235,0.2)] mt-1 p-2 border-solid border border-blue-600 rounded bg-[rgba(37,99,235,0.2)] mt-1 p-2 border-solid;
+}
+.convex-panel-container .convex-panel-debug-clear-button {
+  @apply bg-red-800 text-[white] rounded text-xs cursor-pointer mt-2 px-2 py-1 border-[none] hover:bg-red-700 bg-red-800 text-[white] rounded text-xs cursor-pointer mt-2 px-2 py-1 border-[none] hover:bg-red-700;
+}
+/*DataTable layout styles */
+.convex-panel-container .convex-panel-data-layout {
+  @apply flex overflow-auto flex h-full w-full overflow-hidden flex overflow-auto flex h-full w-full overflow-hidden;
+}
+.convex-panel-container .convex-panel-data-content {
+  @apply flex-1 flex flex-col min-h-[420px] overflow-auto bg-[#1e1e1e] p-0 flex-1 flex flex-col min-h-[420px] overflow-auto bg-[#1e1e1e] p-0;
+}
+.convex-panel-container .convex-panel-data-content::-webkit-scrollbar {
+  @apply w-1 h-1 w-1 h-1;
+}
+.convex-panel-container .convex-panel-data-content::-webkit-scrollbar-track {
+  @apply bg-neutral-800 bg-neutral-800;
+}
+.convex-panel-container .convex-panel-data-content::-webkit-scrollbar-thumb {
+  @apply bg-neutral-600 hover:bg-neutral-500 bg-neutral-600 hover:bg-neutral-500;
+}
+.convex-panel-container .convex-panel-filters-bar {
+  @apply flex justify-between items-center border-b-neutral-700 sticky z-20 bg-[#1e1e1e] p-2 border-b border-solid inset-x-0 flex justify-between items-center border-b-neutral-700 sticky z-20 bg-[#1e1e1e] p-2 border-b border-solid inset-x-0;
+}
+/* Filter Menu Styles */
+.convex-panel-container .convex-panel-filter-menu {
+  @apply fixed z-[9999] bg-neutral-900 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)] min-w-[300px] border border-neutral-700 pointer-events-auto p-3 rounded-lg border-solid fixed z-[9999] bg-neutral-900 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)] min-w-[300px] border border-neutral-700 pointer-events-auto p-3 rounded-lg border-solid; /* Use a very high z-index to ensure it's above everything */ /* Ensure the menu captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-group {
+  @apply mb-3 mb-3;
+}
+.convex-panel-container .convex-panel-filter-menu-group-value {
+  @apply mb-4 mb-4;
+}
+.convex-panel-container .convex-panel-filter-menu-label {
+  @apply block text-xs text-neutral-300 mb-1 block text-xs text-neutral-300 mb-1;
+}
+.convex-panel-container .convex-panel-filter-menu-dropdown {
+  @apply relative relative;
+}
+.convex-panel-container .convex-panel-filter-menu-dropdown-button {
+  @apply w-full text-xs bg-[#2a2a2a] text-[white] border flex justify-between items-center cursor-pointer pointer-events-auto px-3 py-1.5 rounded-lg border-solid border-[#333333] w-full text-xs bg-[#2a2a2a] text-[white] border flex justify-between items-center cursor-pointer pointer-events-auto px-3 py-1.5 rounded-lg border-solid border-[#333333];
+  font-family: monospace; /* Add cursor pointer */ /* Ensure button captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-dropdown-button:focus {
+  outline: none;
+}
+.convex-panel-container .convex-panel-filter-menu-dropdown-content {
+  @apply absolute z-[10000] w-full bg-[#2a2a2a] border shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)] pointer-events-auto mt-1 rounded-lg border-solid border-[#333333] absolute z-[10000] w-full bg-[#2a2a2a] border shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-2px_rgba(0,0,0,0.05)] pointer-events-auto mt-1 rounded-lg border-solid border-[#333333]; /* Even higher z-index for the dropdown */ /* Ensure dropdown content captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-option {
+  @apply w-full text-left text-xs cursor-pointer bg-transparent text-[white] pointer-events-auto px-3 py-1.5 rounded-sm border-[none] hover:bg-neutral-700 hover:rounded-[0.425rem] w-full text-left text-xs cursor-pointer bg-transparent text-[white] pointer-events-auto px-3 py-1.5 rounded-sm border-[none] hover:bg-neutral-700 hover:rounded-[0.425rem];
+  font-family: monospace; /* Add cursor pointer */ /* Ensure no default border */ /* Start with transparent background */ /* Ensure text is visible */ /* Ensure option captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-option-selected {
+  @apply bg-neutral-700 rounded-[0.425rem] bg-neutral-700 rounded-[0.425rem];
+}
+.convex-panel-container .convex-panel-filter-menu-textarea {
+  @apply w-full bg-neutral-700 border border-neutral-600 rounded text-sm text-[white] h-20 resize-none pointer-events-auto p-2 border-solid w-full bg-neutral-700 border border-neutral-600 rounded text-sm text-[white] h-20 resize-none pointer-events-auto p-2 border-solid;
+  font-family: monospace; /* Ensure textarea captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-hint {
+  @apply text-xs text-neutral-400 mt-1 text-xs text-neutral-400 mt-1;
+}
+.convex-panel-container .convex-panel-filter-menu-actions {
+  @apply flex justify-between flex justify-between;
+}
+.convex-panel-container .convex-panel-filter-menu-cancel-button {
+  @apply bg-neutral-700 text-[white] rounded text-xs cursor-pointer pointer-events-auto px-3 py-1.5 border-[none] hover:bg-neutral-600 bg-neutral-700 text-[white] rounded text-xs cursor-pointer pointer-events-auto px-3 py-1.5 border-[none] hover:bg-neutral-600; /* Add cursor pointer */ /* Ensure no default border */ /* Ensure button captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-apply-button {
+  @apply bg-[#3f5295] text-[white] rounded text-xs cursor-pointer pointer-events-auto px-3 py-1.5 border-[none] hover:bg-[rgba(63,82,149,0.6)] bg-[#3f5295] text-[white] rounded text-xs cursor-pointer pointer-events-auto px-3 py-1.5 border-[none] hover:bg-[rgba(63,82,149,0.6)]; /* Add cursor pointer */ /* Ensure no default border */ /* Ensure button captures pointer events */
+}
+/* Info icon and tooltip styles */
+.convex-panel-container .convex-panel-info-icon {
+  @apply w-3.5 h-3.5 text-blue-400 cursor-pointer ml-1 w-3.5 h-3.5 text-blue-400 cursor-pointer ml-1;
+}
+.convex-panel-container .convex-panel-log-info-tooltip {
+  @apply relative inline-flex items-center z-[9999] relative inline-flex items-center z-[9999];
+}
+.convex-panel-container .convex-panel-tooltip-content {
+  @apply fixed bg-[#1a1a1a] border rounded z-[99999] min-w-[300px] max-w-[500px] shadow-[0_4px_8px_rgba(0,0,0,0.5)] whitespace-normal overflow-visible pointer-events-auto p-3 border-solid border-[#333] fixed bg-[#1a1a1a] border rounded z-[99999] min-w-[300px] max-w-[500px] shadow-[0_4px_8px_rgba(0,0,0,0.5)] whitespace-normal overflow-visible pointer-events-auto p-3 border-solid border-[#333];
+}
+.convex-panel-container .convex-panel-tooltip-line {
+  @apply text-xs text-[#d0d0d0] whitespace-pre-wrap leading-[1.4] mb-1 last:mb-0 text-xs text-[#d0d0d0] whitespace-pre-wrap leading-[1.4] mb-1 last:mb-0;
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-health-container {
+  @apply overflow-auto overflow-auto;
+}
+.convex-panel-container .convex-panel-health-header {
+  @apply bg-[#1a1a1a] uppercase mb-[5px] px-4 py-2 border-b-[#333333] border-b border-solid top-0 bg-[#1a1a1a] uppercase mb-[5px] px-4 py-2 border-b-[#333333] border-b border-solid top-0;
+}
+/* Editable cell styles */
+.convex-panel-container .convex-panel-editable-cell {
+  @apply cursor-pointer relative transition-[background-color] duration-[0.2s] ease-[ease] hover:bg-transparent cursor-pointer hover:underline hover:text-white cursor-pointer relative transition-[background-color] duration-[0.2s] ease-[ease] hover:bg-transparent cursor-pointer hover:underline hover:text-white;
+}
+.convex-panel-container .convex-panel-table-cell.editing {
+  @apply p-0 border-2 border-solid border-[#3f5295] overflow-visible z-10 p-0 bg-[#252525] p-0 border-2 border-solid border-[#007acc] p-0 border-2 border-solid border-[#3f5295] overflow-visible z-10 p-0 bg-[#252525] p-0 border-2 border-solid border-[#007acc];
+}
+.convex-panel-container .convex-panel-table-cell.updating {
+  @apply opacity-70 bg-[rgba(63,82,149,0.2)] opacity-70 bg-[rgba(63,82,149,0.2)];
+}
+.convex-panel-container .convex-panel-cell-edit-input {
+  @apply w-full h-full bg-[#1a1a1a] text-[white] text-xs box-border p-2 border-[none] w-full h-full bg-[#252525] text-[#e9e9e9] text-sm p-2 border-[none] w-full h-full bg-[#1a1a1a] text-[white] text-xs box-border p-2 border-[none] w-full h-full bg-[#252525] text-[#e9e9e9] text-sm p-2 border-[none];
+}
+.convex-panel-container .convex-panel-cell-edit-input:focus {
+  outline: none ;
+}
+.convex-panel-container .convex-panel-log-details-text {
+  @apply overflow-hidden text-ellipsis whitespace-nowrap max-w-full overflow-hidden text-ellipsis whitespace-nowrap max-w-full;
+}
+/* Add a new style for the paused live button */
+.convex-panel-container .convex-panel-live-button-paused {
+  @apply bg-[#953f3f] border border-solid border-[rgba(149,63,63,0.25)] hover:bg-[rgba(149,63,63,0.6)] bg-[#953f3f] border border-solid border-[rgba(149,63,63,0.25)] hover:bg-[rgba(149,63,63,0.6)]; /* Red background for paused state */
+}
+/* Update checker styles */
+.convex-panel-container .convex-panel-update-container {
+  @apply flex items-center ml-2 flex items-center ml-2;
+}
+.convex-panel-container .convex-panel-update-button {
+  @apply flex items-center gap-1 rounded bg-[color:var(--convex-panel-primary-color)] text-[white] cursor-pointer text-xs transition-[background-color] duration-[0.2s] ease-[ease] px-2 py-1 border-[none] hover:bg-[color:var(--convex-panel-primary-hover-color)] flex items-center gap-1 rounded bg-[color:var(--convex-panel-primary-color)] text-[white] cursor-pointer text-xs transition-[background-color] duration-[0.2s] ease-[ease] px-2 py-1 border-[none] hover:bg-[color:var(--convex-panel-primary-hover-color)];
+}
+.convex-panel-container .convex-panel-update-button svg {
+  @apply w-3.5 h-3.5 w-3.5 h-3.5;
+}
+.convex-panel-container .convex-panel-log-argument {
+  @apply inline-block align-top mr-1 last:mr-0 inline-block align-top mr-1 last:mr-0;
+}
+/* Make sure object displays properly inside arguments */
+.convex-panel-container .convex-panel-log-argument .convex-panel-json-object {
+  @apply inline-block min-w-[100px] inline-block min-w-[100px];
+}
+/* DevTools styles */
+.convex-panel-container .convex-panel-devtools-container {
+  @apply flex flex-col h-full w-full bg-[#242424] text-white flex flex-col h-full w-full bg-[#242424] text-white;
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+.convex-panel-container .convex-panel-devtools-toolbar {
+  @apply flex items-center gap-2 bg-[#2d2d2d] p-2 border-b-[#3c3c3c] border-b border-solid flex items-center gap-2 bg-[#2d2d2d] p-2 border-b-[#3c3c3c] border-b border-solid;
+}
+.convex-panel-container .convex-panel-devtools-logs {
+  @apply flex-1 overflow-y-auto bg-[#242424] text-neutral-200 p-0 flex-1 overflow-y-auto bg-[#242424] text-neutral-200 p-0;
+}
+.convex-panel-container .convex-panel-devtools-empty {
+  @apply flex flex-col items-center justify-center h-full text-[#999] text-sm text-center p-5 flex flex-col items-center justify-center h-full text-[#999] text-sm text-center p-5;
+}
+.convex-panel-container .convex-panel-devtools-logs-list {
+  @apply flex flex-col w-full flex flex-col w-full;
+}
+.convex-panel-container .convex-panel-devtools-log-entry {
+  @apply flex text-xs leading-normal items-start text-neutral-200 px-2 py-[3px] border-b-[#3c3c3c] border-b border-solid flex text-xs leading-normal items-start text-neutral-200 px-2 py-[3px] border-b-[#3c3c3c] border-b border-solid;
+}
+.convex-panel-container
+  .convex-panel-devtools-log-entry.convex-panel-log-error {
+  @apply bg-[rgba(255,0,0,0.05)] text-[#ff0000] bg-[rgba(255,0,0,0.05)] text-[#ff0000];
+}
+.convex-panel-container
+  .convex-panel-devtools-log-entry.convex-panel-log-warning {
+  @apply bg-[rgba(229,192,123,0.05)] text-[#e5c07b] bg-[rgba(229,192,123,0.05)] text-[#e5c07b];
+}
+.convex-panel-container .convex-panel-devtools-log-entry.convex-panel-log-info {
+  @apply text-neutral-200 text-neutral-200;
+}
+.convex-panel-container
+  .convex-panel-devtools-log-entry.convex-panel-log-debug {
+  @apply text-[#8a8a8a] text-[#8a8a8a];
+}
+.convex-panel-container .convex-panel-devtools-log-timestamp {
+  @apply text-[#888] text-[11px] min-w-[80px] opacity-80 mr-2 text-[#888] text-[11px] min-w-[80px] opacity-80 mr-2;
+}
+.convex-panel-container .convex-panel-devtools-log-message {
+  @apply flex-1 leading-4 ml-2 flex-1 leading-4 ml-2;
+  word-break: break-word;
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+.convex-panel-container .convex-panel-devtools-log-message pre {
+  @apply whitespace-pre-wrap text-xs m-0 whitespace-pre-wrap text-xs m-0;
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+.convex-panel-container .convex-panel-devtools-log-level {
+  @apply text-[#888] text-[11px] min-w-[60px] uppercase hidden mr-2 text-[#888] text-[11px] min-w-[60px] uppercase hidden mr-2; /* Hide the log level to match Chrome DevTools */
+}
+.convex-panel-container .convex-panel-devtools-log-source {
+  @apply hidden hidden; /* Hide the source to match Chrome DevTools */
+}
+/* JSON Viewer styles */
+.convex-panel-container .json-view {
+  @apply text-xs leading-[1.4] text-xs leading-[1.4];
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+.convex-panel-container .json-row {
+  @apply flex items-start cursor-pointer flex items-start cursor-pointer;
+}
+.convex-panel-container .json-toggle {
+  @apply inline-block text-[10px] text-[#909090] transition-transform duration-[0.15s] ease-[ease] w-3 text-center mr-1 inline-block text-[10px] text-[#909090] transition-transform duration-[0.15s] ease-[ease] w-3 text-center mr-1;
+}
+.convex-panel-container .json-children {
+  @apply ml-4 pl-1 border-l-[#3c3c3c] border-l border-dotted ml-4 pl-1 border-l-[#3c3c3c] border-l border-dotted;
+}
+.convex-panel-container .json-property {
+  @apply mx-0 my-0.5 mx-0 my-0.5;
+}
+.convex-panel-container .json-key {
+  @apply text-[#80b2ff] mr-1 text-[#80b2ff] mr-1;
+}
+.convex-panel-container .json-type {
+  @apply text-[#cccccc] text-[#cccccc];
+}
+.convex-panel-container .json-preview {
+  @apply text-[#909090] italic text-[#909090] italic;
+}
+.convex-panel-container .json-string {
+  @apply text-[#9ecbff] text-[#9ecbff];
+}
+.convex-panel-container .json-number {
+  @apply text-[#56b6c2] text-[#56b6c2];
+}
+.convex-panel-container .json-boolean {
+  @apply text-[#d19a66] text-[#d19a66];
+}
+.convex-panel-container .json-null,
+.convex-panel-container .json-undefined {
+  @apply text-[#7f848e] italic text-[#7f848e] italic;
+}
+.convex-panel-container .json-function {
+  @apply text-[#c678dd] italic text-[#c678dd] italic;
+}
+.convex-panel-container .log-argument-container {
+  @apply flex flex-wrap gap-1 flex flex-wrap gap-1;
+}
+.convex-panel-container .log-argument {
+  @apply inline-flex mr-1 inline-flex mr-1;
+  font-family: "monospace";
+}
+.convex-panel-container .log-separator {
+  @apply text-[#ccc] text-[#ccc];
+}
+.convex-panel-container .convex-panel-log-level-selector {
+  @apply ml-auto ml-auto;
+}
+.convex-panel-container .convex-panel-select {
+  @apply bg-[#333] text-white border rounded text-xs px-2 py-1 border-solid border-[#555] focus:border-[#6e9add] bg-[#333] text-white border rounded text-xs px-2 py-1 border-solid border-[#555] focus:border-[#6e9add];
+  outline: none;
+}
+.convex-panel-container .convex-panel-test-button,
+.convex-panel-container .convex-panel-clear-button {
+  @apply bg-[#333] text-white border rounded text-xs cursor-pointer transition-[background-color] duration-[0.2s] px-3 py-1 border-solid border-[#555] bg-[#333] text-white border rounded text-xs cursor-pointer transition-[background-color] duration-[0.2s] px-3 py-1 border-solid border-[#555];
+}
+.convex-panel-container .convex-panel-test-button:hover,
+.convex-panel-container .convex-panel-clear-button:hover {
+  @apply bg-[#444] bg-[#444];
+}
+.convex-panel-container .convex-panel-filter-input {
+  @apply w-full bg-[#333] text-white border rounded text-xs px-2 py-1 border-solid border-[#555] focus:border-[#6e9add] w-full bg-[#333] text-white border rounded text-xs px-2 py-1 border-solid border-[#555] focus:border-[#6e9add];
+  outline: none;
+}
+/* Network Panel styles */
+.convex-panel-container .convex-panel-network-container {
+  @apply flex flex-col h-full w-full bg-[#242424] text-neutral-200 flex flex-col h-full w-full bg-[#242424] text-neutral-200;
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+.convex-panel-container .convex-panel-toolbar-button {
+  @apply bg-[#333] text-white border rounded text-xs cursor-pointer transition-[background-color] duration-[0.2s] px-3 py-1 border-solid border-[#555] hover:bg-[#444] bg-[#333] text-white border rounded text-xs cursor-pointer transition-[background-color] duration-[0.2s] px-3 py-1 border-solid border-[#555] hover:bg-[#444];
+}
+.convex-panel-container .convex-panel-toolbar-button-active {
+  @apply bg-[#555] bg-[#555];
+}
+.convex-panel-container .convex-panel-network-content {
+  @apply flex flex-col overflow-hidden flex flex-col overflow-hidden;
+}
+.convex-panel-container .convex-panel-network-table-container {
+  @apply flex-1 overflow-auto flex-1 overflow-auto;
+}
+.convex-panel-container .convex-panel-network-table {
+  @apply w-full text-xs table-fixed border-collapse w-full text-xs table-fixed border-collapse;
+}
+.convex-panel-container .convex-panel-network-table th {
+  @apply bg-[#2a2a2a] text-left font-[normal] text-[#ccc] whitespace-nowrap sticky z-[1] p-2 border-b-[#3c3c3c] border-b border-solid top-0 first:w-6/12 bg-[#2a2a2a] text-left font-[normal] text-[#ccc] whitespace-nowrap sticky z-[1] p-2 border-b-[#3c3c3c] border-b border-solid top-0 first:w-6/12;
+}
+.convex-panel-container .convex-panel-network-table th:nth-child(2) {
+  @apply w-[10%] w-[10%];
+}
+.convex-panel-container .convex-panel-network-table th:nth-child(3) {
+  @apply w-[15%] w-[15%];
+}
+.convex-panel-container .convex-panel-network-table th:nth-child(4) {
+  @apply w-[10%] w-[10%];
+}
+.convex-panel-container .convex-panel-network-table th:nth-child(5) {
+  @apply w-[15%] w-[15%];
+}
+.convex-panel-container .convex-panel-network-row {
+  @apply cursor-pointer hover:bg-[#333] cursor-pointer hover:bg-[#333];
+}
+.convex-panel-container .convex-panel-network-row-selected {
+  @apply bg-[#3a3a3a] bg-[#3a3a3a];
+}
+.convex-panel-container .convex-panel-network-row td {
+  @apply whitespace-nowrap overflow-hidden text-ellipsis px-2 py-1.5 border-b-[#3c3c3c] border-b border-solid whitespace-nowrap overflow-hidden text-ellipsis px-2 py-1.5 border-b-[#3c3c3c] border-b border-solid;
+}
+.convex-panel-container .convex-panel-network-name {
+  @apply flex flex-col flex flex-col;
+}
+.convex-panel-container .convex-panel-network-method {
+  @apply text-[#9cdcfe] font-[bold] mb-0.5 text-[#9cdcfe] font-[bold] mb-0.5;
+}
+.convex-panel-container .convex-panel-network-url {
+  @apply whitespace-nowrap overflow-hidden text-ellipsis text-[11px] whitespace-nowrap overflow-hidden text-ellipsis text-[11px];
+}
+.convex-panel-container .convex-panel-network-status {
+  @apply font-[bold] font-[bold];
+}
+.convex-panel-container .network-status-success {
+  @apply text-green-400 text-green-400;
+}
+.convex-panel-container .network-status-error {
+  @apply text-red-400 text-red-400;
+}
+.convex-panel-container .network-status-redirect {
+  @apply text-amber-300 text-amber-300;
+}
+.convex-panel-container .convex-panel-network-empty {
+  @apply text-center text-[#999] p-5 text-center text-[#999] p-5;
+}
+.convex-panel-container .convex-panel-network-detail {
+  @apply h-[300px] overflow-hidden flex flex-col border-t-[#3c3c3c] border-t border-solid h-[300px] overflow-hidden flex flex-col border-t-[#3c3c3c] border-t border-solid;
+}
+.convex-panel-container .convex-panel-network-detail-tabs {
+  @apply flex bg-[#2a2a2a] border-b-[#3c3c3c] border-b border-solid flex bg-[#2a2a2a] border-b-[#3c3c3c] border-b border-solid;
+}
+.convex-panel-container .convex-panel-network-detail-tab {
+  @apply text-[#ccc] cursor-pointer text-xs px-4 py-2 border-r-[#3c3c3c] border-[none] border-r border-solid hover:bg-[#333] text-[#ccc] cursor-pointer text-xs px-4 py-2 border-r-[#3c3c3c] border-[none] border-r border-solid hover:bg-[#333];
+  background: none;
+}
+.convex-panel-container .convex-panel-network-detail-tab-active {
+  @apply text-white bg-[#3a3a3a] text-white bg-[#3a3a3a];
+}
+.convex-panel-container .convex-panel-network-detail-content {
+  @apply overflow-auto flex-1 p-2 overflow-auto flex-1 p-2;
+}
+.convex-panel-container .convex-panel-network-detail-section {
+  @apply mb-4 mb-4;
+}
+.convex-panel-container .convex-panel-network-detail-section h4 {
+  @apply text-xs text-[#ccc] font-[normal] mt-0 mb-2 mx-0 pb-1 border-b-[#3c3c3c] border-b border-solid text-xs text-[#ccc] font-[normal] mt-0 mb-2 mx-0 pb-1 border-b-[#3c3c3c] border-b border-solid;
+}
+.convex-panel-container .convex-panel-network-detail-item {
+  @apply flex text-[11px] leading-[1.4] mb-1 flex text-[11px] leading-[1.4] mb-1;
+}
+.convex-panel-container .convex-panel-network-detail-label {
+  @apply w-[150px] text-[#9cdcfe] pr-2 w-[150px] text-[#9cdcfe] pr-2;
+}
+.convex-panel-container .convex-panel-network-detail-value {
+  @apply flex-1 flex-1;
+  word-break: break-word;
+}
+/* Toolbar button updates */
+.convex-panel-container .convex-panel-test-button {
+  @apply bg-[#333] text-white border rounded text-xs cursor-pointer transition-[background-color] duration-[0.2s] px-3 py-1 border-solid border-[#555] hover:bg-[#444] bg-[#333] text-white border rounded text-xs cursor-pointer transition-[background-color] duration-[0.2s] px-3 py-1 border-solid border-[#555] hover:bg-[#444];
+}
+/* Data Table Styles */
+/* Add styles for data content with detail panel */
+.convex-panel-container .convex-panel-data-content.with-detail-panel {
+  @apply flex-row overflow-hidden flex-row overflow-hidden;
+}
+.convex-panel-container .convex-panel-data-container {
+  @apply flex-1 min-h-0 flex flex-col overflow-auto min-w-0 flex-1 min-h-0 flex flex-col overflow-auto min-w-0; /* Important for proper flex behavior */ /* Enable scrolling */ /* Allow container to shrink below content size */
+}
+/* Remove fixed width constraints */
+.convex-panel-container .with-detail-panel .convex-panel-data-container {
+  @apply w-auto w-auto;
+}
+/* Table Styles */
+.convex-panel-container .convex-panel-table-wrapper {
+  /* Change from overflow-x to allow vertical scrolling */
+}
+.convex-panel-container .convex-panel-header-hovered {
+  @apply text-white text-white;
+}
+/* Selected row styles */
+.convex-panel-container .convex-panel-selected-row {
+  @apply bg-[#264f78] hover:bg-[#1c3a59] bg-[#264f78] hover:bg-[#1c3a59];
+}
+/* Cell content styles */
+.convex-panel-container .convex-panel-id-value {
+  font-family: monospace;
+}
+/* Filter button */
+.convex-panel-container .convex-panel-filter-button {
+  background: none;
+}
+/* Checkbox styles */
+.convex-panel-container .convex-panel-checkbox-header,
+.convex-panel-container .convex-panel-checkbox-cell {
+  @apply w-8 text-center px-2 py-0 w-8 text-center px-2 py-0;
+}
+/* Footer and loading states */
+.convex-panel-container .convex-panel-table-footer {
+  /* Push to bottom of flex container */
+}
+.convex-panel-container .convex-panel-loading-message,
+.convex-panel-container .convex-panel-empty-message,
+.convex-panel-container .convex-panel-loading-more-message,
+.convex-panel-container .convex-panel-has-more-message,
+.convex-panel-container .convex-panel-end-message {
+  @apply m-0 p-2 m-0 p-2;
+}
+/* Add new styles for cell editing */
+.convex-panel-container .convex-panel-cell-edit-input {
+  outline: none;
+  font-family: inherit;
+}
+/* Sidebar Section Styles */
+.convex-panel-container .convex-panel-sidebar-section-title {
+  @apply text-xs font-semibold text-[#8e8e8e] uppercase flex items-center gap-1 px-3 py-2 text-xs font-semibold text-[#8e8e8e] uppercase flex items-center gap-1 px-3 py-2;
+}
+.convex-panel-container .convex-panel-sidebar-divider {
+  @apply h-px bg-[#333] mx-0 my-2 h-px bg-[#333] mx-0 my-2;
+}
+.convex-panel-container .convex-panel-sidebar-recent-container,
+.convex-panel-container .convex-panel-sidebar-all-tables-container {
+  @apply mb-2 mb-2;
+}
+/* Detail Panel Styles */
+.convex-panel-container .convex-panel-detail-panel {
+  @apply relative w-auto h-full bg-[#1a1a1a] flex flex-col transition-[width] duration-[0.2s] ease-[ease] border-l-[#333] border-l border-solid relative w-auto h-full bg-[#1a1a1a] flex flex-col transition-[width] duration-[0.2s] ease-[ease] border-l-[#333] border-l border-solid;
+}
+.convex-panel-container .convex-panel-detail-resize-handle {
+  @apply absolute w-1.5 h-full cursor-col-resize bg-transparent z-20 left-0 top-0 hover:bg-[rgba(102,102,102,0.3)] active:bg-[rgba(102,102,102,0.5)] absolute w-1.5 h-full cursor-col-resize bg-transparent z-20 left-0 top-0 hover:bg-[rgba(102,102,102,0.3)] active:bg-[rgba(102,102,102,0.5)];
+}
+.convex-panel-container .convex-panel-detail-header {
+  @apply flex justify-between items-center bg-[#2c2c2c] sticky z-10 px-4 py-1.5 border-b-[#333] border-b border-solid top-0 flex justify-between items-center bg-[#2c2c2c] sticky z-10 px-4 py-1.5 border-b-[#333] border-b border-solid top-0;
+}
+.convex-panel-container .convex-panel-detail-header h3 {
+  @apply text-xs font-semibold text-gray-400 text-xs font-semibold text-gray-400;
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-detail-close-btn {
+  @apply text-[#999] text-xl cursor-pointer w-7 h-7 flex items-center justify-center ml-2 p-0 rounded-[3px] border-[none] hover:bg-[#444] hover:text-white text-[#999] text-xl cursor-pointer w-7 h-7 flex items-center justify-center ml-2 p-0 rounded-[3px] border-[none] hover:bg-[#444] hover:text-white;
+  background: none;
+}
+.convex-panel-container .convex-panel-detail-field {
+  @apply flex flex-col bg-[#1a1a1a] p-3 flex flex-col bg-[#1a1a1a] p-3;
+}
+.convex-panel-container .convex-panel-detail-field-name {
+  @apply text-xs text-[#8e8e8e] font-normal mb-1 text-xs text-[#8e8e8e] font-normal mb-1;
+}
+.convex-panel-container .convex-panel-detail-field-value {
+  @apply text-sm text-[#e0e0e0] whitespace-pre-wrap overflow-auto leading-normal px-1 py-0.5 rounded-[3px] text-sm text-[#e0e0e0] whitespace-pre-wrap overflow-auto leading-normal px-1 py-0.5 rounded-[3px];
+  word-wrap: break-word;
+}
+.convex-panel-container .convex-panel-detail-field-value.editable {
+  @apply cursor-pointer hover:bg-[#2a2a2a] cursor-pointer hover:bg-[#2a2a2a];
+}
+.convex-panel-container .convex-panel-detail-field-edit {
+  @apply flex flex-col w-full flex flex-col w-full;
+}
+.convex-panel-container .convex-panel-detail-field-input {
+  @apply w-full bg-[#252525] border text-[white] text-sm transition-[background-color] duration-[0.2s] mb-2 px-2 py-1.5 rounded-md border-solid border-[#3f3f3f] focus:border-[#3f5295] w-full bg-[#252525] border text-[white] text-sm transition-[background-color] duration-[0.2s] mb-2 px-2 py-1.5 rounded-md border-solid border-[#3f3f3f] focus:border-[#3f5295];
+  outline: none;
+}
+.convex-panel-container .convex-panel-detail-field-actions {
+  @apply flex justify-end gap-2 flex justify-end gap-2;
+}
+.convex-panel-container .convex-panel-detail-cancel-btn,
+.convex-panel-container .convex-panel-detail-save-btn {
+  @apply transition-[background-color] duration-[0.2s] text-xs cursor-pointer font-medium flex items-center gap-1 px-3 py-1.5 rounded-md border-[none] transition-[background-color] duration-[0.2s] text-xs cursor-pointer font-medium flex items-center gap-1 px-3 py-1.5 rounded-md border-[none];
+  outline: none;
+}
+.convex-panel-container .convex-panel-detail-cancel-btn {
+  @apply bg-transparent border text-[#ddd] border-solid border-[#666] hover:bg-[#3a3a3a] bg-transparent border text-[#ddd] border-solid border-[#666] hover:bg-[#3a3a3a];
+}
+.convex-panel-container .convex-panel-detail-save-btn {
+  @apply bg-[#3f5295] text-[white] border border-solid border-[#3f5295] hover:bg-[#006ac1] bg-[#3f5295] text-[white] border border-solid border-[#3f5295] hover:bg-[#006ac1];
+}
+.convex-panel-container .convex-panel-detail-cancel-btn:disabled,
+.convex-panel-container .convex-panel-detail-save-btn:disabled {
+  @apply opacity-60 cursor-not-allowed opacity-60 cursor-not-allowed;
+}
+.convex-panel-container .convex-panel-detail-field-value.convex-panel-id-value,
+.convex-panel-container
+  .convex-panel-detail-field-value
+  .convex-panel-id-value {
+  @apply text-[#569cd6] text-[13px] text-[#569cd6] text-[13px];
+  font-family: monospace;
+}
+.convex-panel-container .convex-panel-true-value {
+  @apply text-[#6aaa64] text-[#6aaa64];
+}
+.convex-panel-container .convex-panel-false-value {
+  @apply text-[#dc3545] text-[#dc3545];
+}
+.convex-panel-container .convex-panel-detail-field-value pre {
+  @apply whitespace-pre-wrap text-[13px] text-neutral-300 bg-[#161616] max-h-[200px] overflow-y-auto m-0 p-2 rounded-[3px] whitespace-pre-wrap text-[13px] text-neutral-300 bg-[#161616] max-h-[200px] overflow-y-auto m-0 p-2 rounded-[3px];
+  font-family: monospace;
+}
+/* Copy to clipboard styling */
+.convex-panel-container .convex-panel-detail-field-value-wrapper {
+  @apply flex items-center justify-between w-full relative min-h-[24px] flex items-center justify-between w-full relative min-h-[24px];
+}
+.convex-panel-container .convex-panel-detail-field-copy {
+  @apply opacity-0 transition-opacity duration-[0.2s] cursor-pointer flex items-center justify-center bg-transparent ml-2 p-1 rounded-[3px] hover:opacity-100 hover:bg-[rgba(255,255,255,0.1)] opacity-0 transition-opacity duration-[0.2s] cursor-pointer flex items-center justify-center bg-transparent ml-2 p-1 rounded-[3px] hover:opacity-100 hover:bg-[rgba(255,255,255,0.1)];
+}
+.convex-panel-container
+  .convex-panel-detail-field-value:hover
+  .convex-panel-detail-field-copy {
+  @apply opacity-70 opacity-70;
+}
+.convex-panel-container .convex-panel-detail-raw-json {
+  font-family: monospace;
+}
+/* Success/Error text styles */
+/* Animation container */
+/* Debug Filter styles */
+.convex-panel-container .convex-panel-filter-debug {
+  font-family: monospace;
+}
+/* Storage Debug styles */
+.convex-panel-container .convex-panel-storage-debug {
+  font-family: monospace;
+}
+/*DataTable layout styles */
+/* Filter Menu Styles */
+.convex-panel-container .convex-panel-filter-menu {
+  /* Use a very high z-index to ensure it's above everything */ /* Ensure the menu captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-dropdown-button {
+  font-family: monospace; /* Add cursor pointer */ /* Ensure button captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-dropdown-button:focus {
+  outline: none;
+}
+.convex-panel-container .convex-panel-filter-menu-dropdown-content {
+  /* Even higher z-index for the dropdown */ /* Ensure dropdown content captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-option {
+  font-family: monospace; /* Add cursor pointer */ /* Ensure no default border */ /* Start with transparent background */ /* Ensure text is visible */ /* Ensure option captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-textarea {
+  font-family: monospace; /* Ensure textarea captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-cancel-button {
+  /* Add cursor pointer */ /* Ensure no default border */ /* Ensure button captures pointer events */
+}
+.convex-panel-container .convex-panel-filter-menu-apply-button {
+  /* Add cursor pointer */ /* Ensure no default border */ /* Ensure button captures pointer events */
+}
+/* Info icon and tooltip styles */
+.convex-panel-container .convex-panel-tooltip-line {
+  font-family: monospace ;
+}
+/* Editable cell styles */
+.convex-panel-container .convex-panel-cell-edit-input:focus {
+  outline: none ;
+}
+/* Add a new style for the paused live button */
+.convex-panel-container .convex-panel-live-button-paused {
+  /* Red background for paused state */
+}
+/* Update checker styles */
+/* Make sure object displays properly inside arguments */
+/* DevTools styles */
+.convex-panel-container .convex-panel-devtools-container {
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+.convex-panel-container .convex-panel-devtools-log-message {
+  word-break: break-word;
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+.convex-panel-container .convex-panel-devtools-log-message pre {
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+.convex-panel-container .convex-panel-devtools-log-level {
+  /* Hide the log level to match Chrome DevTools */
+}
+.convex-panel-container .convex-panel-devtools-log-source {
+  /* Hide the source to match Chrome DevTools */
+}
+/* JSON Viewer styles */
+.convex-panel-container .json-view {
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+.convex-panel-container .log-argument {
+  font-family: "monospace";
+}
+.convex-panel-container .convex-panel-select {
+  outline: none;
+}
+.convex-panel-container .convex-panel-filter-input {
+  outline: none;
+}
+/* Network Panel styles */
+.convex-panel-container .convex-panel-network-container {
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
+.convex-panel-container .convex-panel-network-detail-tab {
+  background: none;
+}
+.convex-panel-container .convex-panel-network-detail-value {
+  word-break: break-word;
+}
+/* Toolbar button updates */
+/* Data Table Styles */
+/* Add styles for data content with detail panel */
+.convex-panel-container .convex-panel-data-container {
+  /* Important for proper flex behavior */ /* Enable scrolling */ /* Allow container to shrink below content size */
+}
+/* Remove fixed width constraints */
+/* Table Styles */
+.convex-panel-container .convex-panel-table-wrapper {
+  /* Change from overflow-x to allow vertical scrolling */
+}
+/* Selected row styles */
+/* Cell content styles */
+.convex-panel-container .convex-panel-id-value {
+  font-family: monospace;
+}
+/* Filter button */
+.convex-panel-container .convex-panel-filter-button {
+  background: none;
+}
+/* Checkbox styles */
+/* Footer and loading states */
+.convex-panel-container .convex-panel-table-footer {
+  /* Push to bottom of flex container */
+}
+/* Add new styles for cell editing */
+.convex-panel-container .convex-panel-cell-edit-input {
+  outline: none;
+  font-family: inherit;
+}
+/* Sidebar Section Styles */
+/* Detail Panel Styles */
+.convex-panel-container .convex-panel-detail-header h3 {
+  font-family: monospace ;
+}
+.convex-panel-container .convex-panel-detail-close-btn {
+  background: none;
+}
+.convex-panel-container .convex-panel-detail-field-value {
+  word-wrap: break-word;
+}
+.convex-panel-container .convex-panel-detail-field-input {
+  outline: none;
+}
+.convex-panel-container .convex-panel-detail-cancel-btn,
+.convex-panel-container .convex-panel-detail-save-btn {
+  outline: none;
+}
+.convex-panel-container .convex-panel-detail-field-value.convex-panel-id-value,
+.convex-panel-container
+  .convex-panel-detail-field-value
+  .convex-panel-id-value {
+  font-family: monospace;
+}
+.convex-panel-container .convex-panel-detail-field-value pre {
+  font-family: monospace;
+}
+/* Copy to clipboard styling */
+.convex-panel-container .convex-panel-copy-success {
+  @apply text-[#6aaa64] font-[bold];
+}
+.convex-panel-container .convex-panel-detail-header-actions {
+  @apply flex items-center gap-2;
+}
+.convex-panel-container .convex-panel-detail-header-action-button {
+  @apply bg-transparent text-[#a0a0a0] text-base cursor-pointer border-[none] hover:text-white;
+}
+.convex-panel-container .dropdown {
+  @apply relative inline-block;
+}
+.convex-panel-container .dropdown-content {
+  @apply absolute bg-[#2c2c2c] min-w-[260px] shadow-[0px_8px_16px_0px_rgba(0,0,0,0.2)] z-10 border mt-1 p-1 rounded-md border-solid border-[#444] right-0 top-full;
+}
+/* Optional: If you want to enable hover behavior instead of click */
+/*
+  .dropdown:hover .dropdown-content {
+    display: block;
   }
+  */
+.convex-panel-container .convex-panel-detail-dropdown-item {
+  @apply cursor-pointer flex items-center gap-2 text-sm p-1 hover:bg-[#222] hover:rounded-md;
+}
+.convex-panel-container .convex-panel-detail-dropdown-item-delete:hover {
+  @apply bg-[#ffebee];
+}
+.convex-panel-container .convex-panel-detail-menu-button {
+  @apply cursor-pointer hover:bg-[#444] hover:rounded;
+}
+.convex-panel-container .convex-panel-full-document-actions {
+  @apply flex items-center gap-2;
+  justify-content: end;
+}
+.convex-panel-container .convex-panel-detail-filter {
+  @apply flex pr-2.5;
+  background: #111;
+}
+.convex-panel-container .convex-panel-detail-no-results {
+  @apply flex items-center justify-center h-full w-full text-[#888] italic text-sm;
+}
+.convex-panel-container .convex-panel-full-document-editor-container {
+  @apply h-[460px];
+}
+.convex-panel-container .convex-panel-functions-container {
+  @apply flex flex-row h-full;
+}
+.convex-panel-container .section-collapse-icon {
+  @apply mr-1;
+}
+/* FileTree Styles */
+.convex-panel-container .convex-panel-tree {
+  @apply text-neutral-200 text-[13px] w-full overflow-x-hidden px-0 py-2;
+}
+.convex-panel-container .convex-panel-tree-folder {
+  @apply flex items-center cursor-pointer select-none text-neutral-200 px-2 py-1 hover:bg-[rgba(255,255,255,0.1)];
+}
+.convex-panel-container .convex-panel-tree-folder-content {
+  @apply ml-2 mt-1 border-l-[#333] border-l border-solid;
+}
+.convex-panel-container .convex-panel-tree-icon {
+  @apply w-4 h-4 text-[#777] mr-1.5;
+}
+.convex-panel-container .convex-panel-tree-code-icon {
+  @apply w-3.5 h-3.5 text-[#777] mr-1.5;
+}
+.convex-panel-container .convex-panel-function-text {
+  @apply text-xs whitespace-nowrap overflow-hidden text-ellipsis;
+  font-family: monospace;
+}
+.convex-panel-container .convex-panel-tree-item {
+  @apply flex items-center cursor-pointer select-none text-neutral-200 text-[13px] justify-between px-2 py-1 hover:bg-[rgba(255,255,255,0.1)];
+}
+.convex-panel-container .convex-panel-tree-item.active {
+  @apply bg-neutral-800;
+}
+.convex-panel-container .convex-panel-tree-function-type {
+  @apply text-[11px] text-[#555] rounded bg-[rgba(255,255,255,0.1)] ml-2 px-1.5 py-0.5;
+}
+.convex-panel-container .convex-panel-tree-lock-icon {
+  @apply w-3 h-3 text-[#555] ml-1.5;
+}
+.convex-panel-container .convex-panel-empty {
+  @apply text-center text-[#555] text-[13px] p-4;
+}
+.convex-panel-container .convex-panel-functions-content {
+  @apply flex items-center justify-center w-full h-full text-sm text-[#777] overflow-auto;
+}
+.convex-panel-container .convex-panel-empty-state {
+  @apply flex flex-col items-center justify-center;
+}
+/* Monaco Editor Highlighting */
+.convex-panel-container .convex-panel-highlighted-line {
+  @apply bg-[rgba(243,176,28,0.2)] border-l-2 border-l-[rgb(243,176,28,0.2)] border-solid;
+}
+.convex-panel-container .convex-panel-highlighted-line-margin {
+  @apply border-l-2 border-l-[rgb(243,176,28,0.2)] border-solid;
+}
+/* readOnlyEditor styles */
+.convex-panel-container .readonlyEditor .monaco-editor .cursors-layer .cursor {
+  @apply hidden;
+}
+.convex-panel-container .readonlyEditor .monacoLineHighlight {
+  @apply bg-[rgb(243,176,28,0.3)] px-0 py-0.5;
+}
 
-  .convex-panel-detail-raw-container:hover .convex-panel-detail-copy-button {
-    @apply opacity-100;
-  }
-
-  .convex-panel-detail-copy-button:hover {
-    @apply text-white;
-  }
-
-  .convex-panel-copy-icon {
-    @apply size-4;
-  }
-
-  .convex-panel-detail-raw-json {
-    @apply text-xs text-neutral-300 font-mono;
-  }
-
-  /* Success/Error text styles already defined, can be reused */
-  .convex-panel-success-text {
-    @apply text-green-500;
-  }
-
-  .convex-panel-error-text {
-    @apply text-red-500;
-  }
-
-  /* Animation container */
-  .convex-panel-logs-container .framer-motion-presence-container {
-    @apply flex flex-1;
-  }
-
-
-
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .convex-panel-card {
-      @apply w-[calc(100vw-2rem)] h-[640px];
-    }
-  }
+/* .convex-panel-container .monaco-editor .monaco-editor-background,
+.convex-panel-container .margin {
+  @apply bg-background-secondary ;
+}
+.convex-panel-container .monaco-editor,
+.convex-panel-container .margin,
+.convex-panel-container .monaco-scrollable-element {
+  @apply bg-background-secondary ;
+} */
+/* Makes spans in hovers not take up too much vertical space */
+.convex-panel-container .monaco-hover-content span {
+  @apply mb-0;
+}
+/* Makes icon rendering in monaco work */
+.convex-panel-container [class^="codicon-"],
+.convex-panel-container [class*="codicon-"] {
+  font-family: "codicon" ;
+}
+.convex-panel-container [class^="codicon-"].hover-decoration,
+.convex-panel-container [class*="codicon-"].hover-decoration {
+  @apply relative leading-[9px] top-0.5; /* This is important to ensure the icon does not push the text out of the line */
+}
+/* Recharts style */
+/* .convex-panel-container .recharts-tooltip-cursor {
+  @apply fill-background-tertiary;
+} */
+.convex-panel-container .recharts-tooltip-wrapper {
+  outline: none;
 }
