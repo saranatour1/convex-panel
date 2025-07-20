@@ -374,7 +374,7 @@ const DataTable: React.FC<DataTableProps> = ({
               filters={filters}
             />
           )}
-          
+
           {selectedTable && (
             <DataTableContent
               documents={documents}

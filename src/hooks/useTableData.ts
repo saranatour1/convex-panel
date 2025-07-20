@@ -161,8 +161,6 @@ export const useTableData = ({
             adminClient
           });
 
-      console.log('tableData', tableData);
-
       setTables(tableData);
       setSelectedTable(newSelectedTable);
       
@@ -354,7 +352,7 @@ export const useTableData = ({
       if (sortConfig) {
         newDocuments = sortDocuments(newDocuments, sortConfig);
       }
-      
+
       if (cursor === null) {
         setDocuments(newDocuments);
       } else {
@@ -593,7 +591,7 @@ export const useTableData = ({
     if (selectedTable) {
       setContinueCursor(null);
       setHasMore(true);
-      setDocuments([]);
+      // setDocuments([]);
       
       // Only reset filters when changing tables
       if (prevTableRef.current !== selectedTable) {
@@ -932,6 +930,7 @@ export const useTableData = ({
     };
   }, []);
 
+  
   return {
     tables,
     selectedTable,
