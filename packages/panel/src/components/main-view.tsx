@@ -3,6 +3,10 @@ import { HealthView } from '../views/health/health-view';
 import { DataView } from '../views/data/data-view';
 import { FunctionsView } from '../views/functions';
 import { SchedulesView } from '../views/schedules';
+import { FilesView } from '../views/files';
+import { LogsView } from '../views/logs';
+import { ComponentsView } from '../views/components';
+import { SettingsView } from '../views/settings';
 import { TabId } from '../types/tabs';
 
 interface MainViewsProps {
@@ -10,6 +14,7 @@ interface MainViewsProps {
   containerProps: {
     convex: any;
     accessToken: string;
+    teamAccessToken?: string;
     deployUrl?: string;
     baseUrl?: string;
     adminClient: any;
@@ -47,15 +52,28 @@ const tabRenderers: Record<TabId, TabRenderer> = {
       projectSlug={projectSlug}
     />
   ),
-  functions: ({ adminClient, accessToken, useMockData, onError }) => (
+  functions: ({ adminClient, accessToken, deployUrl, baseUrl, useMockData, onError }) => (
     <FunctionsView
       adminClient={adminClient}
       accessToken={accessToken}
+      deployUrl={deployUrl}
+      baseUrl={baseUrl}
       useMockData={useMockData}
       onError={onError}
     />
   ),
-  files: createComingSoonRenderer('Files'),
+  files: ({ deployUrl, baseUrl, accessToken, adminClient, useMockData, onError, teamSlug, projectSlug }) => (
+    <FilesView
+      convexUrl={deployUrl || baseUrl}
+      accessToken={accessToken}
+      baseUrl={baseUrl}
+      adminClient={adminClient}
+      useMockData={useMockData}
+      onError={onError}
+      teamSlug={teamSlug}
+      projectSlug={projectSlug}
+    />
+  ),
   schedules: ({ adminClient, accessToken, useMockData }) => (
     <SchedulesView
       adminClient={adminClient}
@@ -63,8 +81,27 @@ const tabRenderers: Record<TabId, TabRenderer> = {
       useMockData={useMockData}
     />
   ),
-  logs: createComingSoonRenderer('Logs'),
-  settings: createComingSoonRenderer('Settings'),
+  logs: ({ deployUrl, baseUrl, accessToken, adminClient, useMockData, onError, teamSlug, projectSlug }) => (
+    <LogsView
+      convexUrl={deployUrl || baseUrl}
+      accessToken={accessToken}
+      baseUrl={baseUrl}
+      adminClient={adminClient}
+      useMockData={useMockData}
+      onError={onError}
+      teamSlug={teamSlug}
+      projectSlug={projectSlug}
+    />
+  ),
+  components: () => <ComponentsView />,
+  settings: ({ deployUrl, accessToken, adminClient, teamAccessToken }) => (
+    <SettingsView
+      adminClient={adminClient}
+      accessToken={accessToken}
+      deploymentUrl={deployUrl}
+      teamAccessToken={teamAccessToken}
+    />
+  ),
 };
 
 export const MainViews: React.FC<MainViewsProps> = ({ activeTab, containerProps }) => {

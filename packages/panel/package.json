@@ -25,25 +25,31 @@
       "default": "./dist/utils/getConvexToken.js"
     },
     "./vite": {
-      "import": "./vite.config.ts",
-      "require": "./vite.config.ts",
-      "default": "./vite.config.ts"
+      "types": "./dist/vite.d.ts",
+      "import": "./dist/vite.esm.js",
+      "require": "./dist/vite.js",
+      "default": "./dist/vite.js"
     }
   },
   "files": [
     "dist",
     "examples",
     "vite.config.ts",
+    "scripts",
     "README.md"
   ],
   "scripts": {
     "copy-src": "node copy-src.js",
-    "build": "npm run copy-src && tsup",
-    "build:rollup": "npm run copy-src && rollup -c",
+    "build:css": "node process-css.js",
+    "build:styles-ts": "node scripts/generate-styles-ts.js",
+    "build": "npm run copy-src && npm run build:css && npm run build:styles-ts && tsup",
     "dev": "tsup --watch",
     "dev:live": "vite --config dev/vite.config.ts",
     "dev:server": "node dev/server.js",
     "dev:all": "npm run dev:server & npm run dev:live",
+    "setup:oauth": "node scripts/setup-oauth.js",
+    "setup:env": "node scripts/setup-env.js",
+    "setup": "npm run setup:oauth && npm run setup:env",
     "clean": "rimraf dist",
     "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -76,6 +82,7 @@
     "lodash": "^4.17.21",
     "lucide-react": "^0.479.0",
     "monaco-editor": "^0.45.0",
+    "react-helmet": "^6.1.0",
     "react-hotkeys-hook": "^4.6.1",
     "react-use": "^17.6.0",
     "react-window": "^1.8.11",
@@ -84,14 +91,10 @@
     "swr": "^2.3.3"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.8",
-    "@rollup/plugin-node-resolve": "^15.3.1",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^11.1.6",
-    "@rollup/plugin-url": "^8.0.2",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/debounce": "^1.2.1",
     "@types/node": "^22.13.10",
+    "@types/react-helmet": "^6.1.11",
     "@types/react-window": "^1.8.8",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.22",
@@ -107,9 +110,6 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "rimraf": "^5.0.1",
-    "rollup": "^3.29.1",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-url": "^3.0.1",
     "tailwindcss": "^4.1.17",
     "tslib": "^2.8.1",
     "tsup": "^8.5.1",
@@ -118,7 +118,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/robertalv/convex-panel.git"
+    "url": "git+https://github.com/robertalv/convex-panel.git"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",

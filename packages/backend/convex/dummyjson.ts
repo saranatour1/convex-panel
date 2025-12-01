@@ -12,7 +12,7 @@ type Todo = {
 type TodoList = {
   total: number;
   skip: number;
-  limit: number;
+  limit: number; 
   todos: Todo[];
 };
 
@@ -30,8 +30,6 @@ export const getFirstFewTodos = internalAction({
 
     console.log(data)
     // Call the mutation to insert the todos
-    await ctx.runMutation(internal.todo.insertFetchedTodos, {
-      todos: data.todos,
-    });
+    await ctx.runMutation(internal.todos.addRandomTodosAfter5Min);
   },
 });

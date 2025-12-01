@@ -1,51 +1,14 @@
 /*
- * Convex Panel - Tailwind CSS v4
+ * Convex Panel - Scoped CSS
  *
- * This file contains Tailwind's utility classes scoped with the 'cp-' prefix.
+ * This file contains custom CSS for the Convex Panel component.
+ * All styles are scoped to prevent affecting the parent app.
  * Import this in your app: import 'convex-panel/dist/styles.css'
+ *
+ * IMPORTANT: We don't import Tailwind directly here to prevent CSS leakage.
+ * All classes are prefixed with 'cp-' for scoping.
+ * Uses CSS custom properties for theming.
  */
-
-@import "tailwindcss";
-
-/*
- * Tailwind v4 CSS-first configuration
- * Using @theme to define custom design tokens
- */
-@theme {
-  /* Convex Panel color palette - These are defaults, overridden by theme classes */
-  --color-panel-bg: #0F1115;
-  --color-panel-bg-secondary: #16181D;
-  --color-panel-bg-tertiary: #1C1F26;
-  --color-panel-border: #2D313A;
-  --color-panel-text: #ffffff;
-  --color-panel-text-secondary: #9ca3af;
-  --color-panel-text-muted: #6b7280;
-  --color-panel-accent: #34D399;
-  --color-panel-accent-hover: #26a878;
-  --color-panel-success: #10b981;
-  --color-panel-warning: #f59e0b;
-  --color-panel-error: #ef4444;
-
-  /* Custom font sizes */
-  --font-size-panel-xs: 10px;
-  --font-size-panel-sm: 11px;
-  --font-size-panel-base: 12px;
-  --font-size-panel-md: 14px;
-  --font-size-panel-lg: 16px;
-
-  /* Custom border radius */
-  --radius-panel-sm: 4px;
-  --radius-panel-md: 6px;
-  --radius-panel-lg: 8px;
-
-  /* Custom spacing */
-  --spacing-panel-1: 4px;
-  --spacing-panel-2: 8px;
-  --spacing-panel-3: 12px;
-  --spacing-panel-4: 16px;
-  --spacing-panel-5: 20px;
-  --spacing-panel-6: 24px;
-}
 
 /* ================================
    Theme Variables
@@ -340,8 +303,10 @@
   background-color: var(--color-panel-scrollbar-hover);
 }
 
-/* Toast/Sonner styling - theme-aware */
-[data-sonner-toaster] {
+/* Toast/Sonner styling - theme-aware - scoped to panel */
+.cp-theme-dark [data-sonner-toaster],
+.cp-theme-light [data-sonner-toaster],
+.cp-bottom-sheet [data-sonner-toaster] {
   --normal-bg: var(--color-panel-bg-tertiary);
   --normal-border: var(--color-panel-border);
   --normal-text: var(--color-panel-text);
@@ -359,7 +324,9 @@
   --info-text: var(--color-panel-text);
 }
 
-[data-sonner-toast] {
+.cp-theme-dark [data-sonner-toast],
+.cp-theme-light [data-sonner-toast],
+.cp-bottom-sheet [data-sonner-toast] {
   background-color: var(--normal-bg) !important;
   border: 1px solid var(--normal-border) !important;
   color: var(--normal-text) !important;
@@ -367,25 +334,33 @@
   border-radius: 8px !important;
 }
 
-[data-sonner-toast][data-type="success"] {
+.cp-theme-dark [data-sonner-toast][data-type="success"],
+.cp-theme-light [data-sonner-toast][data-type="success"],
+.cp-bottom-sheet [data-sonner-toast][data-type="success"] {
   background-color: var(--success-bg) !important;
   border-color: var(--success-border) !important;
   color: var(--success-text) !important;
 }
 
-[data-sonner-toast][data-type="error"] {
+.cp-theme-dark [data-sonner-toast][data-type="error"],
+.cp-theme-light [data-sonner-toast][data-type="error"],
+.cp-bottom-sheet [data-sonner-toast][data-type="error"] {
   background-color: var(--error-bg) !important;
   border-color: var(--error-border) !important;
   color: var(--error-text) !important;
 }
 
-[data-sonner-toast][data-type="warning"] {
+.cp-theme-dark [data-sonner-toast][data-type="warning"],
+.cp-theme-light [data-sonner-toast][data-type="warning"],
+.cp-bottom-sheet [data-sonner-toast][data-type="warning"] {
   background-color: var(--warning-bg) !important;
   border-color: var(--warning-border) !important;
   color: var(--warning-text) !important;
 }
 
-[data-sonner-toast][data-type="info"] {
+.cp-theme-dark [data-sonner-toast][data-type="info"],
+.cp-theme-light [data-sonner-toast][data-type="info"],
+.cp-bottom-sheet [data-sonner-toast][data-type="info"] {
   background-color: var(--info-bg) !important;
   border-color: var(--info-border) !important;
   color: var(--info-text) !important;
@@ -395,9 +370,12 @@
    Bottom Sheet Component Styles
    ================================ */
 
-/* Root panel container */
+/* Root panel container - fully isolated to prevent affecting parent app */
 .cp-bottom-sheet {
+  /* CSS Containment: Isolate styles, layout, and paint within this container */
   contain: style layout paint;
+  /* Prevent style leakage to parent */
+  isolation: isolate;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.5;
@@ -472,6 +450,49 @@
 .cp-support-btn:hover {
   color: var(--color-panel-text);
 }
+
+/* Run Function button */
+.cp-run-function-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-panel-accent);
+  color: var(--color-panel-bg);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-panel-accent) 20%, transparent);
+}
+
+.cp-run-function-btn:hover {
+  background: var(--color-panel-accent-hover);
+}
+
+/** Standard button */
+.cp-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-panel-accent);
+  color: var(--color-panel-bg);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-panel-accent) 20%, transparent);
+}
+
+.cp-btn:hover {
+  background: var(--color-panel-accent-hover);
+}
+
 
 /* Upgrade to Pro button */
 .cp-upgrade-btn {
@@ -770,6 +791,47 @@
 .cp-transition-colors { transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
 
 /* ================================
+   Shared Search Input Styles
+   ================================ */
+
+.cp-search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.cp-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: var(--color-panel-text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cp-search-input {
+  width: 100%;
+  background-color: var(--color-panel-bg-secondary);
+  border: 1px solid var(--color-panel-border);
+  border-radius: 8px;
+  height: 32px;
+  padding-left: 32px;
+  padding-right: 12px;
+  font-size: 12px;
+  color: var(--color-panel-text);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.cp-search-input:focus {
+  border-color: var(--color-panel-accent);
+  background-color: var(--color-panel-bg-tertiary);
+}
+
+/* ================================
    Functions View Component Styles
    ================================ */
 
@@ -1064,6 +1126,209 @@
 }
 
 /* ================================
+   Logs View Component Styles
+   ================================ */
+
+.cp-logs-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--color-panel-bg);
+}
+
+.cp-logs-header {
+  height: 48px;
+  border-bottom: 1px solid var(--color-panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.cp-logs-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-panel-text);
+}
+
+.cp-logs-header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.cp-logs-header-button {
+  padding: 6px 12px;
+  border: 1px solid var(--color-panel-border);
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--color-panel-text-secondary);
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cp-logs-header-button:hover {
+  background-color: var(--color-panel-bg-tertiary);
+}
+
+.cp-logs-search {
+  padding: 8px;
+  border-bottom: 1px solid var(--color-panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-panel-bg);
+}
+
+.cp-logs-table {
+  flex: 1;
+  overflow: auto;
+  background-color: var(--color-panel-bg);
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.cp-logs-table-header {
+  display: flex;
+  border-bottom: 1px solid var(--color-panel-border);
+  color: var(--color-panel-text-muted);
+  padding: 4px 16px;
+  position: sticky;
+  top: 0;
+  background-color: var(--color-panel-bg);
+}
+
+.cp-logs-table-header-cell {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cp-logs-pause-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  background-color: var(--color-panel-bg-tertiary);
+  border: 1px solid var(--color-panel-border);
+  color: var(--color-panel-text-secondary);
+  cursor: pointer;
+  margin-right: -16px;
+}
+
+.cp-logs-pause-btn:hover {
+  background-color: var(--color-panel-accent);
+  color: #fff;
+}
+
+.cp-logs-pause-btn-paused {
+  background-color: var(--color-panel-accent);
+  color: #fff;
+  border: none;
+}
+
+.cp-logs-pause-btn-paused:hover {
+  background-color: var(--color-panel-accent-hover);
+}
+
+.cp-logs-loading,
+.cp-logs-error,
+.cp-logs-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.cp-logs-loading-text {
+  color: var(--color-panel-text-muted);
+  font-size: 14px;
+}
+
+.cp-logs-error-text {
+  color: var(--color-panel-error);
+  font-size: 14px;
+}
+
+.cp-logs-empty-text {
+  color: var(--color-panel-text-muted);
+  font-size: 14px;
+}
+
+.cp-logs-row {
+  display: flex;
+  padding: 4px 16px;
+  cursor: default;
+  border-bottom: 1px solid var(--color-panel-border);
+}
+
+.cp-logs-row:hover {
+  background-color: var(--color-panel-bg-tertiary);
+}
+
+.cp-logs-timestamp {
+  width: 160px;
+  color: var(--color-panel-text-secondary);
+}
+
+.cp-logs-id {
+  width: 80px;
+  color: var(--color-panel-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cp-logs-id-badge {
+  border: 1px solid var(--color-panel-border);
+  border-radius: 2px;
+  padding: 0 4px;
+  font-size: 10px;
+}
+
+.cp-logs-status {
+  width: 128px;
+  color: var(--color-panel-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cp-logs-execution-time {
+  color: var(--color-panel-text-muted);
+}
+
+.cp-logs-function {
+  flex: 1;
+  color: var(--color-panel-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cp-logs-logtype {
+  width: 16px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 10px;
+}
+
+.cp-logs-function-path {
+  color: var(--color-panel-text-muted);
+}
+
+.cp-logs-message {
+  color: var(--color-panel-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 512px;
+}
+
+/* ================================
    Schedules View Component Styles
    ================================ */
 
@@ -1080,6 +1345,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1em;
   padding: 0 16px;
 }
 
@@ -1479,11 +1745,6 @@
 
 /* Tooltip Action Tooltip */
 .cp-tooltip-action-tooltip {
-  position: absolute;
-  right: 0;
-  top: 100%;
-  margin-top: 8px;
-  margin-right: -8px;
   padding: 8px 12px;
   background-color: var(--color-panel-bg-tertiary);
   border: 1px solid var(--color-panel-border);
@@ -1492,16 +1753,20 @@
   border-radius: 4px;
   transition: opacity 0.2s;
   pointer-events: none;
-  z-index: 50;
+  z-index: 99999;
   box-shadow: 0 10px 15px -3px var(--color-panel-shadow);
-  width: 192px;
+  min-width: 192px;
+  max-width: 300px;
   text-align: center;
   line-height: 1.5;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  transform: translateX(8px);
 }
 
 .cp-tooltip-action-arrow {
   position: absolute;
-  top: -4px;
   right: 12px;
   width: 8px;
   height: 8px;
@@ -1509,6 +1774,18 @@
   border-top: 1px solid var(--color-panel-border);
   border-left: 1px solid var(--color-panel-border);
   transform: rotate(45deg);
+}
+
+.cp-tooltip-action-tooltip[data-placement="top"] .cp-tooltip-action-arrow {
+  bottom: -4px;
+  border-top: none;
+  border-bottom: 1px solid var(--color-panel-border);
+  border-right: 1px solid var(--color-panel-border);
+  border-left: none;
+}
+
+.cp-tooltip-action-tooltip[data-placement="bottom"] .cp-tooltip-action-arrow {
+  top: -4px;
 }
 
 /* Tooltip Arrow (for Tooltip component) */
@@ -1519,5 +1796,87 @@
   background-color: var(--color-panel-bg-tertiary);
   border-top: 1px solid var(--color-panel-border);
   border-left: 1px solid var(--color-panel-border);
+}
+
+/* ================================
+   Components View Styles
+   ================================ */
+
+.cp-components-view {
+  display: flex;
+  height: 100%;
+  background-color: var(--color-panel-bg);
+  overflow: hidden;
+}
+
+/* Sidebar */
+.cp-components-sidebar {
+  width: 240px;
+  border-right: 1px solid var(--color-panel-border);
+  background-color: var(--color-panel-bg);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.cp-components-categories {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 8px;
+  gap: 8px;
+}
+
+/* Main Content */
+.cp-components-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: var(--color-panel-bg);
+}
+
+.cp-components-header {
+  margin-bottom: 16px;
+}
+
+.cp-components-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--color-panel-text);
+  margin: 0 0 4px 0;
+}
+
+.cp-components-subtitle {
+  font-size: 12px;
+  color: var(--color-panel-text-secondary);
+  margin: 0;
+}
+
+.cp-components-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 300px));
+  gap: 12px;
+  justify-content: center;
+}
+
+.cp-components-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 64px 24px;
+  color: var(--color-panel-text-secondary);
+}
+
+/* Light theme adjustments for component cards */
+.cp-theme-light .cp-component-card-icon {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.cp-theme-dark .cp-component-card-icon {
+  color: rgba(255, 255, 255, 0.9);
 }
 

@@ -22,6 +22,9 @@ export const STORAGE_KEYS: Record<string, string> = {
   PANEL_HIDDEN: `${STORAGE_PREFIX}:panel-hidden`,
   THEME: `${STORAGE_PREFIX}:theme`,
   PANEL_HEIGHT: `${STORAGE_PREFIX}:panel-height`,
+  SETTINGS_SECTION: `${STORAGE_PREFIX}:settings-section`,
+  BOTTOM_SHEET_EXPANDED: `${STORAGE_PREFIX}:bottom-sheet-expanded`,
+  DEPLOYMENT_STATE_CHANGED: `${STORAGE_PREFIX}:deployment-state-changed`,
 }
 
 export const PANEL_MIN_HEIGHT = 40;
@@ -107,9 +110,11 @@ export const defaultSettings = {
 // API Routes
 export const ROUTES = {
   STREAM_FUNCTION_LOGS: '/api/stream_function_logs',
+  STREAM_UDF_EXECUTION: '/api/stream_udf_execution',
   SHAPES2: '/api/shapes2',
   TABLE_COLUMNS: '/api/get_table_column_names',
   CACHE_HIT_RATE: '/api/app_metrics/cache_hit_percentage_top_k',
+  CACHE_HIT_PERCENTAGE: '/api/cache_hit_percentage',
   FAILURE_RATE: '/api/app_metrics/failure_percentage_top_k',
   LIST_FUNCTION_LOGS: '/api/list_function_logs',
   SCHEDULER_LAG: '/api/app_metrics/scheduler_lag_top_k',
@@ -117,6 +122,8 @@ export const ROUTES = {
   NPM_CONVEX: 'https://registry.npmjs.org/convex/latest',
   CONVEX_CHANGELOG: 'https://github.com/get-convex/convex-js/blob/main/CHANGELOG.md',
   UDF_RATE: '/api/app_metrics/udf_rate',
+  PERFORMANCE_INVOCATION_UDF_RATE: 'api/udf_rate',
+  PERFORMANCE_EXECUTION_TIME: 'api/execution_time',
   LATENCY_PERCENTILES: '/api/app_metrics/latency_percentiles',
   LAST_PUSH_EVENT: '/api/system/deployment_events/last_push_event',
   GET_VERSION: '/api/system/get_version',

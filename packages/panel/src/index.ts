@@ -1,8 +1,5 @@
 import ConvexPanel from './ConvexPanel';
 
-// Import Tailwind CSS styles
-import './styles/tailwind.css';
-
 export type {
   ButtonProps,
   ThemeClasses,
@@ -87,9 +84,14 @@ export {
 export { ThemeProvider, useTheme, useThemeSafe } from './hooks/useTheme';
 export type { Theme } from './hooks/useTheme';
 
+export { isDevelopment } from './utils/env';
+
 // Component exports
 export { ConvexPanel };
+export { ConvexPanelShadow } from './ConvexPanelShadow';
 export { BottomSheet } from './components/bottom-sheet';
 export { AuthPanel } from './components/auth-panel';
 
-export default ConvexPanel;
+// Default export uses Shadow DOM for complete isolation
+import ConvexPanelShadow from './ConvexPanelShadow';
+export default ConvexPanelShadow;

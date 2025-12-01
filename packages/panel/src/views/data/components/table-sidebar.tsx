@@ -46,7 +46,7 @@ export const TableSidebar: React.FC<TableSidebarProps> = ({
       {/* Component Selector */}
       {availableComponents && availableComponents.length > 0 && (
         <div style={{ 
-          padding: '12px', 
+          padding: '8px', 
           borderBottom: '1px solid var(--color-panel-border)',
           backgroundColor: 'var(--color-panel-bg)'
         }}>
@@ -59,51 +59,21 @@ export const TableSidebar: React.FC<TableSidebarProps> = ({
       )}
 
       {/* Search Input */}
-      <div style={{ 
-        padding: '12px', 
-        borderBottom: '1px solid var(--color-panel-border)',
-        backgroundColor: 'var(--color-panel-bg)'
-      }}>
-        <div style={{ position: 'relative' }}>
-          <Search 
-            size={14} 
-            style={{ 
-              position: 'absolute', 
-              left: '10px', 
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'var(--color-panel-text-muted)',
-              pointerEvents: 'none',
-              zIndex: 1
-            }} 
-          />
+      <div
+        style={{
+          padding: '8px',
+          borderBottom: '1px solid var(--color-panel-border)',
+          backgroundColor: 'var(--color-panel-bg)',
+        }}
+      >
+        <div className="cp-search-wrapper">
+          <Search size={14} className="cp-search-icon" />
           <input
             type="text"
             placeholder="Search tables..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              backgroundColor: 'var(--color-panel-bg-secondary)',
-              border: '1px solid var(--color-panel-border)',
-              borderRadius: '6px',
-              height: '36px',
-              paddingLeft: '32px',
-              paddingRight: '12px',
-              fontSize: '13px',
-              color: 'var(--color-panel-text)',
-              outline: 'none',
-              transition: 'border-color 0.2s ease, background-color 0.2s ease',
-              boxSizing: 'border-box',
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-panel-accent)';
-              e.currentTarget.style.backgroundColor = 'var(--color-panel-bg-tertiary)';
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-panel-border)';
-              e.currentTarget.style.backgroundColor = 'var(--color-panel-bg-secondary)';
-            }}
+            className="cp-search-input"
           />
         </div>
       </div>

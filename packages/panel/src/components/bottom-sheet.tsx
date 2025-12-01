@@ -3,13 +3,6 @@ import {
   ChevronDown,
   ChevronUp,
   X,
-  Activity,
-  Database,
-  Code2,
-  FileCode,
-  CalendarClock,
-  ScrollText,
-  Settings,
   HelpCircle,
   Sun,
   Moon,
@@ -18,11 +11,15 @@ import {
 } from 'lucide-react';
 import { ConvexLogo } from './icons';
 import { AskAI } from './ask-ai';
-import { extractDeploymentName, extractProjectName, fetchDeploymentMetadata, fetchProjectInfo } from '../utils/api';
+import { extractDeploymentName, extractProjectName, fetchDeploymentMetadata, fetchProjectInfo, getConvexDeploymentState } from '../utils/api';
+import { getAdminClientInfo, validateAdminClientInfo } from '../utils/adminClient';
+import { setStorageItem, getStorageItem } from '../utils/storage';
+import { STORAGE_KEYS } from '../utils/constants';
 import { DeploymentDisplay } from './shared/deployment-display';
 import { ProjectSelector } from './shared/project-selector';
 import { GlobalFunctionTester } from './function-runner/global-function-tester';
 import { GlobalSheet } from './shared/global-sheet';
+import { Sidebar } from './sidebar';
 import { useActiveTab } from '../hooks/useActiveTab';
 import { useIsGlobalRunnerShown, useShowGlobalRunner } from '../lib/functionRunner';
 import { useFunctionRunnerShortcuts } from '../hooks/useFunctionRunnerShortcuts';
@@ -30,6 +27,7 @@ import { TabId } from '../types/tabs';
 import { Team, Project, EnvType } from '../types';
 import { useThemeSafe } from '../hooks/useTheme';
 import { useHasSubscription } from '../hooks/useTeamOrbSubscription';
+import { SupportPopup } from './support-popup';
 
 interface BottomSheetProps {
   isOpen: boolean;
@@ -51,56 +49,11 @@ interface BottomSheetProps {
   project?: Project;
 }
 
-interface SidebarItemProps {
-  icon: React.ReactNode;
-  label: string;
-  isActive?: boolean;
-  onClick: () => void;
-}
-
 const PANEL_HEIGHT_STORAGE_KEY = 'convex-panel-bottom-sheet-height';
 const PANEL_MIN_HEIGHT = 40;
 const PANEL_COLLAPSED_HEIGHT = `${PANEL_MIN_HEIGHT}px`;
 const PANEL_MAX_HEIGHT_RATIO = 0.9;
 const PANEL_DEFAULT_HEIGHT = '60vh';
-
-interface TabDefinition {
-  id: TabId;
-  icon: React.ReactNode;
-  label: string;
-}
-
-const TAB_DEFINITIONS: TabDefinition[] = [
-  { id: 'health', icon: <Activity size={14} />, label: 'Health' },
-  { id: 'data', icon: <Database size={14} />, label: 'Data' },
-  { id: 'functions', icon: <Code2 size={14} />, label: 'Functions' },
-  { id: 'files', icon: <FileCode size={14} />, label: 'Files' },
-  { id: 'schedules', icon: <CalendarClock size={14} />, label: 'Schedules' },
-  { id: 'logs', icon: <ScrollText size={14} />, label: 'Logs' },
-  { id: 'settings', icon: <Settings size={14} />, label: 'Settings' },
-];
-
-const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, isActive, onClick }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-
-  return (
-    <div
-      className="cp-sidebar-item-wrapper"
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-    >
-      {isActive && <div className="cp-sidebar-active-indicator" />}
-      <button
-        type="button"
-        onClick={onClick}
-        className={`cp-sidebar-btn ${isActive ? 'active' : ''}`}
-      >
-        {icon}
-      </button>
-      {showTooltip && <div className="cp-tooltip">{label}</div>}
-    </div>
-  );
-};
 
 export const BottomSheet: React.FC<BottomSheetProps> = ({
   isOpen,
@@ -125,6 +78,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   const [internalActiveTab, setInternalActiveTab] = useActiveTab();
   const activeTab = externalActiveTab ?? internalActiveTab;
   const [isResizing, setIsResizing] = useState(false);
+  const [isSupportPopupOpen, setIsSupportPopupOpen] = useState(false);
   const [customHeight, setCustomHeight] = useState<number | null>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(PANEL_HEIGHT_STORAGE_KEY);
@@ -167,6 +121,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     };
   } | null>(null);
 
+  const [deploymentState, setDeploymentState] = useState<'running' | 'paused' | null>(null);
+
   useEffect(() => {
     if (!isAuthenticated || !deploymentUrl) {
       setDeploymentMetadata(null);
@@ -178,7 +134,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         const metadata = await fetchDeploymentMetadata(adminClient, deploymentUrl, accessToken);
         setDeploymentMetadata(metadata);
       } catch (error) {
-        console.debug('Failed to fetch deployment metadata:', error);
         setDeploymentMetadata({
           deploymentName: extractDeploymentName(deploymentUrl),
           projectName: extractProjectName(deploymentUrl),
@@ -202,7 +157,6 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         const info = await fetchProjectInfo(adminClient, deploymentUrl, accessToken, teamSlug, projectSlug);
         setProjectInfo(info);
       } catch (error) {
-        console.debug('Failed to fetch project info:', error);
         if (team || project) {
           setProjectInfo({ team, project });
         } else {
@@ -213,6 +167,81 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
 
     fetchInfo();
   }, [isAuthenticated, deploymentUrl, adminClient, accessToken, teamSlug, projectSlug, team, project]);
+
+  // Fetch deployment state
+  useEffect(() => {
+    if (!isAuthenticated || !deploymentUrl || !adminClient) {
+      setDeploymentState(null);
+      return;
+    }
+
+    const fetchDeploymentState = async () => {
+      try {
+        const clientInfo = getAdminClientInfo(adminClient, deploymentUrl);
+        const validationError = validateAdminClientInfo(clientInfo);
+
+        if (validationError) {
+          return;
+        }
+
+        const { deploymentUrl: finalDeploymentUrl, adminKey } = clientInfo;
+        const finalAdminKey = accessToken || adminKey;
+
+        if (!finalDeploymentUrl || !finalAdminKey) {
+          return;
+        }
+
+        const state = await getConvexDeploymentState(finalDeploymentUrl, finalAdminKey);
+        setDeploymentState(state.state);
+      } catch (error) {
+        setDeploymentState(null);
+      }
+    };
+
+    fetchDeploymentState();
+    
+    // Check for immediate state changes (triggered by pause-deployment component)
+    const checkForStateChange = () => {
+      const lastChange = getStorageItem<number>(STORAGE_KEYS.DEPLOYMENT_STATE_CHANGED, 0);
+      const now = Date.now();
+      // If state was changed within the last 10 seconds, refresh immediately
+      if (lastChange > 0 && (now - lastChange) < 10000) {
+        fetchDeploymentState();
+      }
+    };
+
+    // Listen for custom deployment state change events for immediate updates
+    const handleDeploymentStateChange = () => {
+      fetchDeploymentState();
+    };
+
+    window.addEventListener('deploymentStateChanged', handleDeploymentStateChange);
+    
+    // Also poll every 2 seconds to keep state updated (as fallback)
+    const interval = setInterval(() => {
+      checkForStateChange();
+      fetchDeploymentState();
+    }, 2000);
+    
+    // Also check immediately on mount and when dependencies change
+    checkForStateChange();
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('deploymentStateChanged', handleDeploymentStateChange);
+    };
+  }, [isAuthenticated, deploymentUrl, adminClient, accessToken]);
+
+  const handleSettingsClick = () => {
+    // Navigate to settings tab
+    if (onTabChange) {
+      onTabChange('settings');
+    } else {
+      setInternalActiveTab('settings');
+    }
+    // Set the settings section to pause-deployment
+    setStorageItem(STORAGE_KEYS.SETTINGS_SECTION, 'pause-deployment');
+  };
 
   // Project name for future use
   const _projectName = deploymentMetadata?.projectName || providedProjectName || extractProjectName(deploymentUrl) || 'convex-panel';
@@ -265,13 +294,17 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   useFunctionRunnerShortcuts();
 
   const getHeight = () => {
-    if (!isAuthenticated) return PANEL_COLLAPSED_HEIGHT;
-    if (!isOpen) return PANEL_COLLAPSED_HEIGHT;
+    // Always show at least the collapsed height (40px) so header is always visible
+    const minHeight = PANEL_COLLAPSED_HEIGHT;
+    if (!isAuthenticated) return minHeight;
+    if (!isOpen) return minHeight;
     if (customHeight !== null) return `${customHeight}px`;
     return PANEL_DEFAULT_HEIGHT;
   };
 
   const height = getHeight();
+  // Ensure height is never less than collapsed height
+  const finalHeight = height === '0px' || !height ? PANEL_COLLAPSED_HEIGHT : height;
 
   const headerLeftContent = isAuthenticated ? (
     <>
@@ -335,7 +368,11 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
         </button>
       )}
       <AskAI />
-      <button type="button" className="cp-support-btn">
+      <button
+        type="button"
+        className="cp-support-btn"
+        onClick={() => setIsSupportPopupOpen(true)}
+      >
         <HelpCircle size={14} /> Support
       </button>
       <button
@@ -359,19 +396,29 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     </>
   );
 
+  // Always render the BottomSheet - it should always be visible
   return (
     <div
       className={`cp-bottom-sheet cp-theme-${theme}`}
       style={{
-        height,
+        height: finalHeight,
+        minHeight: PANEL_COLLAPSED_HEIGHT,
         transition: isResizing ? 'none' : 'height 0.3s ease',
         userSelect: isResizing ? 'none' : 'auto',
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 99998,
+        display: 'flex',
+        flexDirection: 'column',
+        visibility: 'visible',
+        opacity: 1,
       }}
     >
       {isPanelExpanded && (
         <div onMouseDown={handleResizeStart} className="cp-resize-handle" />
       )}
-
       <div className="cp-header" style={{ borderBottom: isOpen ? undefined : 'none' }}>
         <div className="cp-header-section">{headerLeftContent}</div>
         <div className="cp-header-section">{headerRightContent}</div>
@@ -388,19 +435,51 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
               />
             ) : (
               <>
-                <div className="cp-sidebar">
-                  {TAB_DEFINITIONS.map((tab) => (
-                    <SidebarItem
-                      key={tab.id}
-                      icon={tab.icon}
-                      label={tab.label}
-                      isActive={activeTab === tab.id}
-                      onClick={() => handleTabChange(tab.id)}
-                    />
-                  ))}
-                </div>
+                <Sidebar activeTab={activeTab} onTabChange={handleTabChange} />
 
                 <div className="cp-main-content" ref={mainContentRef} style={{ position: 'relative', overflow: 'hidden' }}>
+                    {/* Deployment Paused Banner */}
+                    {isAuthenticated && deploymentState === 'paused' && (
+                      <div
+                        style={{
+                          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                          border: '1px solid rgba(239, 68, 68, 0.2)',
+                          color: '#f87171',
+                          padding: '12px 24px',
+                          textAlign: 'center',
+                          fontSize: '14px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        <span>This deployment is paused. Resume your deployment on the </span>
+                        <button
+                          type="button"
+                          onClick={handleSettingsClick}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#60a5fa',
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+                            padding: 0,
+                            fontSize: '14px',
+                            fontWeight: 500,
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = '#93c5fd';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = '#60a5fa';
+                          }}
+                        >
+                          settings
+                        </button>
+                        <span> page.</span>
+                      </div>
+                    )}
                   {children}
                   {isPanelExpanded && <GlobalSheet container={sheetContainer} />}
                 </div>
@@ -422,6 +501,13 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
           )}
         </>
       )}
+
+      {/* Support Popup */}
+      <SupportPopup
+        isOpen={isSupportPopupOpen}
+        onClose={() => setIsSupportPopupOpen(false)}
+        hasProAccess={hasSubscription === true}
+      />
     </div>
   );
 };

@@ -1,20 +1,30 @@
-import { ConvexReactClient, ConvexProvider } from "convex/react";
-import ConvexPanel from "@convex-panel/panel";
-import TodoApp from "./TodoApp";
-import "@convex-panel/panel/styles.css"
+import { useEffect } from "react";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { Analytics } from "@vercel/analytics/react";
+import { AppRouterProvider } from "./router";
 
-// Get Convex URL from environment variables (Vite uses import.meta.env)
-// ConvexPanel will auto-detect this, but we need it for ConvexProvider
-const convexUrl = import.meta.env.VITE_CONVEX_URL || "https://polished-sockeye-52.convex.cloud";
+const convexUrl = import.meta.env.VITE_CONVEX_URL;
+
+if (!convexUrl) {
+  throw new Error("VITE_CONVEX_URL is required for Convex Panel to connect.");
+}
+
 const convex = new ConvexReactClient(convexUrl);
 
-function App() {
+export default function App() {
+  useEffect(() => {
+    document.documentElement.lang = "en";
+    document.documentElement.classList.add("dark");
+
+    return () => {
+      document.documentElement.classList.remove("dark");
+    };
+  }, []);
+
   return (
     <ConvexProvider client={convex}>
-      <TodoApp />
-        <ConvexPanel />
+      <AppRouterProvider />
+      <Analytics />
     </ConvexProvider>
   );
 }
-
-export default App;
