@@ -15,17 +15,15 @@ import {
 } from 'lucide-react';
 import React, { Activity, useEffect, useState } from 'react';
 import { FixedSizeList } from 'react-window';
-import { ComponentSelector } from '../../components/function-runner/components/component-selector';
-import { FunctionSelector } from '../../components/function-runner/components/function-selector';
-import { CustomQuery } from '../../components/function-runner/function-runner';
 import { useComponents } from '../../hooks/useComponents';
 import { useCronJobs } from '../../hooks/useCronJobs';
 import { useFunctions } from '../../hooks/useFunctions';
 import { usePaginatedScheduledJobs } from '../../hooks/usePaginatedScheduledJobs';
-// import { logsViewStyles } from '../../styles/panelStyles';
 import { getDeploymentUrl } from '../../utils/adminClient';
 import { formatCronSchedule, formatRelativeTime } from '../../utils/cronFormatters';
-import { ModuleFunction } from '../../utils/functionDiscovery';
+import { CustomQuery, ModuleFunction } from '../../types';
+import { ComponentSelector } from '../../components/component-selector';
+import { FunctionSelector } from '../../components/function-runner/function-selector';
 
 export interface SchedulesViewProps {
   adminClient?: any;
@@ -77,11 +75,11 @@ export const SchedulesView: React.FC<SchedulesViewProps> = ({
     componentId: selectedComponent,
   });
 
-  const [selectedFunction, setSelectedFunction] = useState<ModuleFunction | CustomQuery | null>(allFunctions?.[0]);
+  const [selectedFunction, setSelectedFunction] = useState<ModuleFunction | CustomQuery | null>(null);
   const deploymentUrl = getDeploymentUrl(adminClient);
 
   useEffect(() => {
-    setSelectedFunction(allFunctions[0]);
+    setSelectedFunction(null);
   }, [allFunctions, setSelectedFunction]);
 
   useEffect(() => {
@@ -173,7 +171,7 @@ export const SchedulesView: React.FC<SchedulesViewProps> = ({
         selectedTab={selectedTab}
         listHeight={listHeight}
         deploymentUrl={deploymentUrl}
-        allFunctions={allFunctions}
+        allFunctions={allFunctions as any[]}
         setSelectedFunction={setSelectedFunction}
         hoveredRowIndex={hoveredRowIndex}
         setHoveredRowIndex={setHoveredRowIndex}
@@ -282,9 +280,10 @@ const ScheduledFunctionView = ({
     <div className="cp-logs-search" style={{ padding: '12px 16px' }}>
       <div style={{ width: '240px' }}>
         <FunctionSelector
-          selectedFunction={selectedFunction}
-          onSelect={setSelectedFunction}
-          functions={allFunctions}
+          
+          selectedFunction={selectedFunction as any}
+          onSelect={(fn) => setSelectedFunction(fn as any)}
+          functions={allFunctions as any}
           componentId={selectedComponentId}
         />
       </div>
